@@ -17,7 +17,7 @@ export default function SignUpPage({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('./Images/SignUpImage.jpg')}
+      source={require('./Images/gymPhoto.jpg')}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
