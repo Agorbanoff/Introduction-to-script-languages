@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TextInput,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 
 export default function SignUpPage({ navigation }) {
@@ -15,73 +16,85 @@ export default function SignUpPage({ navigation }) {
   const [password, setPassword] = useState('');
 
   return (
-    <View style={styles.outerContainer}>
-      <SafeAreaView>
-        <Text style={styles.frontText}>
-          Welcome to our app. Make an account and get shredded!
-        </Text>
-      </SafeAreaView>
+    <ImageBackground
+      source={require('./Images/SignUpImage.jpg')}
+      style={styles.backgroundImage}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <SafeAreaView>
+          <Text style={styles.frontText}>
+            Welcome to our app. Make an account and get shredded!
+          </Text>
+        </SafeAreaView>
 
-      <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          secureTextEntry={true}
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.container}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor="#aaa"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+            placeholderTextColor="#aaa"
+          />
 
-        <View style={styles.buttonColumn}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => console.log('Sign up pressed')}>
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonColumn}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => console.log('Sign up pressed')}
+            >
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => navigation.navigate('logIn')}>
-            <Text style={styles.buttonText}>Already have an account?</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => navigation.navigate('logIn')}
+            >
+              <Text style={styles.buttonText}>Already have an account?</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <StatusBar style="auto" />
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(33, 33, 33, 0.85)', // Optional: semi-transparent white overlay for readability
+    justifyContent: 'center',
+  },
   frontText: {
     textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
-    backgroundColor: 'white',
     color: '#00ff00',
-    marginTop: '20%',
     padding: 30,
   },
-  outerContainer: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
   container: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '40%',
     padding: 20,
   },
   input: {
@@ -91,6 +104,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 20,
     paddingHorizontal: 10,
+    backgroundColor: 'white',
   },
   buttonColumn: {
     flexDirection: 'column',
