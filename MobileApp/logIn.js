@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
     marginBottom: 15, // Updated to match button spacing
     paddingHorizontal: 15,
     backgroundColor: 'black',
+    color: 'white',
   },
   buttonColumn: {
     flexDirection: 'column',
