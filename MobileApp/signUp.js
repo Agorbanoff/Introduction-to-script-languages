@@ -55,14 +55,14 @@ export default function SignUpPage({ navigation }) {
           <View style={styles.buttonColumn}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => console.log('Sign up pressed')}
+              onPress={() => navigation.navigate('statistics')}
             >
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate('logIn')}
+              onPress={() => navigation.navigate('login')}
             >
               <Text style={styles.buttonText}>Already have an account?</Text>
             </TouchableOpacity>

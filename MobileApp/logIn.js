@@ -48,14 +48,14 @@ export default function SignUpPage({ navigation }) {
           <View style={styles.buttonColumn}>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => console.log('Sign up pressed')}
+              onPress={() => navigation.navigate('statistics')}
             >
               <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => navigation.navigate('signUp')}
+              onPress={() => navigation.navigate('signup')}
             >
               <Text style={styles.buttonText}>Don't Have An Account?</Text>
             </TouchableOpacity>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 15, // Updated to match button spacing
+    marginBottom: 15, 
     paddingHorizontal: 15,
     backgroundColor: 'black',
     color: 'white',
