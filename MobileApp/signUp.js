@@ -24,7 +24,7 @@ export default function SignUpPage({ navigation }) {
       <View style={styles.overlay}>
         <SafeAreaView>
           <Text style={styles.frontText}>
-            Welcome to our app. Make an account and get shredded!
+            Welcome to our app{'\n'} Make an account and get shredded!
           </Text>
         </SafeAreaView>
 
@@ -87,9 +87,9 @@ const styles = StyleSheet.create({
   },
   frontText: {
     textAlign: 'center',
-    fontSize: 20,
+    fontSize: 30,
     fontWeight: 'bold',
-    color: '#00ff00',
+    color: '#1db344',
     padding: 30,
   },
   container: {
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#00ff00',
+    backgroundColor: '#1db344',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   buttonText: {
-    color: 'white',
+    color: 'black',
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
