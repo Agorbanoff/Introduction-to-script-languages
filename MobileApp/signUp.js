@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     width: '100%',
-    marginVertical: 5,
+    marginVertical: 10,
   },
   buttonText: {
     color: 'black',
