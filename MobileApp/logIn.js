@@ -4,8 +4,8 @@
     export default function LogInPage({ navigation }) {
         return (
             <View style={styles.container}>
-                <Button title="Log In" onPress={() => console.log("log in pressed")} />
-                <Button title="To sign up click here" onPress={() => navigation.navigate('signUp')} />
+                <Button title="Log In " onPress={() => console.log("log in pressed")} />
+                <Button title="sign up" onPress={() => navigation.navigate('signUp')} />
                 <StatusBar style="auto" />
             </View>
         );
