@@ -103,9 +103,10 @@ const styles = StyleSheet.create({
     width: '80%',
     borderColor: 'gray',
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 20,
     paddingHorizontal: 10,
-    backgroundColor: 'white',
+    backgroundColor: 'black',
   },
   buttonColumn: {
     flexDirection: 'column',
