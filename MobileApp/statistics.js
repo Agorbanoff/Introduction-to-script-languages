@@ -75,7 +75,7 @@ export default function SignUpPage({ navigation }) {
               <View style={styles.buttonColumn}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => console.log('Statistic submitted')}
+                  onPress={() => navigation.navigate('status')}
                 >
                   <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
