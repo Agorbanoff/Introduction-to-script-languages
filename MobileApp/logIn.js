@@ -8,10 +8,13 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 
 export default function SignUpPage({ navigation }) {
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -21,49 +24,54 @@ export default function SignUpPage({ navigation }) {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <SafeAreaView>
-          <Text style={styles.frontText}>
-            Welcome Back!
-          </Text>
-        </SafeAreaView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
+            <SafeAreaView>
+              <Text style={styles.frontText}>Welcome Back!</Text>
+            </SafeAreaView>
 
-        <View style={styles.container}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            secureTextEntry={true}
-            value={password}
-            onChangeText={setPassword}
-            placeholderTextColor="#aaa"
-          />
+            <View style={styles.container}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                secureTextEntry={true}
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#aaa"
+              />
 
-          <View style={styles.buttonColumn}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('statistics')}
-            >
-              <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
+              <View style={styles.buttonColumn}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => navigation.navigate('statistics')}
+                >
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('signup')}
-            >
-              <Text style={styles.buttonText}>Don't Have An Account?</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => navigation.navigate('signup')}
+                >
+                  <Text style={styles.buttonText}>Don't Have An Account?</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <StatusBar style="auto" />
           </View>
-        </View>
-
-        <StatusBar style="auto" />
-      </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
@@ -97,7 +105,7 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 15, 
+    marginBottom: 15,
     paddingHorizontal: 15,
     backgroundColor: 'black',
     color: 'white',

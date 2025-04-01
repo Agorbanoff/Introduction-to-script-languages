@@ -8,6 +8,10 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 
 export default function SignUpPage({ navigation }) {
@@ -21,56 +25,63 @@ export default function SignUpPage({ navigation }) {
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <SafeAreaView>
-          <Text style={styles.frontText}>
-            Welcome to our app{'\n'} Make an account and get shredded!
-          </Text>
-        </SafeAreaView>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
+            <SafeAreaView>
+              <Text style={styles.frontText}>
+                Welcome to our app{'\n'} Make an account and get shredded!
+              </Text>
+            </SafeAreaView>
 
-        <View style={styles.container}>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username"
-            value={username}
-            onChangeText={setUsername}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            placeholderTextColor="#aaa"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password"
-            secureTextEntry={true}
-            value={password}
-            onChangeText={setPassword}
-            placeholderTextColor="#aaa"
-          />
+            <View style={styles.container}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your username"
+                value={username}
+                onChangeText={setUsername}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                secureTextEntry={true}
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#aaa"
+              />
 
-          <View style={styles.buttonColumn}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('statistics')}
-            >
-              <Text style={styles.buttonText}>Submit</Text>
-            </TouchableOpacity>
+              <View style={styles.buttonColumn}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => navigation.navigate('statistics')}
+                >
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => navigation.navigate('login')}
-            >
-              <Text style={styles.buttonText}>Already have an account?</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => navigation.navigate('login')}
+                >
+                  <Text style={styles.buttonText}>Already have an account?</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <StatusBar style="auto" />
           </View>
-        </View>
-
-        <StatusBar style="auto" />
-      </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </ImageBackground>
   );
 }
@@ -82,7 +93,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)', // Optional: semi-transparent white overlay for readability
+    backgroundColor: 'rgba(33, 33, 33, 0.85)',
     justifyContent: 'center',
   },
   frontText: {
@@ -96,7 +107,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    marginBottom: '20%'
+    marginBottom: '20%',
   },
   input: {
     height: 40,
