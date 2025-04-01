@@ -21,11 +21,11 @@ export default function SignUpPage({ navigation }) {
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
-      return "Training less than 3 times a week may not provide optimal progress. Consider increasing to 3-5 sessions.";
+      return "Training less than 3 times a week may not provide optimal progress. Consider increasing to 3-5 sessions.\nAre you sure you want to continue?";
     } else if (sessionsPerWeek === 6 ) {
-      return "Training more than 5 times a week can be intense. Ensure you are getting enough rest.";
+      return "Training more than 5 times a week can be intense. Ensure you are getting enough rest.\nAre you sure you want to continue?";
     } else if (sessionsPerWeek === 7) {
-      return "Training 7 days a week is only recommended for advanced individuals with carefully planned recovery.";
+      return "Training 7 days a week is only recommended for advanced individuals with carefully planned recovery.\nAre you sure you want to continue?";
     }
     return "";
   };
