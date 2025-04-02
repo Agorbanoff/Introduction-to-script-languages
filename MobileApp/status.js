@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Slider from '@react-native-community/slider';
 import {
   StatusBar,
   StyleSheet,
@@ -17,12 +16,12 @@ import {
 export default function SignUpPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
   const [warningMessage, setWarningMessage] = useState("");
-  const [warningAcknowledged, setWarningAcknowledged] = useState(false); // New state to track if the warning was acknowledged
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
       return "Training less than 3 times a week may not provide optimal progress. Consider increasing to 3-5 sessions.\nAre you sure you want to continue?";
-    } else if (sessionsPerWeek === 6 ) {
+    } else if (sessionsPerWeek === 6) {
       return "Training more than 5 times a week can be intense. Ensure you are getting enough rest.\nAre you sure you want to continue?";
     } else if (sessionsPerWeek === 7) {
       return "Training 7 days a week is only recommended for advanced individuals with carefully planned recovery.\nAre you sure you want to continue?";
@@ -33,11 +32,34 @@ export default function SignUpPage({ navigation }) {
   const handleGetStartedPress = () => {
     const advice = getTrainingAdvice();
     if (advice && !warningAcknowledged) {
-      setWarningMessage(advice); // Set the warning message if there's advice to give
-      setWarningAcknowledged(true); // Indicate that the warning is now acknowledged
+      setWarningMessage(advice);
+      setWarningAcknowledged(true);
     } else {
-      navigation.navigate('Home'); // Navigate when no warnings are necessary or if warning has been acknowledged
+      navigation.navigate('Home');
     }
+  };
+
+  const renderDayButtons = () => {
+    return [...Array(7)].map((_, i) => {
+      const day = i + 1;
+      const isSelected = sessionsPerWeek === day;
+
+      return (
+        <TouchableOpacity
+          key={day}
+          style={[styles.dayButton, isSelected && styles.dayButtonSelected]}
+          onPress={() => {
+            setSessionsPerWeek(day);
+            setWarningMessage('');
+            setWarningAcknowledged(false);
+          }}
+        >
+          <Text style={[styles.dayButtonText, isSelected && styles.dayButtonTextSelected]}>
+            {day}
+          </Text>
+        </TouchableOpacity>
+      );
+    });
   };
 
   return (
@@ -57,22 +79,16 @@ export default function SignUpPage({ navigation }) {
                 We've estimated that you're underweight. We recommend that you eat in a calorie surplus.
               </Text>
               <Text style={styles.label}>How many times per week do you want to train?</Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={1}
-                maximumValue={7}
-                step={1}
-                value={sessionsPerWeek}
-                onValueChange={(value) => {
-                  setSessionsPerWeek(value);
-                  setWarningAcknowledged(false); // Reset the acknowledgement when user changes the selection
-                  setWarningMessage("");
-                }}
-                minimumTrackTintColor="#1db344"
-                maximumTrackTintColor="#000000"
-              />
-              <Text style={styles.sessionsText}>{sessionsPerWeek} session(s) per week</Text>
-              {warningMessage ? <Text style={styles.warningText}>{warningMessage}</Text> : null}
+
+              <View style={styles.daysRow}>{renderDayButtons()}</View>
+
+              <Text style={styles.sessionsText}>
+                {sessionsPerWeek} session(s) per week
+              </Text>
+
+              {warningMessage ? (
+                <Text style={styles.warningText}>{warningMessage}</Text>
+              ) : null}
             </SafeAreaView>
 
             <View style={styles.container}>
@@ -110,6 +126,54 @@ const styles = StyleSheet.create({
     padding: 30,
     marginTop: '35%',
   },
+  label: {
+    fontSize: 20,
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  daysRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginVertical: 10,
+    paddingHorizontal: 20,
+  },
+  dayButton: {
+    backgroundColor: '#222',
+    borderColor: '#1db344',
+    borderWidth: 1,
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    margin: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayButtonSelected: {
+    backgroundColor: '#1db344',
+  },
+  dayButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  dayButtonTextSelected: {
+    color: 'black',
+  },
+  sessionsText: {
+    textAlign: 'center',
+    color: '#FFF',
+    fontSize: 18,
+    marginVertical: 10,
+  },
+  warningText: {
+    textAlign: 'center',
+    color: '#FFA500',
+    fontSize: 16,
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -130,28 +194,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     textAlign: 'center',
-  },
-  label: {
-    fontSize: 20,
-    color: '#FFF',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  slider: {
-    width: '80%',
-    height: 40,
-    alignSelf: 'center',
-  },
-  sessionsText: {
-    textAlign: 'center',
-    color: '#FFF',
-    fontSize: 18,
-    marginVertical: 10,
-  },
-  warningText: {
-    textAlign: 'center',
-    color: '#FFA500',  
-    fontSize: 16,
-    marginTop: 10,
   },
 });
