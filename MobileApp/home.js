@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  ImageBackground,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,11 +14,14 @@ const LongContentScreen = () => {
   const navigation = useNavigation();
 
   return (
+
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.text}>Hello world</Text>
-        {/* Add more content here if needed */}
-      </ScrollView>
+     
+      <ImageBackground
+            source={require('./Images/homePagePhoto.jpg')}
+            style={styles.backgroundImage}
+            resizeMode="cover"
+          ></ImageBackground>
 
       {/* Bottom Navigation Bar */}
       <View style={styles.navBar}>
@@ -43,11 +47,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  backgroundImage: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 80, // space for navbar
+    paddingBottom: 80, 
   },
   text: {
     fontSize: 24,
