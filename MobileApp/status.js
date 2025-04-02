@@ -35,7 +35,7 @@ export default function SignUpPage({ navigation }) {
       setWarningMessage(advice);
       setWarningAcknowledged(true);
     } else {
-      navigation.navigate('Home');
+      navigation.navigate('home');
     }
   };
 

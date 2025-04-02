@@ -1,26 +1,25 @@
-import React, { useState } from 'react';
-import Slider from '@react-native-community/slider';
+import React from 'react';
 import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from 'react-native';
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
+    SafeAreaView,
+    TouchableOpacity,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    TouchableWithoutFeedback,
+    Keyboard,
+    ScrollView,
+  } from 'react-native';
 
-export default function HomePage(){
+const LongContentScreen = () => {
+  return (
+    <ScrollView>
+        <Text> Hello world</Text>
+    </ScrollView>
+  );
+};
 
-    return (
-        <View>
-            <SafeAreaView> 
-                <Text> Hello world </Text>
-            </SafeAreaView>
-        </View>
-    )
-}
+export default LongContentScreen; 
