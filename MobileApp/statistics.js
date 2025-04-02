@@ -12,7 +12,6 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
   Alert,
 } from 'react-native';
 
@@ -29,7 +28,6 @@ export default function SignUpPage({ navigation }) {
       return;
     }
 
-    // You can pass data here if needed
     console.log('Gender selected:', gender);
     console.log('Height:', height);
     console.log('Weight:', weight);
@@ -50,107 +48,101 @@ export default function SignUpPage({ navigation }) {
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.overlay}>
-              <SafeAreaView>
-                <Text style={styles.frontText}>
-                  Hello "Alex"! {'\n'} let's gather some statistics about you!
-                </Text>
-              </SafeAreaView>
+          <View style={styles.overlay}>
+            <SafeAreaView>
+              <Text style={styles.frontText}>
+                Hello "Alex"! {'\n'} Let's gather some statistics about you!
+              </Text>
+            </SafeAreaView>
 
-              <View style={styles.container}>
-                {/* Gender Picker */}
-                <Text style={styles.label}>Select your gender:</Text>
-                <View style={styles.genderRow}>
-                  <TouchableOpacity
+            <View style={styles.container}>
+              {/* Gender Picker */}
+              <Text style={styles.label}>Select your gender:</Text>
+              <View style={styles.genderRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.genderButton,
+                    gender === 'male' && styles.genderButtonSelected,
+                  ]}
+                  onPress={() => setGender('male')}
+                >
+                  <Text
                     style={[
-                      styles.genderButton,
-                      gender === 'male' && styles.genderButtonSelected,
+                      styles.genderButtonText,
+                      gender === 'male' && styles.genderButtonTextSelected,
                     ]}
-                    onPress={() => setGender('male')}
                   >
-                    <Text
-                      style={[
-                        styles.genderButtonText,
-                        gender === 'male' && styles.genderButtonTextSelected,
-                      ]}
-                    >
-                      Male
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[
-                      styles.genderButton,
-                      gender === 'female' && styles.genderButtonSelected,
-                    ]}
-                    onPress={() => setGender('female')}
-                  >
-                    <Text
-                      style={[
-                        styles.genderButtonText,
-                        gender === 'female' && styles.genderButtonTextSelected,
-                      ]}
-                    >
-                      Female
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                {gender && (
-                  <Text style={styles.selectedGenderText}>
-                    Selected: {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                    Male
                   </Text>
-                )}
+                </TouchableOpacity>
 
-                {/* Inputs */}
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your height (cm)"
-                  keyboardType="numeric"
-                  value={height}
-                  onChangeText={setHeight}
-                  placeholderTextColor="#aaa"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your weight (kg)"
-                  keyboardType="numeric"
-                  value={weight}
-                  onChangeText={setWeight}
-                  placeholderTextColor="#aaa"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your neck circumference (cm)"
-                  keyboardType="numeric"
-                  value={neck}
-                  onChangeText={setNeck}
-                  placeholderTextColor="#aaa"
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your waist circumference (cm)"
-                  keyboardType="numeric"
-                  value={waist}
-                  onChangeText={setWaist}
-                  placeholderTextColor="#aaa"
-                />
-
-                <View style={styles.buttonColumn}>
-                  <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Submit</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.genderButton,
+                    gender === 'female' && styles.genderButtonSelected,
+                  ]}
+                  onPress={() => setGender('female')}
+                >
+                  <Text
+                    style={[
+                      styles.genderButtonText,
+                      gender === 'female' && styles.genderButtonTextSelected,
+                    ]}
+                  >
+                    Female
+                  </Text>
+                </TouchableOpacity>
               </View>
 
-              <StatusBar style="auto" />
+              {gender && (
+                <Text style={styles.selectedGenderText}>
+                  Selected: {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                </Text>
+              )}
+
+              {/* Inputs */}
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your height (cm)"
+                keyboardType="numeric"
+                value={height}
+                onChangeText={setHeight}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your weight (kg)"
+                keyboardType="numeric"
+                value={weight}
+                onChangeText={setWeight}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your neck circumference (cm)"
+                keyboardType="numeric"
+                value={neck}
+                onChangeText={setNeck}
+                placeholderTextColor="#aaa"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your waist circumference (cm)"
+                keyboardType="numeric"
+                value={waist}
+                onChangeText={setWaist}
+                placeholderTextColor="#aaa"
+              />
+
+              <View style={styles.buttonColumn}>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                  <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </ScrollView>
+
+            <StatusBar style="auto" />
+          </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ImageBackground>
