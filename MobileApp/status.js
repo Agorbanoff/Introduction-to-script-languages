@@ -17,7 +17,7 @@ import {
 export default function SignUpPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
   const [warningMessage, setWarningMessage] = useState("");
-  const [warningAcknowledged, setWarningAcknowledged] = useState(false); // New state to track if the warning was acknowledged
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
@@ -33,10 +33,10 @@ export default function SignUpPage({ navigation }) {
   const handleGetStartedPress = () => {
     const advice = getTrainingAdvice();
     if (advice && !warningAcknowledged) {
-      setWarningMessage(advice); // Set the warning message if there's advice to give
-      setWarningAcknowledged(true); // Indicate that the warning is now acknowledged
+      setWarningMessage(advice);
+      setWarningAcknowledged(true); 
     } else {
-      navigation.navigate('Home'); // Navigate when no warnings are necessary or if warning has been acknowledged
+      navigation.navigate('home'); 
     }
   };
 
@@ -65,7 +65,7 @@ export default function SignUpPage({ navigation }) {
                 value={sessionsPerWeek}
                 onValueChange={(value) => {
                   setSessionsPerWeek(value);
-                  setWarningAcknowledged(false); // Reset the acknowledgement when user changes the selection
+                  setWarningAcknowledged(false);
                   setWarningMessage("");
                 }}
                 minimumTrackTintColor="#1db344"
