@@ -80,7 +80,9 @@ export default function SignUpPage({ navigation }) {
               </Text>
               <Text style={styles.label}>How many times per week do you want to train?</Text>
 
-              <View style={styles.daysRow}>{renderDayButtons()}</View>
+              <View style={styles.daysRow}>
+                {renderDayButtons()}
+              </View>
 
               <Text style={styles.sessionsText}>
                 {sessionsPerWeek} session(s) per week
@@ -134,19 +136,19 @@ const styles = StyleSheet.create({
   },
   daysRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    marginVertical: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   dayButton: {
     backgroundColor: '#222',
     borderColor: '#1db344',
     borderWidth: 1,
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    margin: 5,
+    borderRadius: 100,
+    width: '12%',
+    aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
