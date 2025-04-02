@@ -17,6 +17,7 @@ export default function SignUpPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
   const [warningMessage, setWarningMessage] = useState("");
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
