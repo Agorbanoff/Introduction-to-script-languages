@@ -1,10 +1,8 @@
 import React from 'react';
 import {
   StyleSheet,
-  Text,
   View,
   TouchableOpacity,
-  ScrollView,
   ImageBackground,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -14,29 +12,29 @@ const LongContentScreen = () => {
   const navigation = useNavigation();
 
   return (
-
     <View style={styles.container}>
-     
       <ImageBackground
-            source={require('./Images/homePagePhoto.jpg')}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-          ></ImageBackground>
+        source={require('./Images/homePagePhoto.jpg')}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          {/* Bottom Navigation Bar */}
+          <View style={styles.navBar}>
+            <TouchableOpacity onPress={() => navigation.navigate('Gym')}>
+              <Ionicons name="barbell-outline" size={28} color="#1db344" />
+            </TouchableOpacity>
 
-      {/* Bottom Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => navigation.navigate('Gym')}>
-          <Ionicons name="barbell-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Food')}>
+              <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+            </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Food')}>
-          <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-          <Ionicons name="settings-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+              <Ionicons name="settings-outline" size={28} color="#1db344" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ImageBackground>
     </View>
   );
 };
@@ -49,16 +47,12 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
   },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 80, 
-  },
-  text: {
-    fontSize: 24,
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(33, 33, 33, 0.85)',
+    justifyContent: 'flex-end',
   },
   navBar: {
     height: 60,
