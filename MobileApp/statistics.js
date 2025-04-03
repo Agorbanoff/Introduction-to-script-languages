@@ -20,7 +20,7 @@ export default function SignUpPage({ navigation }) {
   const [weight, setWeight] = useState('');
   const [neck, setNeck] = useState('');
   const [waist, setWaist] = useState('');
-  const [gender, setGender] = useState(null); // 'male' or 'female'
+  const [gender, setGender] = useState(null); 
 
   const handleSubmit = () => {
     if (!gender) {
@@ -100,7 +100,6 @@ export default function SignUpPage({ navigation }) {
                 </Text>
               )}
 
-              {/* Inputs */}
               <TextInput
                 style={styles.input}
                 placeholder="Enter your height (cm)"

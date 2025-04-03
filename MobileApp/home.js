@@ -21,15 +21,15 @@ const LongContentScreen = () => {
         <View style={styles.overlay}>
           {/* Bottom Navigation Bar */}
           <View style={styles.navBar}>
-            <TouchableOpacity onPress={() => navigation.navigate('Gym')}>
+            <TouchableOpacity onPress={() => navigation.navigate('home')}>
               <Ionicons name="barbell-outline" size={28} color="#1db344" />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Food')}>
+            <TouchableOpacity onPress={() => navigation.navigate('diet')}>
               <Ionicons name="restaurant-outline" size={28} color="#1db344" />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+            <TouchableOpacity onPress={() => navigation.navigate('settings')}>
               <Ionicons name="settings-outline" size={28} color="#1db344" />
             </TouchableOpacity>
           </View>
