@@ -19,7 +19,7 @@ const LongContentScreen = () => {
         resizeMode="cover"
       >
         <View style={styles.overlay}>
-          {/* Bottom Navigation Bar */}
+    
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => navigation.navigate('home')}>
               <Ionicons name="barbell-outline" size={28} color="#1db344" />

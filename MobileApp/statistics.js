@@ -56,7 +56,6 @@ export default function SignUpPage({ navigation }) {
             </SafeAreaView>
 
             <View style={styles.container}>
-              {/* Gender Picker */}
               <Text style={styles.label}>Select your gender:</Text>
               <View style={styles.genderRow}>
                 <TouchableOpacity
@@ -116,23 +115,6 @@ export default function SignUpPage({ navigation }) {
                 onChangeText={setWeight}
                 placeholderTextColor="#aaa"
               />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your neck circumference (cm)"
-                keyboardType="numeric"
-                value={neck}
-                onChangeText={setNeck}
-                placeholderTextColor="#aaa"
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your waist circumference (cm)"
-                keyboardType="numeric"
-                value={waist}
-                onChangeText={setWaist}
-                placeholderTextColor="#aaa"
-              />
-
               <View style={styles.buttonColumn}>
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                   <Text style={styles.buttonText}>Submit</Text>
@@ -190,6 +172,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 10,
+    marginBottom: 20,
   },
   genderButtonSelected: {
     backgroundColor: '#1db344',

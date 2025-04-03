@@ -17,7 +17,6 @@ const SettingsScreen = ({ navigation }) => {
         resizeMode="cover"
       >
         <View style={styles.overlay}>
-          {/* Content Area for Settings */}
           <View style={styles.settingsContainer}>
             <SettingsButton icon="person-outline" text="Change Username" onPress={() => console.log('Change Username')} />
             <SettingsButton icon="lock-closed-outline" text="Change Password" onPress={() => console.log('Change Password')} />
@@ -25,7 +24,6 @@ const SettingsScreen = ({ navigation }) => {
             <SettingsButton icon="leaf-outline" text="Add Allergens" onPress={() => console.log('Add Allergen')} />
           </View>
 
-          {/* Bottom Navigation Bar */}
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => navigation.navigate('home')}>
               <Ionicons name="barbell-outline" size={28} color="#1db344" />
@@ -62,23 +60,23 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(33, 33, 33, 0.85)',
-    justifyContent: 'space-between',  // Adjusts layout to space-between to align items properly
-    paddingVertical: 20,  // Adds padding at the top and bottom of the overlay
+    justifyContent: 'space-between',  
+    paddingVertical: 20, 
   },
   settingsContainer: {
     flexGrow: 1,
-    justifyContent: 'center',  // Ensures the settings are centered in the available space
+    justifyContent: 'center',  
     alignItems: 'center',
   },
   button: {
     flexDirection: 'row',
     backgroundColor: '#1db344',
-    paddingVertical: 20,  // Increased padding for a more spacious button layout
-    paddingHorizontal: 40,  // More horizontal padding
+    paddingVertical: 20,  
+    paddingHorizontal: 40,  
     borderRadius: 10,
-    marginBottom: 15,  // Slightly more space between buttons
+    marginBottom: 15, 
     alignItems: 'center',
-    width: '80%',  // Adjust width as needed for visual balance
+    width: '80%', 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -87,7 +85,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 18,  // Slightly larger font size for better readability
+    fontSize: 18,  
     marginLeft: 10,
   },
   icon: {
@@ -95,9 +93,9 @@ const styles = StyleSheet.create({
     height: 24,
   },
   navBar: {
-    width: '100%',  // Ensure full width
-    position: 'absolute',  // Position absolutely to stick at the bottom
-    bottom: 0,  // Aligns at the bottom
+    width: '100%',  
+    position: 'absolute',  
+    bottom: 0,  
     height: 60,
     backgroundColor: '#111',
     flexDirection: 'row',
