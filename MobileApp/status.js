@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from 'react-native';
 
-export default function SignUpPage({ navigation }) {
+export default function StatusPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
   const [warningMessage, setWarningMessage] = useState("");
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);

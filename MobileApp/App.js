@@ -7,6 +7,7 @@ import StatisticsPage from './statistics';
 import StatusPage from './status';
 import HomePage from './home';
 import SettingsPage from './settings';
+import AllergensPage from './allergens';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ export default function App() {
         <Stack.Screen name="status" component={StatusPage} options={{ title: 'Status', headerShown: false }} />
         <Stack.Screen name="home" component={HomePage} options={{ title: 'Home', headerShown: false }} />
         <Stack.Screen name="settings" component={SettingsPage} options={{ title: 'Settings', headerShown: false }} />
+        <Stack.Screen name='allergens' component={AllergensPage} options={{ title: 'Allergens', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

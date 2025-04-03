@@ -14,7 +14,7 @@ import {
   Keyboard,
 } from 'react-native';
 
-export default function SignUpPage({ navigation }) {
+export default function LogInPage({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 

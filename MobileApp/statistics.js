@@ -15,7 +15,7 @@ import {
   Alert,
 } from 'react-native';
 
-export default function SignUpPage({ navigation }) {
+export default function StatisticsPage({ navigation }) {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [neck, setNeck] = useState('');

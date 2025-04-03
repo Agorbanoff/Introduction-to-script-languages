@@ -24,11 +24,12 @@ const SettingsScreen = ({ navigation }) => {
             <SettingsButton icon="leaf-outline" text="Add Allergens" onPress={() => console.log('Add Allergen')} />
           </View>
 
+
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => navigation.navigate('home')}>
               <Ionicons name="barbell-outline" size={28} color="#1db344" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('diet')}>
+            <TouchableOpacity onPress={() => navigation.navigate('allergens')}>
               <Ionicons name="restaurant-outline" size={28} color="#1db344" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('settings')}>
