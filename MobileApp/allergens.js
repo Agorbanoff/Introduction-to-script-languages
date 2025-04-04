@@ -96,7 +96,7 @@ const DietScreen = ({ navigation }) => {
           </View>
 
           <View style={styles.navBar}>
-            <TouchableOpacity onPress={() => navigation.navigate('home')}>
+            <TouchableOpacity onPress={() => navigation.navigate('gym')}>
               <Ionicons name="barbell-outline" size={28} color="#1db344" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('allergens')}>
