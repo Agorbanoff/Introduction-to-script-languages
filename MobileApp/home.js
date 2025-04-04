@@ -19,17 +19,37 @@ const LongContentScreen = () => {
         resizeMode="cover"
       >
         <View style={styles.overlay}>
-    
           <View style={styles.navBar}>
-            <TouchableOpacity onPress={() => navigation.navigate('home')}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'gym' }],
+                })
+              }
+            >
               <Ionicons name="barbell-outline" size={28} color="#1db344" />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('allergens')}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'allergens' }],
+                })
+              }
+            >
               <Ionicons name="restaurant-outline" size={28} color="#1db344" />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('settings')}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'settings' }],
+                })
+              }
+            >
               <Ionicons name="settings-outline" size={28} color="#1db344" />
             </TouchableOpacity>
           </View>
