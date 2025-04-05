@@ -89,7 +89,7 @@ const DietScreen = ({ navigation }) => {
             </ScrollView>
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={() => console.log('Continue pressed')}
+              onPress={() => navigation.navigate('diet')}
             >
               <Text style={styles.continueButtonText}>Continue</Text>
             </TouchableOpacity>

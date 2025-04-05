@@ -9,6 +9,7 @@ import HomePage from './home';
 import SettingsPage from './settings';
 import AllergensPage from './allergens';
 import GymPage from './gym';
+import DietPage from './diet';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="home" component={HomePage} options={{ title: 'Home', headerShown: false }} />
         <Stack.Screen name="settings" component={SettingsPage} options={{ title: 'Settings', headerShown: false }} />
         <Stack.Screen name='allergens' component={AllergensPage} options={{ title: 'Allergens', headerShown: false }} />
+        <Stack.Screen name="diet" component={DietPage} options={{ title: 'Diet', headerShown: false }} />
         <Stack.Screen name="gym" component={GymPage} options={{ title: 'Gym', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -4,6 +4,7 @@ import {
   View,
   TouchableOpacity,
   ImageBackground,
+  Text,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -19,6 +20,9 @@ const LongContentScreen = () => {
         resizeMode="cover"
       >
         <View style={styles.overlay}>
+          <Text style={styles.centeredText}>
+            Choose where you want to go 
+          </Text>
           <View style={styles.navBar}>
             <TouchableOpacity
               onPress={() =>
@@ -67,12 +71,18 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
   },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(33, 33, 33, 0.85)',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  centeredText: {
+    marginTop: 100,
+    textAlign: 'center',
+    color: '#1db344',
+    fontSize: 50,
   },
   navBar: {
     height: 60,
