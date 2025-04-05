@@ -22,8 +22,8 @@ const SettingsScreen = ({ navigation }) => {
             <SettingsButton icon="lock-closed-outline" text="Change Password" onPress={() => console.log('Change Password')} />
             <SettingsButton icon="fitness-outline" text="Change Workout Plan" onPress={() => console.log('Change Workout Plan')} />
             <SettingsButton icon="leaf-outline" text="Add Allergens" onPress={() => console.log('Add Allergen')} />
+            <SettingsButton icon="trash-outline" text="Delete Account" onPress={() => console.log('Delete Account')} />
           </View>
-
 
           <View style={styles.navBar}>
             <TouchableOpacity onPress={() => navigation.navigate('gym')}>

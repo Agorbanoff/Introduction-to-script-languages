@@ -40,21 +40,21 @@ export default function SignUpPage({ navigation }) {
             <View style={styles.container}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter your username"
+                placeholder="Enter an username"
                 value={username}
                 onChangeText={setUsername}
                 placeholderTextColor="#aaa"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your email"
+                placeholder="Enter an email"
                 value={email}
                 onChangeText={setEmail}
                 placeholderTextColor="#aaa"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your password"
+                placeholder="Enter a password"
                 secureTextEntry={true}
                 value={password}
                 onChangeText={setPassword}

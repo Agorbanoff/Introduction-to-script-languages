@@ -21,42 +21,58 @@ const LongContentScreen = () => {
       >
         <View style={styles.overlay}>
           <Text style={styles.centeredText}>
-            Choose where you want to go 
+            Let's get started
           </Text>
-          <View style={styles.navBar}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'gym' }],
-                })
-              }
-            >
-              <Ionicons name="barbell-outline" size={28} color="#1db344" />
+          <View style={styles.imageRow}>
+            <TouchableOpacity onPress={() => navigation.navigate('gym')}>
+              <ImageBackground
+                source={require('./Images/gymPhoto.jpg')}
+                style={styles.image}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'allergens' }],
-                })
-              }
-            >
-              <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() =>
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'settings' }],
-                })
-              }
-            >
-              <Ionicons name="settings-outline" size={28} color="#1db344" />
+            <Text style={styles.orText}>or</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('allergens')}>
+              <ImageBackground
+                source={require('./Images/dietPhoto.jpg')}
+                style={styles.image}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           </View>
+          <Text style={styles.chooseText}>Choose below</Text>
+        </View>
+        <View style={styles.navBar}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'gym' }],
+              })
+            }
+          >
+            <Ionicons name="barbell-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'allergens' }],
+              })
+            }
+          >
+            <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'settings' }],
+              })
+            }
+          >
+            <Ionicons name="settings-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
         </View>
       </ImageBackground>
     </View>
@@ -71,21 +87,48 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    justifyContent: 'center',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(33, 33, 33, 0.85)',  // Restoring the transparency
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
   centeredText: {
-    marginTop: 100,
     textAlign: 'center',
     color: '#1db344',
     fontSize: 50,
+    marginBottom: 50,  // Front text placed higher
+  },
+  imageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  image: {
+    borderRadius: 30,
+    width: 150,  
+    height: 200,
+    marginHorizontal: 10,
+  },
+  orText: {
+    fontSize: 24,
+    color: '#1db344',
+  },
+  chooseText: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontSize: 50,
+    color: '#1db344',
+    marginBottom: 60,
   },
   navBar: {
+    position: 'absolute',
+    bottom: 0,
     height: 60,
+    width: '100%',
     backgroundColor: '#111',
     flexDirection: 'row',
     justifyContent: 'space-around',
