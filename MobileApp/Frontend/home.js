@@ -40,7 +40,7 @@ const LongContentScreen = () => {
               />
             </TouchableOpacity>
           </View>
-          <Text style={styles.chooseText}>Choose below</Text>
+          <Text style={styles.chooseText}>To start with</Text>
         </View>
         <View style={styles.navBar}>
           <TouchableOpacity
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',  // Restoring the transparency
+    backgroundColor: 'rgba(33, 33, 33, 0.85)', 
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#1db344',
     fontSize: 50,
-    marginBottom: 50,  // Front text placed higher
+    marginBottom: 50, 
   },
   imageRow: {
     flexDirection: 'row',
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   orText: {
-    fontSize: 24,
+    fontSize: 40,
     color: '#1db344',
   },
   chooseText: {
