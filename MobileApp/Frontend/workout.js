@@ -8,11 +8,8 @@ import {
   ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 
-const PushDay = () => {
-  const navigation = useNavigation();
-
+const PushDay = ({ navigation }) => {
   // Define the Push Day exercises.
   const pushExercises = [
     {
@@ -101,7 +98,7 @@ const PushDay = () => {
     <View style={styles.container}>
       {/* Header Section */}
       <ImageBackground
-        source={require('./Images/PushImage.jpg')} // Use your push day header image.
+        source={require('./Images/PushImage.jpg')} // Replace with your own header image
         style={styles.headerImage}
         resizeMode="cover"
       >
@@ -118,10 +115,10 @@ const PushDay = () => {
         )}
       </ScrollView>
 
-      {/* Navigation (Back button) */}
+      {/* Navigation (Back button) with red color */}
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="#1db344" />
+          <Ionicons name="arrow-back" size={28} color="red" />
         </TouchableOpacity>
       </View>
     </View>
