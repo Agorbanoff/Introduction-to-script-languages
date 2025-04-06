@@ -10,26 +10,19 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 const allergensList = [
-  'Peanuts',
-  'Tree Nuts (almonds, walnuts, cashews, hazelnuts, pecans, pistachios)',
   'Milk',
   'Eggs',
-  'Fish (salmon, tuna, cod)',
-  'Crustaceans (shrimp, crab, lobster)',
-  'Mollusks (clams, mussels, oysters)',
+  'Fish',
   'Wheat',
-  'Soy',
-  'Sesame',
-  'Mustard',
   'Celery',
-  'Lupin',
   'Sulfites',
   'Gluten',
-  'Corn',
-  'Sunflower seeds',
-  'Poppy seeds',
   'Kiwi',
   'Banana',
+  'soy',
+  'pork',
+  'chicken',
+  'beef',
 ];
 
 const DietScreen = ({ navigation }) => {
@@ -186,7 +179,8 @@ const styles = StyleSheet.create({
     marginBottom: 55, 
   },
   continueButtonText: {
-    color: 'white',
+    fontWeight: 'bold',
+    color: 'black',
     fontSize: 18,
   },
 });

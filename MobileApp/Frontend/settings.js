@@ -85,13 +85,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonText: {
-    color: 'white',
+    fontWeight: 'bold',
+    color: 'black',
     fontSize: 18,  
     marginLeft: 10,
   },
   icon: {
     width: 24,
     height: 24,
+    color: 'black',
   },
   navBar: {
     width: '100%',  
