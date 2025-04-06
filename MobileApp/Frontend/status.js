@@ -35,7 +35,8 @@ export default function StatusPage({ navigation }) {
       setWarningMessage(advice);
       setWarningAcknowledged(true);
     } else {
-      navigation.navigate('gym');
+      // Pass sessionsPerWeek as a parameter when navigating.
+      navigation.navigate('gym', { sessionsPerWeek });
     }
   };
 
@@ -94,10 +95,7 @@ export default function StatusPage({ navigation }) {
             </SafeAreaView>
 
             <View style={styles.container}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleGetStartedPress}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleGetStartedPress}>
                 <Text style={styles.buttonText}>Get started</Text>
               </TouchableOpacity>
             </View>

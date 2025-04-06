@@ -12,27 +12,20 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from 'react-native';
 
 export default function StatisticsPage({ navigation }) {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [neck, setNeck] = useState('');
-  const [waist, setWaist] = useState('');
-  const [gender, setGender] = useState(null); 
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
 
   const handleSubmit = () => {
-    if (!gender) {
-      Alert.alert('Missing Info', 'Please select your gender.');
-      return;
-    }
-
+    // Log values; age and gender are optional.
     console.log('Gender selected:', gender);
     console.log('Height:', height);
     console.log('Weight:', weight);
-    console.log('Neck:', neck);
-    console.log('Waist:', waist);
+    console.log('Age:', age);
 
     navigation.navigate('status');
   };
@@ -56,7 +49,7 @@ export default function StatisticsPage({ navigation }) {
             </SafeAreaView>
 
             <View style={styles.container}>
-              <Text style={styles.label}>Select your gender:</Text>
+              <Text style={styles.label}>Select your gender (optional):</Text>
               <View style={styles.genderRow}>
                 <TouchableOpacity
                   style={[
@@ -93,11 +86,11 @@ export default function StatisticsPage({ navigation }) {
                 </TouchableOpacity>
               </View>
 
-              {gender && (
+              {gender ? (
                 <Text style={styles.selectedGenderText}>
                   Selected: {gender.charAt(0).toUpperCase() + gender.slice(1)}
                 </Text>
-              )}
+              ) : null}
 
               <TextInput
                 style={styles.input}
@@ -115,6 +108,15 @@ export default function StatisticsPage({ navigation }) {
                 onChangeText={setWeight}
                 placeholderTextColor="#aaa"
               />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your age (optional)"
+                keyboardType="numeric"
+                value={age}
+                onChangeText={setAge}
+                placeholderTextColor="#aaa"
+              />
+
               <View style={styles.buttonColumn}>
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                   <Text style={styles.buttonText}>Submit</Text>

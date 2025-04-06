@@ -8,17 +8,94 @@ import {
   Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-
-const workoutData = [
-  { id: 85, type: 'Workout + Cardio', image: require('./Images/gymPhoto.jpg') },
-  { id: 86, type: 'Active rest day', image: require('./Images/gymPhoto.jpg') },
-  { id: 87, type: 'Workout + Cardio', image: require('./Images/gymPhoto.jpg') },
-  { id: 88, type: 'Active rest day', image: require('./Images/gymPhoto.jpg') },
-];
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const GymPage = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  // Retrieve sessionsPerWeek from route params (defaulting to 3 if not provided)
+  const { sessionsPerWeek = 3 } = route.params || {};
+
+  const totalDays = 7;
+  let schedule = [];
+  const cycle = ['PUSH', 'PULL', 'LEGS'];
+
+  if (sessionsPerWeek === 1) {
+    schedule = [
+      'FULL-BODY',
+      'Rest day',
+      'Rest day',
+      'Rest day',
+      'Rest day',
+      'Rest day',
+      'Rest day',
+    ];
+  } else if (sessionsPerWeek === 2) {
+    schedule = [
+      'UPPER BODY',
+      'Rest day',
+      'Rest day',
+      'Rest day',
+      'LOWER',
+      'Rest day',
+      'Rest day',
+    ];
+  } else if (sessionsPerWeek === 3) {
+    schedule = Array.from({ length: totalDays }, (_, i) =>
+      i < 3 ? cycle[i] : 'Rest day'
+    );
+  } else if (sessionsPerWeek === 4) {
+    schedule = [
+      'UPPER BODY',
+      'LOWER BODY',
+      'Rest day',
+      'UPPER BODY',
+      'LOWER BODY',
+      'Rest day',
+      'Rest day',
+    ];
+  } else if (sessionsPerWeek === 5) {
+    schedule = [
+      'PUSH',
+      'PULL',
+      'LEGS AND CORE',
+      'ARM DAY',
+      'CHEST AND BACK',
+      'Rest day',
+      'Rest day',
+    ];
+  } else if (sessionsPerWeek === 6) {
+    schedule = [
+      'PUSH',
+      'PULL',
+      'LEGS',
+      'Rest day',
+      'PUSH',
+      'PULL',
+      'LEGS',
+    ];
+  } else if (sessionsPerWeek === 7) {
+    schedule = [
+      'PUSH',
+      'PULL',
+      'LEGS',
+      'CORE MOBILITY',
+      'PUSH',
+      'PULL',
+      'LEGS',
+    ];
+  } else {
+    schedule = Array.from({ length: totalDays }, (_, i) =>
+      i < sessionsPerWeek ? 'Workout' : 'Rest day'
+    );
+  }
+
+  // Build an array of workoutData objects.
+  const workoutData = schedule.map((type, index) => ({
+    id: index + 1,
+    type,
+    image: require('./Images/gymPhoto.jpg'),
+  }));
 
   return (
     <View style={styles.container}>
@@ -29,10 +106,16 @@ const GymPage = () => {
           {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
             <View
               key={index}
-              style={[styles.dayCircle, day === 'F' && styles.activeDayCircle]}
+              style={[
+                styles.dayCircle,
+                day === 'F' && styles.activeDayCircle,
+              ]}
             >
               <Text
-                style={[styles.dayText, day === 'F' && styles.activeDayText]}
+                style={[
+                  styles.dayText,
+                  day === 'F' && styles.activeDayText,
+                ]}
               >
                 {day}
               </Text>
@@ -54,7 +137,18 @@ const GymPage = () => {
 
         <ScrollView style={styles.scroll}>
           {workoutData.map((item) => (
-            <TouchableOpacity key={item.id} style={styles.card}>
+            <TouchableOpacity
+              key={item.id}
+              style={styles.card}
+              // Navigate to a detailed schedule for the day
+              onPress={() =>
+                navigation.navigate('WorkoutSchedule', {
+                  day: item.id,
+                  workoutType: item.type,
+                  sessionsPerWeek,
+                })
+              }
+            >
               <Image source={item.image} style={styles.cardImage} />
               <View style={styles.cardContent}>
                 <Text style={styles.cardId}>{item.id}</Text>
@@ -75,7 +169,7 @@ const GymPage = () => {
           onPress={() =>
             navigation.reset({
               index: 0,
-              routes: [{ name: 'gym' }],
+              routes: [{ name: 'home' }],
             })
           }
         >
