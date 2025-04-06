@@ -142,7 +142,7 @@ const GymPage = () => {
               style={styles.card}
               // Navigate to a detailed schedule for the day
               onPress={() =>
-                navigation.navigate('WorkoutSchedule', {
+                navigation.navigate('workout', {
                   day: item.id,
                   workoutType: item.type,
                   sessionsPerWeek,
