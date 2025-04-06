@@ -35,7 +35,7 @@ export default function StatusPage({ navigation }) {
       setWarningMessage(advice);
       setWarningAcknowledged(true);
     } else {
-      navigation.navigate('home');
+      navigation.navigate('gym');
     }
   };
 

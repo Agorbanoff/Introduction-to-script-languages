@@ -5,7 +5,6 @@ import LoginPage from './logIn';
 import SignUpPage from './signUp';
 import StatisticsPage from './statistics';
 import StatusPage from './status';
-import HomePage from './home';
 import SettingsPage from './settings';
 import AllergensPage from './allergens';
 import GymPage from './gym';
@@ -21,7 +20,6 @@ export default function App() {
         <Stack.Screen name="signup" component={SignUpPage} options={{ title: 'Sign up', headerShown: false }} />
         <Stack.Screen name="statistics" component={StatisticsPage} options={{ title: 'Statistics', headerShown: false }} />
         <Stack.Screen name="status" component={StatusPage} options={{ title: 'Status', headerShown: false }} />
-        <Stack.Screen name="home" component={HomePage} options={{ title: 'Home', headerShown: false }} />
         <Stack.Screen name="settings" component={SettingsPage} options={{ title: 'Settings', headerShown: false }} />
         <Stack.Screen name='allergens' component={AllergensPage} options={{ title: 'Allergens', headerShown: false }} />
         <Stack.Screen name="diet" component={DietPage} options={{ title: 'Diet', headerShown: false }} />

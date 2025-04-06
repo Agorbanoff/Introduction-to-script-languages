@@ -75,7 +75,7 @@ const GymPage = () => {
           onPress={() =>
             navigation.reset({
               index: 0,
-              routes: [{ name: 'home' }],
+              routes: [{ name: 'gym' }],
             })
           }
         >
