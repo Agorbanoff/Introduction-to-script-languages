@@ -169,7 +169,7 @@ const GymPage = () => {
           onPress={() =>
             navigation.reset({
               index: 0,
-              routes: [{ name: 'home' }],
+              routes: [{ name: 'gym' }],
             })
           }
         >
@@ -180,7 +180,7 @@ const GymPage = () => {
           onPress={() =>
             navigation.reset({
               index: 0,
-              routes: [{ name: 'allergens' }],
+              routes: [{ name: 'diet' }],
             })
           }
         >

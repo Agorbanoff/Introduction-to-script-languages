@@ -44,7 +44,7 @@ const meals = {
 
 const DietPlanScreen = ({ navigation }) => {
   const navigateToDetails = (meal) => {
-    console.log('Navigate to:', meal.name); // Placeholder for navigation
+    console.log('Navigate to:', meal.name); 
   };
 
   const renderMealCategory = (category) => (
@@ -86,7 +86,7 @@ const DietPlanScreen = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.navigate('gym')}>
             <Ionicons name="barbell-outline" size={28} color="#1db344" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('allergens')}>
+          <TouchableOpacity onPress={() => navigation.navigate('diet')}>
             <Ionicons name="restaurant-outline" size={28} color="#1db344" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('settings')}>

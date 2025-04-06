@@ -56,7 +56,7 @@ export default function LogInPage({ navigation }) {
                   style={styles.button}
                   onPress={() => navigation.navigate('statistics')}
                 >
-                  <Text style={styles.buttonText}>Submit</Text>
+                  <Text style={styles.buttonText}>Log in</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
