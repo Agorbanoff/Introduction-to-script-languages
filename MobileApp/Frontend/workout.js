@@ -1,5 +1,4 @@
-// CombinedWorkout.js
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,12 +10,10 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const CombinedWorkout = () => {
+const PushDay = () => {
   const navigation = useNavigation();
-  // "push" or "pull"
-  const [workoutType, setWorkoutType] = useState('push');
 
-  // Define Push Day exercises
+  // Define the Push Day exercises.
   const pushExercises = [
     {
       id: 1,
@@ -44,7 +41,8 @@ const CombinedWorkout = () => {
       name: 'Lateral Raises',
       sets: 3,
       reps: '15-20',
-      description: 'Keep a slight bend in your elbows and raise to shoulder height',
+      description:
+        'Keep a slight bend in your elbows and raise to shoulder height',
     },
     {
       id: 5,
@@ -76,63 +74,14 @@ const CombinedWorkout = () => {
     },
   ];
 
-  // Define Pull Day exercises
-  const pullExercises = [
-    {
-      id: 1,
-      name: 'Warmup',
-      sets: 1,
-      reps: 'N/A',
-      description: 'Light cardio & dynamic stretching',
-    },
-    {
-      id: 2,
-      name: 'Pull Ups',
-      sets: 3,
-      reps: '8-12',
-      description: 'Focus on full range of motion',
-    },
-    {
-      id: 3,
-      name: 'Lat Pulldown',
-      sets: 3,
-      reps: '8-12',
-      description: 'Keep your back engaged and squeeze at the bottom',
-    },
-    {
-      id: 4,
-      name: 'Low Row',
-      sets: 3,
-      reps: '8-12',
-      description: 'Maintain proper posture throughout the movement',
-    },
-    {
-      id: 5,
-      name: 'Preacher Curl',
-      sets: 3,
-      reps: '8-12',
-      description: 'Focus on a slow and controlled movement',
-    },
-    {
-      id: 6,
-      name: 'Bicep Curl',
-      sets: 3,
-      reps: '8-12',
-      description: 'Keep elbows fixed and squeeze at the top',
-    },
-  ];
-
-  // Select the appropriate exercise array based on workoutType
-  const currentExercises = workoutType === 'push' ? pushExercises : pullExercises;
-
-  // Render a single exercise item
+  // Render a single exercise item.
   const renderExerciseItem = (exercise, index) => (
     <View key={exercise.id} style={styles.exerciseRow}>
       <View style={styles.timelineContainer}>
         <View style={styles.timelineCircle}>
           <Text style={styles.timelineText}>{exercise.id}</Text>
         </View>
-        {index < currentExercises.length - 1 && <View style={styles.timelineLine} />}
+        {index < pushExercises.length - 1 && <View style={styles.timelineLine} />}
       </View>
       <View style={styles.exerciseContent}>
         <Text style={styles.exerciseName}>{exercise.name}</Text>
@@ -152,49 +101,21 @@ const CombinedWorkout = () => {
     <View style={styles.container}>
       {/* Header Section */}
       <ImageBackground
-        source={
-          workoutType === 'push'
-            ? require('./Images/PushImage.jpg')
-            : require('./Images/PushImage.jpg')
-        }
+        source={require('./Images/PushImage.jpg')} // Use your push day header image.
         style={styles.headerImage}
         resizeMode="cover"
       >
         <View style={styles.headerOverlay}>
-          <Text style={styles.title}>
-            {workoutType === 'push' ? 'PUSH DAY' : 'PULL DAY'}
-          </Text>
-          <Text style={styles.subtitle}>
-            {workoutType === 'push'
-              ? 'Focus on chest, shoulders & triceps'
-              : 'Focus on back & biceps'}
-          </Text>
+          <Text style={styles.title}>PUSH DAY</Text>
+          <Text style={styles.subtitle}>Focus on chest, shoulders & triceps</Text>
         </View>
       </ImageBackground>
 
-      {/* Toggle Buttons */}
-      <View style={styles.toggleRow}>
-        <TouchableOpacity
-          style={[styles.toggleButton, workoutType === 'push' && styles.toggleButtonSelected]}
-          onPress={() => setWorkoutType('push')}
-        >
-          <Text style={[styles.toggleButtonText, workoutType === 'push' && styles.toggleButtonTextSelected]}>
-            PUSH
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, workoutType === 'pull' && styles.toggleButtonSelected]}
-          onPress={() => setWorkoutType('pull')}
-        >
-          <Text style={[styles.toggleButtonText, workoutType === 'pull' && styles.toggleButtonTextSelected]}>
-            PULL
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Exercises List */}
       <ScrollView contentContainerStyle={styles.scroll}>
-        {currentExercises.map((exercise, index) => renderExerciseItem(exercise, index))}
+        {pushExercises.map((exercise, index) =>
+          renderExerciseItem(exercise, index)
+        )}
       </ScrollView>
 
       {/* Navigation (Back button) */}
@@ -207,7 +128,7 @@ const CombinedWorkout = () => {
   );
 };
 
-export default CombinedWorkout;
+export default PushDay;
 
 const styles = StyleSheet.create({
   container: {
@@ -235,31 +156,6 @@ const styles = StyleSheet.create({
     color: '#ccc',
     textAlign: 'center',
     marginTop: 4,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  toggleButton: {
-    backgroundColor: '#222',
-    borderColor: '#1db344',
-    borderWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    marginHorizontal: 10,
-  },
-  toggleButtonSelected: {
-    backgroundColor: '#1db344',
-  },
-  toggleButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  toggleButtonTextSelected: {
-    color: 'black',
   },
   scroll: {
     padding: 16,
