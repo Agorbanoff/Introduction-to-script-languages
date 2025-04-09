@@ -13,7 +13,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 const GymPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  // Retrieve sessionsPerWeek from route params (defaulting to 3 if not provided)
   const { sessionsPerWeek = 3 } = route.params || {};
 
   const totalDays = 7;

@@ -13,11 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 const meals = {
   breakfast: [
-    { name: 'Quinoa Pudding', image: require('./Images/breakfast1.png'), calories: '449' },
-    { name: 'Protein Breakfast Cake', image: require('./Images/breakfast2.png'), calories: '407' },
-    { name: 'Overnight Chocolate Pudding', image: require('./Images/breakfast3.png'), calories: '388' },
-    { name: 'Fruit Yogurt', image: require('./Images/breakfast4.png'), calories: '320' },
-    { name: 'Avocado Toast', image: require('./Images/breakfast5.png'), calories: '290' },
+    { name: 'Scrambled eggs with spinach and toast', image: require('./Images/breakfast1.png'), calories: '449' },
+    { name: 'Greek Yogurt with Mixed Nuts and Honey', image: require('./Images/breakfast2.png'), calories: '407' },
+    { name: 'Avocado Toast with Poached Eggs', image: require('./Images/breakfast3.png'), calories: '388' },
+    { name: 'Cottage Cheese with Fresh Fruit', image: require('./Images/breakfast4.png'), calories: '320' },
+    { name: 'Smoothie Bowl', image: require('./Images/breakfast5.png'), calories: '290' },
   ],
   lunch: [
     { name: 'Chicken Salad', image: require('./Images/lunch1.png'), calories: '510' },
