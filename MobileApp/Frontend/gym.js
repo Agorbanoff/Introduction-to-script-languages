@@ -13,7 +13,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 const GymPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  // Retrieve sessionsPerWeek from route params (defaulting to 3 if not provided)
   const { sessionsPerWeek = 3 } = route.params || {};
 
   const totalDays = 7;
@@ -36,7 +35,7 @@ const GymPage = () => {
       'Rest day',
       'Rest day',
       'Rest day',
-      'LOWER',
+      'LOWER BODY',
       'Rest day',
       'Rest day',
     ];
@@ -90,7 +89,6 @@ const GymPage = () => {
     );
   }
 
-  // Build an array of workoutData objects.
   const workoutData = schedule.map((type, index) => ({
     id: index + 1,
     type,
@@ -140,7 +138,6 @@ const GymPage = () => {
             <TouchableOpacity
               key={item.id}
               style={styles.card}
-              // Navigate to a detailed schedule for the day
               onPress={() =>
                 navigation.navigate('workout', {
                   day: item.id,
