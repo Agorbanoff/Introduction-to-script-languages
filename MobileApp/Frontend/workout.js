@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,9 +6,45 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  Modal,
+  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
+
+const exerciseAlternatives = {
+  'Bench Press': ['Dumbbell Press', 'Incline Bench Press', 'Push-ups'],
+  'Chest Fly Machine': ['Cable Chest Fly', 'Pec Deck', 'Flat Dumbbell Fly'],
+  'Barbell Squats': ['Front Squats', 'Goblet Squats', 'Hack Squats'],
+  'Barbell Squat': ['Goblet Squat', 'Smith Machine Squat', 'Landmine Squat'],
+  'Deadlifts': ['Trap Bar Deadlift', 'Romanian Deadlift', 'Sumo Deadlift'],
+  'Barbell Deadlift': ['Snatch-Grip Deadlift', 'Deficit Deadlift', 'Block Pull'],
+  'Pull-ups': ['Lat Pulldown', 'Assisted Pull-ups', 'Inverted Rows'],
+  'Overhead Tricep Extension': ['Skull Crushers', 'Overhead Cable Extension'],
+  'Triceps Dips': ['Close Grip Bench', 'Triceps Rope Pushdown'],
+  'Barbell Rows': ['Dumbbell Rows', 'Seated Cable Rows'],
+  'Bicep Curls': ['EZ-Bar Curls', 'Hammer Curls'],
+  'Barbell Curl': ['Preacher Curl', 'Cable Curl'],
+  'Dumbbell Shoulder Press': ['Arnold Press', 'Barbell Shoulder Press'],
+  'Lat Pulldown': ['Cable Pullover', 'Machine Pull-down'],
+  'Lateral Raises': ['Cable Lateral Raise', 'Upright Row'],
+  'Tricep Pushdown': ['Rope Pushdown', 'Straight Bar Pushdown'],
+  'Leg Press': ['Hack Squat', 'Belt Squat'],
+  'Romanian Deadlifts': ['Good Mornings', 'Single-leg RDL'],
+  'Walking Lunges': ['Split Squats', 'Step Ups'],
+  'Calf Raises': ['Seated Calf Raises', 'Donkey Calf Raises'],
+  'Overhead Press': ['Seated Dumbbell Press', 'Machine Shoulder Press'],
+  'Plank Hold': ['Side Plank', 'Plank with Arm Lift'],
+  'Hollow Body Hold': ['Boat Pose', 'Leg Raises'],
+  'Dead Bug': ['Bird Dog', 'Leg Lowers'],
+  'Glute Bridge March': ['Hip Thrust', 'Single-leg Glute Bridge'],
+  'Leg Curl Machine': ['Stability Ball Curl', 'Nordic Curl'],
+  'Leg Extensions': ['Resistance Band Extension', 'Sissy Squats'],
+  'Cat-Cow Stretch': ['Child’s Pose', 'Pelvic Tilt'],
+  'World’s Greatest Stretch': ['Dynamic Lunge + Reach', 'Inchworm to Cobra'],
+  'Warmup': ['Light Cardio', 'Dynamic Stretching', 'Jump Rope'],
+  'Cool Down': ['Foam Rolling', 'Static Stretching', 'Breathing Exercise'],
+};
 
 const workoutPlans = {
   PUSH: {
@@ -112,15 +148,40 @@ const workoutPlans = {
     ],
   },
 };
-
 const WorkoutPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { workoutType } = route.params || {};
 
-  // 💥 Handles names like "CORE MOBILITY", "Core-Mobility", "core mobility"
   const key = workoutType.replace(/[\s-]/g, '_').toUpperCase();
-  const plan = workoutPlans[key] || null;
+  const basePlan = workoutPlans[key] || null;
+
+  const [plan, setPlan] = useState(basePlan);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
+
+  const handleOpenModal = (name, index) => {
+    if (!exerciseAlternatives[name]) return;
+    setSelectedExercise(name);
+    setSelectedIndex(index);
+    setModalVisible(true);
+  };
+
+  const handleSwap = (altName) => {
+    const updated = [...plan.exercises];
+    updated[selectedIndex] = {
+      ...updated[selectedIndex],
+      name: altName,
+      description: `Alternative to ${selectedExercise}`,
+    };
+    setPlan({ ...plan, exercises: updated });
+    setModalVisible(false);
+  };
+
+  const resetPlan = () => {
+    setPlan(workoutPlans[key]);
+  };
 
   if (!plan) {
     return (
@@ -135,11 +196,7 @@ const WorkoutPage = () => {
 
   return (
     <View style={styles.container}>
-      <ImageBackground
-        source={plan.image}
-        style={styles.headerImage}
-        resizeMode="cover"
-      >
+      <ImageBackground source={plan.image} style={styles.headerImage}>
         <View style={styles.headerOverlay}>
           <Text style={styles.title}>{plan.title}</Text>
           <Text style={styles.subtitle}>{plan.subtitle}</Text>
@@ -148,23 +205,59 @@ const WorkoutPage = () => {
 
       <ScrollView contentContainerStyle={styles.scroll}>
         {plan.exercises.map((exercise, index) => (
-          <View key={exercise.id} style={styles.exerciseRow}>
+          <TouchableOpacity
+            key={exercise.id}
+            style={styles.exerciseRow}
+            onPress={() => handleOpenModal(exercise.name, index)}
+          >
             <View style={styles.timelineContainer}>
               <View style={styles.timelineCircle}>
                 <Text style={styles.timelineText}>{exercise.id}</Text>
               </View>
-              {index < plan.exercises.length - 1 && <View style={styles.timelineLine} />}
+              {index < plan.exercises.length - 1 && (
+                <View style={styles.timelineLine} />
+              )}
             </View>
             <View style={styles.exerciseContent}>
               <Text style={styles.exerciseName}>{exercise.name}</Text>
               <Text style={styles.exerciseInfo}>
                 Sets: {exercise.sets} | Reps: {exercise.reps}
               </Text>
-              <Text style={styles.exerciseDescription}>{exercise.description}</Text>
+              <Text style={styles.exerciseDescription}>
+                {exercise.description}
+              </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
+
+        <TouchableOpacity style={styles.resetButton} onPress={resetPlan}>
+          <Ionicons name="refresh" size={18} color="#fff" />
+          <Text style={styles.resetText}>Reset to original</Text>
+        </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Replace "{selectedExercise}" with:</Text>
+            <FlatList
+              data={exerciseAlternatives[selectedExercise]}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalOption}
+                  onPress={() => handleSwap(item)}
+                >
+                  <Text style={styles.modalOptionText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCancel}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -178,15 +271,8 @@ const WorkoutPage = () => {
 export default WorkoutPage;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#111',
-  },
-  headerImage: {
-    width: '100%',
-    height: 200,
-    justifyContent: 'flex-end',
-  },
+  container: { flex: 1, backgroundColor: '#111' },
+  headerImage: { width: '100%', height: 200, justifyContent: 'flex-end' },
   headerOverlay: {
     backgroundColor: 'rgba(0,0,0,0.5)',
     paddingVertical: 10,
@@ -204,18 +290,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
-  scroll: {
-    padding: 16,
-    paddingBottom: 20,
-  },
-  exerciseRow: {
-    flexDirection: 'row',
-    marginBottom: 20,
-  },
-  timelineContainer: {
-    width: 40,
-    alignItems: 'center',
-  },
+  scroll: { padding: 16, paddingBottom: 40 },
+  exerciseRow: { flexDirection: 'row', marginBottom: 20 },
+  timelineContainer: { width: 40, alignItems: 'center' },
   timelineCircle: {
     width: 24,
     height: 24,
@@ -249,15 +326,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  exerciseInfo: {
-    color: '#ccc',
-    fontSize: 14,
+  exerciseInfo: { color: '#ccc', fontSize: 14 },
+  exerciseDescription: { color: '#aaa', fontSize: 12, marginTop: 4 },
+  resetButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#444',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 20,
+    alignSelf: 'center',
   },
-  exerciseDescription: {
-    color: '#aaa',
-    fontSize: 12,
-    marginTop: 4,
-  },
+  resetText: { color: '#fff', marginLeft: 6, fontWeight: 'bold' },
   navBar: {
     height: 60,
     backgroundColor: '#111',
@@ -273,4 +354,36 @@ const styles = StyleSheet.create({
     marginTop: 20,
     textAlign: 'center',
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#222',
+    padding: 20,
+    borderRadius: 12,
+    width: '80%',
+    maxHeight: '60%',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  modalOption: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  modalOptionText: { color: '#fff', fontSize: 14 },
+  modalCancel: {
+    color: '#ff4444',
+    textAlign: 'center',
+    marginTop: 16,
+    fontWeight: 'bold',
+  },
 });
+
