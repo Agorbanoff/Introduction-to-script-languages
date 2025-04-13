@@ -16,77 +16,25 @@ const GymPage = () => {
   const { sessionsPerWeek = 3 } = route.params || {};
 
   const totalDays = 7;
-  let schedule = [];
   const cycle = ['PUSH', 'PULL', 'LEGS'];
+  let schedule = [];
 
   if (sessionsPerWeek === 1) {
-    schedule = [
-      'FULL-BODY',
-      'Rest day',
-      'Rest day',
-      'Rest day',
-      'Rest day',
-      'Rest day',
-      'Rest day',
-    ];
+    schedule = ['FULL-BODY', 'Rest day', 'Rest day', 'Rest day', 'Rest day', 'Rest day', 'Rest day'];
   } else if (sessionsPerWeek === 2) {
-    schedule = [
-      'UPPER BODY',
-      'Rest day',
-      'Rest day',
-      'Rest day',
-      'LOWER BODY',
-      'Rest day',
-      'Rest day',
-    ];
+    schedule = ['UPPER BODY', 'Rest day', 'Rest day', 'Rest day', 'LOWER BODY', 'Rest day', 'Rest day'];
   } else if (sessionsPerWeek === 3) {
-    schedule = Array.from({ length: totalDays }, (_, i) =>
-      i < 3 ? cycle[i] : 'Rest day'
-    );
+    schedule = Array.from({ length: totalDays }, (_, i) => i < 3 ? cycle[i] : 'Rest day');
   } else if (sessionsPerWeek === 4) {
-    schedule = [
-      'UPPER BODY',
-      'LOWER BODY',
-      'Rest day',
-      'UPPER BODY',
-      'LOWER BODY',
-      'Rest day',
-      'Rest day',
-    ];
+    schedule = ['UPPER BODY', 'LOWER BODY', 'Rest day', 'UPPER BODY', 'LOWER BODY', 'Rest day', 'Rest day'];
   } else if (sessionsPerWeek === 5) {
-    schedule = [
-      'PUSH',
-      'PULL',
-      'LEGS AND CORE',
-      'ARM DAY',
-      'CHEST AND BACK',
-      'Rest day',
-      'Rest day',
-    ];
+    schedule = ['PUSH', 'PULL', 'LEGS AND CORE', 'ARM DAY', 'CHEST AND BACK', 'Rest day', 'Rest day'];
   } else if (sessionsPerWeek === 6) {
-    schedule = [
-      'PUSH',
-      'PULL',
-      'LEGS',
-      'Rest day',
-      'PUSH',
-      'PULL',
-      'LEGS',
-    ];
+    schedule = ['PUSH', 'PULL', 'LEGS', 'Rest day', 'PUSH', 'PULL', 'LEGS'];
   } else if (sessionsPerWeek === 7) {
-    schedule = [
-      'PUSH',
-      'PULL',
-      'LEGS',
-      'CORE MOBILITY',
-      'PUSH',
-      'PULL',
-      'LEGS',
-    ];
+    schedule = ['PUSH', 'PULL', 'LEGS', 'CORE MOBILITY', 'PUSH', 'PULL', 'LEGS'];
   } else {
-    schedule = Array.from({ length: totalDays }, (_, i) =>
-      i < sessionsPerWeek ? 'Workout' : 'Rest day'
-    );
+    schedule = Array.from({ length: totalDays }, (_, i) => i < sessionsPerWeek ? 'Workout' : 'Rest day');
   }
 
   const workoutData = schedule.map((type, index) => ({
@@ -95,37 +43,55 @@ const GymPage = () => {
     image: require('./Images/gymPhoto.jpg'),
   }));
 
+  // === Date and week logic ===
+  const today = new Date();
+  const todayIndex = (today.getDay() + 6) % 7; // Map Sunday=0 to last
+  const displayDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
+  const getWeekNumber = (date) => {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  };
+
+  const currentWeek = getWeekNumber(today);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.header}>WORKOUTS</Text>
 
+        {/* Days with week number underneath */}
         <View style={styles.dayRow}>
-          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dayCircle,
-                day === 'F' && styles.activeDayCircle,
-              ]}
-            >
-              <Text
+          {displayDays.map((day, index) => (
+            <View key={index} style={styles.dayColumn}>
+              <View
                 style={[
-                  styles.dayText,
-                  day === 'F' && styles.activeDayText,
+                  styles.dayCircle,
+                  index === todayIndex && styles.activeDayCircle,
                 ]}
               >
-                {day}
+                <Text
+                  style={[
+                    styles.dayText,
+                    index === todayIndex && styles.activeDayText,
+                  ]}
+                >
+                  {day}
+                </Text>
+              </View>
+              <Text
+                style={[
+                  styles.weekLabel,
+                  index === todayIndex && styles.activeWeekLabel,
+                ]}
+              >
+                WK {currentWeek}
               </Text>
             </View>
           ))}
-        </View>
-
-        <View style={styles.weekRow}>
-          <Text style={styles.weekText}>WEEK 10</Text>
-          <Text style={styles.weekText}>WEEK 11</Text>
-          <Text style={styles.weekText}>WEEK 12</Text>
-          <Text style={styles.activeWeekText}>WEEK 13</Text>
         </View>
 
         <View style={styles.editRow}>
@@ -134,10 +100,13 @@ const GymPage = () => {
         </View>
 
         <ScrollView style={styles.scroll}>
-          {workoutData.map((item) => (
+          {workoutData.map((item, index) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.card}
+              style={[
+                styles.card,
+                index === todayIndex && styles.activeCard,
+              ]}
               onPress={() =>
                 navigation.navigate('workout', {
                   day: item.id,
@@ -222,6 +191,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
+  dayColumn: {
+    alignItems: 'center',
+  },
   dayCircle: {
     width: 32,
     height: 32,
@@ -240,18 +212,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  weekText: {
+  weekLabel: {
     color: '#999',
-    fontSize: 12,
+    fontSize: 10,
+    marginTop: 4,
   },
-  activeWeekText: {
+  activeWeekLabel: {
     color: '#c33',
-    fontSize: 12,
     fontWeight: 'bold',
   },
   editRow: {
@@ -273,6 +240,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+  },
+  activeCard: {
+    borderWidth: 1,
+    borderColor: '#1db344',
   },
   cardImage: {
     width: 60,
