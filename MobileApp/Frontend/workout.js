@@ -90,10 +90,52 @@ const workoutPlans = {
       { id: 7, name: 'Cool Down', sets: 1, reps: 'N/A', description: 'Foam rolling, hamstring & quad stretches' },
     ],
   },
+  LEGS_AND_CORE: {
+    title: 'LEGS AND CORE',
+    subtitle: 'Legs and core strength',
+    image: require('./Images/LegImage.jpg'), // Add the image for this workout
+    exercises: [
+      { id: 1, name: 'Warmup', sets: 1, reps: 'N/A', description: 'Light cardio & dynamic stretching' },
+      { id: 2, name: 'Barbell Squats', sets: 4, reps: '8-12', description: 'Full squat depth' },
+      { id: 3, name: 'Romanian Deadlifts', sets: 3, reps: '8-12', description: 'Focus on hamstrings' },
+      { id: 4, name: 'Walking Lunges', sets: 3, reps: '20 steps', description: 'Glutes & quads focus' },
+      { id: 5, name: 'Plank Hold', sets: 3, reps: '30-60 sec', description: 'Core stability' },
+      { id: 6, name: 'Leg Raises', sets: 3, reps: '15-20', description: 'Lower abdominal focus' },
+      { id: 7, name: 'Cool Down', sets: 1, reps: 'N/A', description: 'Stretch hamstrings & quads' },
+    ],
+  },
+  ARM_DAY: {
+    title: 'ARM DAY',
+    subtitle: 'Biceps & Triceps',
+    image: require('./Images/ArmImage.jpg'), // Add the image for this workout
+    exercises: [
+      { id: 1, name: 'Warmup', sets: 1, reps: 'N/A', description: 'Light cardio & arm circles' },
+      { id: 2, name: 'Bicep Curls', sets: 4, reps: '8-12', description: 'Control the movement' },
+      { id: 3, name: 'Triceps Dips', sets: 3, reps: '8-12', description: 'Bodyweight or assisted' },
+      { id: 4, name: 'Tricep Pushdown', sets: 3, reps: '8-12', description: 'Full range motion' },
+      { id: 5, name: 'Hammer Curls', sets: 3, reps: '10-15', description: 'For bicep and forearm development' },
+      { id: 6, name: 'Skull Crushers', sets: 3, reps: '8-12', description: 'Focus on tricep contraction' },
+      { id: 7, name: 'Cool Down', sets: 1, reps: 'N/A', description: 'Stretch arms and shoulders' },
+    ],
+  },
+  CHEST_AND_BACK: {
+    title: 'CHEST AND BACK',
+    subtitle: 'Chest & Back strength',
+    image: require('./Images/UpperImage.jpg'), // Add the image for this workout
+    exercises: [
+      { id: 1, name: 'Warmup', sets: 1, reps: 'N/A', description: 'Light cardio & dynamic stretches' },
+      { id: 2, name: 'Bench Press', sets: 4, reps: '8-12', description: 'Control each rep' },
+      { id: 3, name: 'Barbell Rows', sets: 3, reps: '8-12', description: 'Focus on back contraction' },
+      { id: 4, name: 'Pull-ups', sets: 3, reps: 'Max', description: 'Wide grip' },
+      { id: 5, name: 'Chest Fly Machine', sets: 3, reps: '8-12', description: 'Controlled motion' },
+      { id: 6, name: 'Dumbbell Pullover', sets: 3, reps: '10-12', description: 'Stretch and contract the chest' },
+      { id: 7, name: 'Cool Down', sets: 1, reps: 'N/A', description: 'Stretch chest & back' },
+    ],
+  },
   CORE_MOBILITY: {
     title: 'CORE MOBILITY',
     subtitle: 'Core strength & mobility work',
-    image: require('./Images/CoreImage.jpg'),
+    image: require('./Images/PushImage.jpg'),
     exercises: [
       { id: 1, name: 'Warmup', sets: 1, reps: 'N/A', description: '5-min light jog + dynamic stretches' },
       { id: 2, name: 'Plank Hold', sets: 3, reps: '30-60 sec', description: 'Core activation' },
@@ -147,20 +189,100 @@ const workoutPlans = {
       { id: 7, name: 'Cool Down', sets: 1, reps: 'N/A', description: 'Full-body stretch & foam rolling' },
     ],
   },
+  REST_DAY: {
+    title: 'REST DAY',
+    subtitle: 'Recovery and relaxation',
+    image: require('./Images/FullBodyImage.jpg'), // Add an appropriate image for rest day
+    exercises: [
+      { id: 1, name: 'Rest and Recover', sets: 'N/A', reps: 'N/A', description: 'Take the day off to recover.' },
+      { id: 2, name: 'Optional: Light Stretching', sets: 1, reps: '10-15 min', description: 'Gentle stretches to stay loose.' },
+      { id: 3, name: 'Optional: Easy Walk', sets: 1, reps: '20-30 min', description: 'A light walk to promote blood flow.' },
+    ],
+  },
 };
 const WorkoutPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { workoutType } = route.params || {};
 
-  const key = workoutType.replace(/[\s-]/g, '_').toUpperCase();
-  const basePlan = workoutPlans[key] || null;
+  const key = workoutType?.replace(/[\s-]/g, '_').toUpperCase();
 
+  const basePlan = workoutPlans[key] || null;
   const [plan, setPlan] = useState(basePlan);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(null);
 
+  if (!plan) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>No workout found.</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backLink}>Go back</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Special handling for Rest Day
+  // Special handling for Rest Day
+  if (key === 'REST_DAY') {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Background image with overlay */}
+        <ImageBackground
+          source={require('./Images/PushImage.jpg')} // Rest Day image
+          style={styles.headerImage}
+          resizeMode="cover" // Ensure the image covers the entire screen
+        >
+          <View style={styles.headerOverlay}>
+            <Text style={styles.title}>{plan.title}</Text>
+            <Text style={styles.subtitle}>{plan.subtitle}</Text>
+          </View>
+        </ImageBackground>
+  
+        {/* Rest day message */}
+        <View style={styles.textOverlay}>
+          <Text style={styles.restMessage}>
+            Recovery is just as important as the workout.
+          </Text>
+          <Text style={styles.tipTitle}>💡 Tip of the Day</Text>
+          <Text style={styles.tipText}>
+            Get at least 7–9 hours of sleep, hydrate, and eat enough protein.
+          </Text>
+  
+          {/* Optional Activities */}
+          <View style={styles.activitySection}>
+            <Text style={styles.sectionTitle}>Optional Light Activities:</Text>
+            {['Rest and Recover', 'Light Stretching', 'Easy Walk'].map((activity, index) => (
+              <View key={index} style={styles.activityCard}>
+                <Text style={styles.activityName}>{activity}</Text>
+                <Text style={styles.activityDescription}>
+                  {activity === 'Rest and Recover'
+                    ? 'Take the day off to recover.'
+                    : activity === 'Light Stretching'
+                    ? 'Gentle stretches to stay loose.'
+                    : 'A light walk to promote blood flow.'}
+                </Text>
+              </View>
+            ))}
+          </View>
+  
+          {/* Back Button */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={20} color="#fff" />
+            <Text style={styles.backButtonText}>Back to Plan</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
+  
+  
+  
   const handleOpenModal = (name, index) => {
     if (!exerciseAlternatives[name]) return;
     setSelectedExercise(name);
@@ -182,17 +304,6 @@ const WorkoutPage = () => {
   const resetPlan = () => {
     setPlan(workoutPlans[key]);
   };
-
-  if (!plan) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>No workout found.</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backLink}>Go back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -272,9 +383,13 @@ export default WorkoutPage;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#111' },
-  headerImage: { width: '100%', height: 200, justifyContent: 'flex-end' },
+  headerImage: { 
+    width: '100%', 
+    height: 200, 
+    justifyContent: 'flex-end' 
+  },
   headerOverlay: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.4)', // Updated overlay to make text stand out
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
@@ -385,5 +500,112 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontWeight: 'bold',
   },
+
+  /* Rest Day Page Styles */
+  restContainer: {
+    flexGrow: 1,
+    backgroundColor: '#111',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  restTitle: {
+    fontSize: 30,
+    color: '#1db344',
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  restMessage: {
+    fontSize: 16,
+    color: '#ccc',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  restTip: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  restTipText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  restSubheading: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  restActivities: {
+    marginBottom: 24,
+  },
+  restItem: {
+    color: '#ccc',
+    fontSize: 14,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  restButton: {
+    flexDirection: 'row',
+    backgroundColor: '#1db344',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  restButtonText: {
+    color: '#fff',
+    marginLeft: 8,
+    fontWeight: 'bold',
+  },
+
+  /* New style for Activity Cards */
+  activityCard: {
+    backgroundColor: '#222', // Dark background for better visibility
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 20,
+    marginHorizontal: 20,
+  },
+  activityName: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  activityDescription: {
+    color: '#aaa',
+    fontSize: 14,
+    marginTop: 8,
+  },
+  activitySection: {
+    marginTop: 20,
+    width: '100%',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+
+  /* Adjustments for better visibility and usability */
+  textOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Improved contrast for text
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  textContent: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  }
 });
+
 
