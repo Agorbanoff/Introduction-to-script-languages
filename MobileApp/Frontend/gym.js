@@ -43,9 +43,8 @@ const GymPage = () => {
     image: require('./Images/gymPhoto.jpg'),
   }));
 
-  // === Date and week logic ===
   const today = new Date();
-  const todayIndex = (today.getDay() + 6) % 7; // Map Sunday=0 to last
+  const todayIndex = (today.getDay() + 6) % 7;
   const displayDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   const getWeekNumber = (date) => {
@@ -63,7 +62,6 @@ const GymPage = () => {
       <View style={styles.content}>
         <Text style={styles.header}>WORKOUTS</Text>
 
-        {/* Days with week number underneath */}
         <View style={styles.dayRow}>
           {displayDays.map((day, index) => (
             <View key={index} style={styles.dayColumn}>
@@ -107,13 +105,19 @@ const GymPage = () => {
                 styles.card,
                 index === todayIndex && styles.activeCard,
               ]}
-              onPress={() =>
-                navigation.navigate('workout', {
-                  day: item.id,
-                  workoutType: item.type,
-                  sessionsPerWeek,
-                })
-              }
+              onPress={() => {
+                if (item.type.toUpperCase() === 'REST DAY') {
+                  navigation.navigate('workout', {
+                    workoutType: 'REST DAY',
+                  });
+                } else {
+                  navigation.navigate('workout', {
+                    day: item.id,
+                    workoutType: item.type,
+                    sessionsPerWeek,
+                  });
+                }
+              }}
             >
               <Image source={item.image} style={styles.cardImage} />
               <View style={styles.cardContent}>
