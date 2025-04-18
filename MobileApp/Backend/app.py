@@ -1,7 +1,5 @@
-from flask import Flask
+from fastapi import FastAPI
+from config.db_config import db_client
 
-app = Flask(__name__)
+app = FastAPI()
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
