@@ -44,7 +44,7 @@ export default function StatisticsPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>
-                Hello Alex! {'\n'} Let's gather some statistics about you!
+                Hello, Alex! {'\n'} Let's gather some statistics about you!
               </Text>
             </SafeAreaView>
 

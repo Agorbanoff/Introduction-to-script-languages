@@ -228,12 +228,11 @@ const WorkoutPage = () => {
   // Special handling for Rest Day
   if (key === 'REST_DAY') {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Background image with overlay */}
+      <View style={{ flex: 1, backgroundColor: '#111' }}>
         <ImageBackground
-          source={require('./Images/PushImage.jpg')} // Rest Day image
+          source={require('./Images/FullBodyImage.jpg')}
           style={styles.headerImage}
-          resizeMode="cover" // Ensure the image covers the entire screen
+          resizeMode="cover"
         >
           <View style={styles.headerOverlay}>
             <Text style={styles.title}>{plan.title}</Text>
@@ -241,45 +240,36 @@ const WorkoutPage = () => {
           </View>
         </ImageBackground>
   
-        {/* Rest day message */}
-        <View style={styles.textOverlay}>
-          <Text style={styles.restMessage}>
-            Recovery is just as important as the workout.
-          </Text>
-          <Text style={styles.tipTitle}>💡 Tip of the Day</Text>
-          <Text style={styles.tipText}>
-            Get at least 7–9 hours of sleep, hydrate, and eat enough protein.
-          </Text>
-  
-          {/* Optional Activities */}
-          <View style={styles.activitySection}>
-            <Text style={styles.sectionTitle}>Optional Light Activities:</Text>
-            {['Rest and Recover', 'Light Stretching', 'Easy Walk'].map((activity, index) => (
-              <View key={index} style={styles.activityCard}>
-                <Text style={styles.activityName}>{activity}</Text>
-                <Text style={styles.activityDescription}>
-                  {activity === 'Rest and Recover'
-                    ? 'Take the day off to recover.'
-                    : activity === 'Light Stretching'
-                    ? 'Gentle stretches to stay loose.'
-                    : 'A light walk to promote blood flow.'}
-                </Text>
-              </View>
-            ))}
+        <View style={[styles.scroll, { flex: 1 }]}>
+          <View style={styles.tipBox}>
+            <Text style={styles.tipTitle}>💡 Recovery is just as important as the workout.</Text>
+            <Text style={styles.tipText}>
+              Get at least 7–9 hours of sleep, hydrate, and eat enough protein.
+            </Text>
           </View>
   
-          {/* Back Button */}
+          <Text style={styles.sectionTitle}>Optional Light Activities:</Text>
+  
+          {plan.exercises.map((exercise) => (
+            <View key={exercise.id} style={styles.activityCard}>
+              <Text style={styles.activityName}>{exercise.name.replace('Optional: ', '')}</Text>
+              <Text style={styles.activityDescription}>{exercise.description}</Text>
+            </View>
+          ))}
+  
           <TouchableOpacity
-            style={styles.backButton}
+            style={styles.resetButton}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={20} color="#fff" />
-            <Text style={styles.backButtonText}>Back to Plan</Text>
+            <Text style={styles.resetText}>Back to Plan</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     );
   }
+  
+  
   
   
   
@@ -528,6 +518,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 6,
   },
+  tipBox: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  tipTitle: {
+    color: '#ffd700',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 6,
+  },
+  tipText: {
+    color: '#ccc',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  
   restTipText: {
     color: '#aaa',
     fontSize: 14,
