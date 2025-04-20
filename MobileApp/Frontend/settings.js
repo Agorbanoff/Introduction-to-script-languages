@@ -22,6 +22,7 @@ const SettingsScreen = ({ navigation }) => {
             <SettingsButton icon="lock-closed-outline" text="Change Password" onPress={() => console.log('Change Password')} />
             <SettingsButton icon="fitness-outline" text="Change Workout Plan" onPress={() => console.log('Change Workout Plan')} />
             <SettingsButton icon="trash-outline" text="Delete Account" onPress={() => console.log('Delete Account')} />
+            <SettingsButton icon="trash-outline" text="Log out" onPress={() => console.log('logged out')} />
           </View>
 
           <View style={styles.navBar}>
