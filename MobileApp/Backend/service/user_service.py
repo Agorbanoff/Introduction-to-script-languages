@@ -56,6 +56,7 @@ def logIn(user: User) -> dict:
     token = create_access_token({"sub": user.email})
 
     return {
+        "message": "User logged in successfully",
         "access_token": token,
         "token_type": "bearer",
         "user": {
