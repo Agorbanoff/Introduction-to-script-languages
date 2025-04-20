@@ -11,7 +11,7 @@ router = APIRouter()
 async def register_user(user: User):
     return signUp(user) 
 
-@router.get("/login")
+@router.post("/login")
 async def send_user(user: User):
     return logIn(user)
 
