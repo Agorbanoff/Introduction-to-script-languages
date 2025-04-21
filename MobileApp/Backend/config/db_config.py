@@ -1,19 +1,13 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
-# Get MongoDB URI from Render environment variable
 uri = os.getenv("MONGODB_URI")
+if not uri:
+    raise ValueError("❌ MONGODB_URI not set in environment variables")
 
-client = MongoClient(uri, server_api=ServerApi('1'))
+client = AsyncIOMotorClient(uri)
+db = client["todo_db"]
 
-try:
-    client.admin.command('ping')
-    print("✅ Connected to MongoDB!")
-except Exception as e:
-    print("❌ MongoDB connection failed:", e)
-
-db = client.todo_db
 collection_name = db["Users"]
 collection_statistics = db["Statistics"]
 collection_training = db["Training"]
