@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Alert } from 'react-native'; 
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -20,6 +21,7 @@ export default function SignUpPage({ navigation }) {
   const [password, setPassword] = useState('');
 
   const handleSignUp = async () => {
+    console.log('🚀 Sign Up button pressed');
     try {
       const response = await fetch('https://gymax.onrender.com/signup', {
         method: 'POST',
@@ -34,7 +36,9 @@ export default function SignUpPage({ navigation }) {
       });
   
       const data = await response.json();
-  
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
+      console.log(response);
       if (response.ok) {
         console.log('Success:', data);
         navigation.navigate('statistics'); // move to next screen

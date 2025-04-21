@@ -26,25 +26,27 @@ export default function LogInPage({ navigation }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email, // assuming you're using email as username
+          email: email,
           password: password,
         }),
       });
   
       const data = await response.json();
+      console.log('Login response:', data);
   
-      if (response.ok && data.message === 'Login successful') {
-        console.log('Logged in:', data);
-        navigation.navigate('gym');
+      if (response.ok && data.access_token) {
+        // 🟢 Login successful
+        navigation.navigate('gym'); // or wherever you want to go
       } else {
         console.error('Login failed:', data);
-        alert(data.message || 'Invalid credentials');
+        alert('Invalid credentials or server error');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Network error:', error);
       alert('Network error');
     }
   };
+  
   
 
   return (
