@@ -5,12 +5,12 @@ from service.user_credentials_service import signUp, logIn
 from schemas.schema_user import list_serial
 
 
-router = APIRouter()
+user_router = APIRouter()
 
-@router.post("/signup")
+@user_router.post("/signup")
 async def register_user(user: UserSignUp):
     return await signUp(user) 
 
-@router.post("/login")
+@user_router.post("/login")
 async def send_user(user: UserLogIn):
     return await logIn(user)

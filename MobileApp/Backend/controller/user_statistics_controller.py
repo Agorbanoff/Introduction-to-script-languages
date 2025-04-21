@@ -5,7 +5,7 @@ from config.db_config import collection_name
 from jose import jwt, JWTError
 import os
 
-router = APIRouter()
+user_statistics_router = APIRouter()
 
 JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
 JWT_ALGORITHM = "HS256"
@@ -31,7 +31,7 @@ async def get_user_id_from_token(authorization: str = Header(...)) -> str:
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-@router.post("/statistics")
+@user_statistics_router.post("/statistics")
 async def submit_statistics(
     stats: UserCredentials,
     user_id: str = Depends(get_user_id_from_token)
