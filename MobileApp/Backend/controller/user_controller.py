@@ -14,4 +14,3 @@ async def register_user(user: User):
 @router.post("/login")
 async def send_user(user: User):
     return await logIn(user)
-

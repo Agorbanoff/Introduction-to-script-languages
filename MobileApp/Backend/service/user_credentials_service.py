@@ -76,7 +76,6 @@ async def logIn(user: User) -> dict:
         "token_type": "bearer",
         "user": {
             "id": str(existing_user["_id"]),
-            "username": existing_user["username"],
             "email": existing_user["email"]
         }
     }
@@ -88,4 +87,10 @@ async def deleteAccount():
     pass
 
 async def findUsername():
+    pass
+
+async def changeUsername():
+    pass
+
+async def changePassword():
     pass
