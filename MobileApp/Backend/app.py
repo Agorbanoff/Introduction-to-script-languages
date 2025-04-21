@@ -6,5 +6,6 @@ from exceptions.global_exception_handler import add_exception_handlers
 app = FastAPI()
 
 add_exception_handlers(app)
-app.include_router(user_router)
-app.include_router(user_statistics_router)
+
+app.include_router(user_router, prefix="/auth")
+app.include_router(user_statistics_router, prefix="/stats")
