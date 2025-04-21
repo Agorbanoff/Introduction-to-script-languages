@@ -12,8 +12,7 @@ from exceptions.exceptions import (
 )
 JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_SECONDS = int(os.getenv("JWT_EXPIRE_SECONDS", 3600))
-
+JWT_EXPIRE_SECONDS = int(timedelta(days=30).total_seconds())
 
 def hashingPassword(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
