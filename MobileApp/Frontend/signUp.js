@@ -19,6 +19,36 @@ export default function SignUpPage({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleSignUp = async () => {
+    try {
+      const response = await fetch('https://gymax.onrender.com/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          email: email,
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log('Success:', data);
+        navigation.navigate('statistics'); // move to next screen
+      } else {
+        console.error('Failed:', data);
+        Alert.alert('Error', data.detail || 'Registration failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Network or server error');
+    }
+  };
+  
+
   return (
     <ImageBackground
       source={require('./Images/gymPhoto.jpg')}
@@ -64,7 +94,8 @@ export default function SignUpPage({ navigation }) {
               <View style={styles.buttonColumn}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => navigation.navigate('statistics')}
+                  onPress={handleSignUp}
+
                 >
                   <Text style={styles.buttonText}>Sign up</Text>
                 </TouchableOpacity>

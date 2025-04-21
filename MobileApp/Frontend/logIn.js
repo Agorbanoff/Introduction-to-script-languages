@@ -18,6 +18,35 @@ export default function LogInPage({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('https://gymax.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email, // assuming you're using email as username
+          password: password,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok && data.message === 'Login successful') {
+        console.log('Logged in:', data);
+        navigation.navigate('gym');
+      } else {
+        console.error('Login failed:', data);
+        alert(data.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Network error');
+    }
+  };
+  
+
   return (
     <ImageBackground
       source={require('./Images/gymPhoto.jpg')}
@@ -52,10 +81,11 @@ export default function LogInPage({ navigation }) {
               />
 
               <View style={styles.buttonColumn}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => navigation.navigate('statistics')}
-                >
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleLogin}
+              >
+
                   <Text style={styles.buttonText}>Log in</Text>
                 </TouchableOpacity>
 
