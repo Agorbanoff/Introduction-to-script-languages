@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 
 from config.db_config import collection_name
-from model.user_entity import User
+from MobileApp.Backend.model.user_credentials_entity import User
 from exceptions.exceptions import (
     UserNotFoundException,
     InvalidPasswordException,

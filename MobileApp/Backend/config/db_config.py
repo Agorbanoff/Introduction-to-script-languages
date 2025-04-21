@@ -15,3 +15,4 @@ except Exception as e:
 
 db = client.todo_db
 collection_name = db["Users"]
+collection_statistics = db["Statistics"]
