@@ -1,0 +1,40 @@
+from fastapi import APIRouter, Depends, Header, HTTPException
+from model.user_training_entity import UserTraining
+from service.user_training_service import TimePerWeek
+from config.db_config import collection_name
+from jose import jwt, JWTError
+import os
+
+user_training_router = APIRouter()
+
+JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
+JWT_ALGORITHM = "HS256"
+
+async def get_user_id_from_token(authorization: str = Header(...)) -> str:
+    if not authorization.startswith("Bearer "):
+        pass
+
+    token = authorization.split(" ")[1]
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            pass
+        
+        user = await collection_name.find_one({"email": email})
+        if not user:
+           pass
+
+        return str(user["_id"])
+
+    except JWTError:
+        pass
+
+@user_training_router.post("/training")
+async def submit_training(
+    training: UserTraining,
+    user_id: str = Depends(get_user_id_from_token)
+):
+    await TimePerWeek(user_id=user_id, times=training.times_a_week)
+    return {"message": "Training data saved"}
