@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -12,6 +13,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
 
 export default function StatisticsPage({ navigation }) {
@@ -19,15 +21,57 @@ export default function StatisticsPage({ navigation }) {
   const [weight, setWeight] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
-  const handleSubmit = () => {
-    // Log values; age and gender are optional.
-    console.log('Gender selected:', gender);
-    console.log('Height:', height);
-    console.log('Weight:', weight);
-    console.log('Age:', age);
+  // Get user email from AsyncStorage
+  useEffect(() => {
+    const getEmail = async () => {
+      const storedEmail = await AsyncStorage.getItem('email');
+      if (storedEmail) setUserEmail(storedEmail);
+    };
+    getEmail();
+  }, []);
 
-    navigation.navigate('status');
+  const handleSubmit = async () => {
+    if (!height || !weight || !age || !gender) {
+      alert('Please fill out all fields before submitting.');
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        alert('User not authenticated.');
+        return;
+      }
+
+      const response = await fetch('https://gymax.onrender.com/stats/statistics', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          height: parseFloat(height),
+          weight: parseFloat(weight),
+          age: parseInt(age),
+          gender: gender,
+          user_email: userEmail,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Statistics response:', data);
+
+      if (response.ok) {
+        navigation.navigate('status');
+      } else {
+        Alert.alert('Error', data.message || 'Failed to save statistics');
+      }
+    } catch (error) {
+      console.error('Error submitting stats:', error);
+      Alert.alert('Error', 'Network error while sending statistics');
+    }
   };
 
   return (
@@ -49,7 +93,7 @@ export default function StatisticsPage({ navigation }) {
             </SafeAreaView>
 
             <View style={styles.container}>
-              <Text style={styles.label}>Select your gender (optional):</Text>
+              <Text style={styles.label}>Select your gender:</Text>
               <View style={styles.genderRow}>
                 <TouchableOpacity
                   style={[
@@ -110,7 +154,7 @@ export default function StatisticsPage({ navigation }) {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter your age (optional)"
+                placeholder="Enter your age"
                 keyboardType="numeric"
                 value={age}
                 onChangeText={setAge}

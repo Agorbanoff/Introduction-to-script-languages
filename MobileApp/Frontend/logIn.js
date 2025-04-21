@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -30,24 +32,36 @@ export default function LogInPage({ navigation }) {
           password: password,
         }),
       });
-  
-      const data = await response.json();
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('❌ Response not JSON:', text);
+        Alert.alert('Error', 'Invalid server response.');
+        return;
+      }
+
       console.log('Login response:', data);
-  
+
       if (response.ok && data.access_token) {
-        // 🟢 Login successful
-        navigation.navigate('gym'); // or wherever you want to go
+        console.log('✅ Token:', data.access_token);
+
+        // Save token and email
+        await AsyncStorage.setItem('token', data.access_token);
+        await AsyncStorage.setItem('email', email);
+
+        navigation.navigate('gym'); // or your next screen
       } else {
-        console.error('Login failed:', data);
-        alert('Invalid credentials or server error');
+        console.error('❌ Login failed:', data);
+        Alert.alert('Error', data.detail || data.message || 'Invalid credentials');
       }
     } catch (error) {
-      console.error('Network error:', error);
-      alert('Network error');
+      console.error('❌ Network error:', error);
+      Alert.alert('Error', 'Network or server error');
     }
   };
-  
-  
 
   return (
     <ImageBackground
@@ -83,11 +97,7 @@ export default function LogInPage({ navigation }) {
               />
 
               <View style={styles.buttonColumn}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleLogin}
-              >
-
+                <TouchableOpacity style={styles.button} onPress={handleLogin}>
                   <Text style={styles.buttonText}>Log in</Text>
                 </TouchableOpacity>
 

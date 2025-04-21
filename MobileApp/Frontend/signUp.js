@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native'; 
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -23,7 +24,7 @@ export default function SignUpPage({ navigation }) {
   const handleSignUp = async () => {
     console.log('🚀 Sign Up button pressed');
     try {
-      const response = await fetch('https://gymax.onrender.com/signup', {
+      const response = await fetch('https://gymax.onrender.com/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,24 +35,37 @@ export default function SignUpPage({ navigation }) {
           password: password,
         }),
       });
-  
-      const data = await response.json();
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('❌ Response not JSON:', text);
+        Alert.alert('Error', 'Server returned invalid response.');
+        return;
+      }
+
       console.log('Response status:', response.status);
       console.log('Response data:', data);
-      console.log(response);
-      if (response.ok) {
-        console.log('Success:', data);
-        navigation.navigate('statistics'); // move to next screen
+
+      if (response.ok && data.access_token) {
+        console.log('✅ Token received:', data.access_token);
+
+        // Store token in AsyncStorage
+        await AsyncStorage.setItem('token', data.access_token);
+        await AsyncStorage.setItem('email', email); // Optional: save email too
+
+        navigation.navigate('statistics');
       } else {
-        console.error('Failed:', data);
-        Alert.alert('Error', data.detail || 'Registration failed');
+        console.error('❌ Registration failed:', data);
+        Alert.alert('Error', data.detail || data.message || 'Registration failed');
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Network error:', error);
       Alert.alert('Error', 'Network or server error');
     }
   };
-  
 
   return (
     <ImageBackground
@@ -74,14 +88,14 @@ export default function SignUpPage({ navigation }) {
             <View style={styles.container}>
               <TextInput
                 style={styles.input}
-                placeholder="Enter an username"
+                placeholder="Enter a username"
                 value={username}
                 onChangeText={setUsername}
                 placeholderTextColor="#aaa"
               />
               <TextInput
                 style={styles.input}
-                placeholder="Enter an email"
+                placeholder="Enter your email"
                 value={email}
                 onChangeText={setEmail}
                 placeholderTextColor="#aaa"
@@ -96,11 +110,7 @@ export default function SignUpPage({ navigation }) {
               />
 
               <View style={styles.buttonColumn}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleSignUp}
-
-                >
+                <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                   <Text style={styles.buttonText}>Sign up</Text>
                 </TouchableOpacity>
 
