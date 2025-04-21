@@ -7,7 +7,8 @@ class Gender(str, Enum):
     female = "female"
 
 class UserCredentials(BaseModel):
-    gender: Optional[List[Gender]] = None
+    gender: Optional[Gender] = None
     weight: Optional[int] = None
     height: Optional[int] = None
     age: Optional[int] = None
+    bfp: Optional[float] = None

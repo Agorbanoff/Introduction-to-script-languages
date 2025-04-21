@@ -43,10 +43,6 @@ async def signUp(user: UserSignUp) -> dict:
         "email": user.email,
         "password": hashed_pass
     })
-
-    user_id = str(result.inserted_id)
-    await getStatistics(user_id)
-    await trainingInfo(user_id)
     
     token = create_access_token({"sub": user.email})
 
@@ -55,7 +51,6 @@ async def signUp(user: UserSignUp) -> dict:
         "access_token": token,
         "token_type": "bearer",
         "user": {
-            "id": user_id,
             "username": user.username,
             "email": user.email
         }

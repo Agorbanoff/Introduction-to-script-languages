@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from controller.user_controller import router
+from controller.user_statistics_controller import router
 from exceptions.global_exception_handler import add_exception_handlers
 
 app = FastAPI()
