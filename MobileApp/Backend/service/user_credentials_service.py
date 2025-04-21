@@ -6,7 +6,7 @@ from service.user_training_service import trainingInfo
 import os
 
 from config.db_config import collection_name
-from model.user_credentials_entity import User
+from model.user_credentials_entity import UserSignUp, UserLogIn
 from exceptions.exceptions import (
     UserNotFoundException,
     InvalidPasswordException,
@@ -32,7 +32,7 @@ def create_access_token(data: dict, expires_delta: int = JWT_EXPIRE_SECONDS) -> 
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
-async def signUp(user: User) -> dict:
+async def signUp(user: UserSignUp) -> dict:
     if await collection_name.find_one({"email": user.email}):
         raise EmailAlreadyUsedException()
 
@@ -61,7 +61,7 @@ async def signUp(user: User) -> dict:
         }
     }
 
-async def logIn(user: User) -> dict:
+async def logIn(user: UserLogIn) -> dict:
     existing_user = await collection_name.find_one({"email": user.email})
     if not existing_user:
         raise UserNotFoundException()

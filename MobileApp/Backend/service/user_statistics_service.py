@@ -1,4 +1,3 @@
-from model.user_statistics_entity import UserCredentials
 from config.db_config import collection_statistics
 
 async def getStatistics(user_id: str):
