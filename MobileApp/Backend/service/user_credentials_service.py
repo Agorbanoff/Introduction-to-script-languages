@@ -1,8 +1,6 @@
 import bcrypt
 from jose import jwt
 from datetime import datetime, timedelta
-from service.user_statistics_service import getStatistics
-from service.user_training_service import trainingInfo
 import os
 
 from config.db_config import collection_name
