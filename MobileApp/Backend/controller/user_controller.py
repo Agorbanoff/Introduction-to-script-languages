@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from MobileApp.Backend.model.user_credentials_entity import User
+from model.user_credentials_entity import User
 from config.db_config import collection_name
 from service.user_credentials_service import signUp, logIn
 from schemas.schema_user import list_serial
