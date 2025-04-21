@@ -2,6 +2,7 @@ import bcrypt
 from jose import jwt
 from datetime import datetime, timedelta
 from service.user_statistics_service import getStatistics
+from service.user_training_service import trainingInfo
 import os
 
 from config.db_config import collection_name
@@ -31,23 +32,37 @@ def create_access_token(data: dict, expires_delta: int = JWT_EXPIRE_SECONDS) -> 
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
-def signUp(user: User) -> dict:
-    if collection_name.find_one({"email": user.email}):
+async def signUp(user: User) -> dict:
+    if await collection_name.find_one({"email": user.email}):
         raise EmailAlreadyUsedException()
 
     hashed_pass = hashingPassword(user.password)
 
-    collection_name.insert_one({
+    result = await collection_name.insert_one({
         "username": user.username,
         "email": user.email,
         "password": hashed_pass
     })
 
-    return {"message": "User registered successfully"}
+    user_id = str(result.inserted_id)
+    await getStatistics(user_id)
+    await trainingInfo(user_id)
+    
+    token = create_access_token({"sub": user.email})
 
+    return {
+        "message": "User registered successfully",
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {
+            "id": user_id,
+            "username": user.username,
+            "email": user.email
+        }
+    }
 
-def logIn(user: User) -> dict:
-    existing_user = collection_name.find_one({"email": user.email})
+async def logIn(user: User) -> dict:
+    existing_user = await collection_name.find_one({"email": user.email})
     if not existing_user:
         raise UserNotFoundException()
 
