@@ -45,7 +45,6 @@ async def submit_statistics(
         weight=stats.weight,
         height=stats.height,
         gender=stats.gender
-
     )
 
     return {"message": "Statistics saved and BFP calculated"}

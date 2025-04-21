@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
-from typing import Optional, List
+from typing import Optional
 
 class Gender(str, Enum):
     male = "male"
@@ -11,4 +11,3 @@ class UserCredentials(BaseModel):
     weight: Optional[int] = None
     height: Optional[int] = None
     age: Optional[int] = None
-    bfp: Optional[float] = None
