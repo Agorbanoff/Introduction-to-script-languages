@@ -6,7 +6,7 @@ from service.user_training_service import trainingInfo
 import os
 
 from config.db_config import collection_name
-from MobileApp.Backend.model.user_credentials_entity import User
+from model.user_credentials_entity import User
 from exceptions.exceptions import (
     UserNotFoundException,
     InvalidPasswordException,
