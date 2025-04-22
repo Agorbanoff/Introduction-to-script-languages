@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,36 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const GymPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { sessionsPerWeek = 3 } = route.params || {};
+  const [sessionsPerWeek, setSessionsPerWeek] = useState(null);
+
+  useEffect(() => {
+    const loadSessions = async () => {
+      if (route.params?.sessionsPerWeek) {
+        setSessionsPerWeek(route.params.sessionsPerWeek);
+      } else {
+        const stored = await AsyncStorage.getItem('sessionsPerWeek');
+        setSessionsPerWeek(stored ? parseInt(stored, 10) : 3);
+      }
+    };
+    loadSessions();
+  }, [route.params]);
+
+  if (sessionsPerWeek === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1db344" />
+      </View>
+    );
+  }
 
   const totalDays = 7;
   const cycle = ['PUSH', 'PULL', 'LEGS'];
@@ -177,6 +199,12 @@ export default GymPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#111',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#111',
   },
   content: {
