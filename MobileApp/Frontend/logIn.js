@@ -32,7 +32,7 @@ export default function LogInPage({ navigation }) {
           password: password,
         }),
       });
-
+  
       const text = await response.text();
       let data;
       try {
@@ -42,17 +42,36 @@ export default function LogInPage({ navigation }) {
         Alert.alert('Error', 'Invalid server response.');
         return;
       }
-
+  
       console.log('Login response:', data);
-
+  
       if (response.ok && data.access_token) {
         console.log('✅ Token:', data.access_token);
-
+  
         // Save token and email
         await AsyncStorage.setItem('token', data.access_token);
         await AsyncStorage.setItem('email', email);
-
-        navigation.navigate('gym'); // or your next screen
+  
+        // Get training sessions
+        const trainingResponse = await fetch('https://gymax.onrender.com/stats/training', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${data.access_token}`,
+          },
+        });
+  
+        if (trainingResponse.ok) {
+          const trainingData = await trainingResponse.json();
+          console.log('Training info:', trainingData);
+  
+          const sessions = trainingData.sessions_per_week;
+          await AsyncStorage.setItem('sessionsPerWeek', sessions.toString());
+  
+          navigation.navigate('gym', { sessionsPerWeek: sessions });
+        } else {
+          console.log('⚠️ No training data found, redirecting to StatusPage');
+          navigation.navigate('status'); // ако искаш да избере колко пъти ще тренира
+        }
       } else {
         console.error('❌ Login failed:', data);
         Alert.alert('Error', data.detail || data.message || 'Invalid credentials');
@@ -62,6 +81,7 @@ export default function LogInPage({ navigation }) {
       Alert.alert('Error', 'Network or server error');
     }
   };
+  
 
   return (
     <ImageBackground
