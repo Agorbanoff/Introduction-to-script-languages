@@ -1,8 +1,19 @@
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from exceptions.exceptions import UserNotFoundException, InvalidPasswordException, EmailAlreadyUsedException
+from fastapi import FastAPI
+from exceptions.exceptions import (
+    UserNotFoundException,
+    InvalidPasswordException,
+    EmailAlreadyUsedException,
+    InvalidTokenFormatException,
+    InvalidTokenPayloadException,
+    InvalidTokenException,
+    EmptyStatisticsException,
+    StatisticsNotFoundException,
+    TrainingNotFoundException
+)
 
-def add_exception_handlers(app):
+def add_exception_handlers(app: FastAPI):
     @app.exception_handler(UserNotFoundException)
     async def user_not_found_handler(request: Request, exc: UserNotFoundException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
@@ -13,4 +24,20 @@ def add_exception_handlers(app):
 
     @app.exception_handler(EmailAlreadyUsedException)
     async def email_used_handler(request: Request, exc: EmailAlreadyUsedException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(InvalidTokenFormatException)
+    async def invalid_token_format_handler(request: Request, exc: InvalidTokenFormatException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(EmptyStatisticsException)
+    async def empty_stats_handler(request: Request, exc: EmptyStatisticsException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(StatisticsNotFoundException)
+    async def stats_not_found_handler(request: Request, exc: StatisticsNotFoundException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(TrainingNotFoundException)
+    async def training_not_found_handler(request: Request, exc: TrainingNotFoundException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})

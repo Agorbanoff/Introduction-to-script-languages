@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from model.user_statistics_entity import UserCredentials
 from service.user_statistics_service import getStatistics, getBFP
+from exceptions.exceptions import InvalidTokenException, UserNotFoundException, EmptyStatisticsException
 from config.db_config import collection_name
 from jose import jwt, JWTError
 import os
@@ -12,7 +13,7 @@ JWT_ALGORITHM = "HS256"
 
 async def get_user_id_from_token(authorization: str = Header(...)) -> str:
     if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid token format")
+        raise InvalidTokenException()
 
     token = authorization.split(" ")[1]
 
@@ -20,16 +21,16 @@ async def get_user_id_from_token(authorization: str = Header(...)) -> str:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         email = payload.get("sub")
         if not email:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
+            raise InvalidTokenException()
         
         user = await collection_name.find_one({"email": email})
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise UserNotFoundException()
         
         return str(user["_id"])
 
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        raise InvalidTokenException()
 
 @user_statistics_router.post("/statistics")
 async def submit_statistics(
@@ -37,7 +38,7 @@ async def submit_statistics(
     user_id: str = Depends(get_user_id_from_token)
 ):
     if None in (stats.age, stats.weight, stats.height, stats.gender):
-       pass
+       raise EmptyStatisticsException()
 
     await getStatistics(
         user_id=user_id,
@@ -53,6 +54,6 @@ async def submit_statistics(
 async def get_BFP(user_id: str = Depends(get_user_id_from_token)):
     result = await getBFP(user_id=user_id)
     if not result:
-        pass
+        raise EmptyStatisticsException()
 
     return {"BFP": result.get("bfp")}
