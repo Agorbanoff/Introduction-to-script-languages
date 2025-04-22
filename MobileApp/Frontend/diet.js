@@ -357,7 +357,7 @@ export default function DietPlanScreen({ navigation }) {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.dishCard}
-            onPress={() => navigation.navigate('RecipeScreen', { meal: item })}
+            onPress={() => navigation.navigate('recipe', { meal: item })}
           >
             <Image source={item.image} style={styles.dishImage} />
             <Text style={styles.dishText}>{item.name}</Text>

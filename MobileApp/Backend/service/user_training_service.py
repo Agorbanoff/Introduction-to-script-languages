@@ -10,4 +10,3 @@ async def getTimePerWeek(user_id: str):
     return await collection_training.find_one({
         "user_id": user_id,
     })
-

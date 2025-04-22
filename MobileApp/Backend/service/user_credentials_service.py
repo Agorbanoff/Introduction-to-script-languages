@@ -73,20 +73,8 @@ async def logIn(user: UserLogIn) -> dict:
         }
     }
 
-async def logOut():
-    pass
-
-async def deleteAccount():
-    pass
-
 async def findUsername(user_id: str):
     user = await collection_name.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise UserNotFoundException()
     return user["username"]
-
-async def changeUsername():
-    pass
-
-async def changePassword():
-    pass

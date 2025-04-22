@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Header, HTTPException
-from service.user_credentials_service import signUp, logIn, findUsername
+from fastapi import APIRouter, Depends, Header, HTTPException, Body
+from service.user_credentials_service import signUp, logIn, findUsername, changeUsername, changePassword, deleteAccount
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from config.db_config import collection_name
 from jose import jwt, JWTError
@@ -31,6 +31,7 @@ async def get_user_id_from_token(authorization: str = Header(...)) -> str:
 
     except JWTError:
         raise InvalidTokenException()
+
 
 @user_router.post("/signup")
 async def register_user(user: UserSignUp):
