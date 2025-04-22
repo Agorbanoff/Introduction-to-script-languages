@@ -36,5 +36,5 @@ async def submit_training(
     training: UserTraining,
     user_id: str = Depends(get_user_id_from_token)
 ):
-    await TimePerWeek(user_id=user_id, times=training.times_a_week)
+    await TimePerWeek(user_id=user_id, times=training.sessions_per_week)
     return {"message": "Training data saved"}

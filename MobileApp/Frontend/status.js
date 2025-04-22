@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StatusBar,
   StyleSheet,
@@ -11,6 +12,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
 
 export default function StatusPage({ navigation }) {
@@ -29,14 +31,52 @@ export default function StatusPage({ navigation }) {
     return "";
   };
 
-  const handleGetStartedPress = () => {
+  const handleGetStartedPress = async () => {
     const advice = getTrainingAdvice();
+
     if (advice && !warningAcknowledged) {
       setWarningMessage(advice);
       setWarningAcknowledged(true);
-    } else {
-      // Pass sessionsPerWeek as a parameter when navigating.
-      navigation.navigate('gym', { sessionsPerWeek });
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const email = await AsyncStorage.getItem('email');
+
+      if (!token || !email) {
+        Alert.alert('Error', 'User not authenticated.');
+        return;
+      }
+
+      const response = await fetch('https://gymax.onrender.com/stats/training', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          sessions_per_week: sessionsPerWeek,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Training save response:', data);
+
+      if (response.ok) {
+        navigation.navigate('gym', { sessionsPerWeek });
+      } else {
+        Alert.alert(
+          'Error',
+          Array.isArray(data.detail)
+            ? data.detail.map(d => d.msg).join('\n')
+            : data.detail || 'Failed to save training info'
+        );
+        
+      }
+    } catch (error) {
+      console.error('❌ Network error:', error);
+      Alert.alert('Error', 'Network error while sending training info');
     }
   };
 
