@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from model.user_training_entity import UserTraining
-from service.user_training_service import TimePerWeek
+from service.user_training_service import TimePerWeek, getTimePerWeek
 from config.db_config import collection_name
 from jose import jwt, JWTError
 import os
@@ -38,3 +38,11 @@ async def submit_training(
 ):
     await TimePerWeek(user_id=user_id, times=training.sessions_per_week)
     return {"message": "Training data saved"}
+
+@user_training_router.get("/training")
+async def get_training(user_id: str = Depends(get_user_id_from_token)):
+    result = await getTimePerWeek(user_id=user_id)
+    if not result:
+        pass
+
+    return {"sessions_per_week": result.get("sessions_per_week")}
