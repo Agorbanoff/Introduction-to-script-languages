@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from model.user_training_entity import UserTraining
 from service.user_training_service import TimePerWeek, getTimePerWeek
+from exceptions.exceptions import InvalidTokenException, UserNotFoundException, EmptyStatisticsException
 from config.db_config import collection_name
 from jose import jwt, JWTError
 import os
@@ -12,7 +13,7 @@ JWT_ALGORITHM = "HS256"
 
 async def get_user_id_from_token(authorization: str = Header(...)) -> str:
     if not authorization.startswith("Bearer "):
-        pass
+        raise InvalidTokenException()
 
     token = authorization.split(" ")[1]
 
@@ -20,16 +21,16 @@ async def get_user_id_from_token(authorization: str = Header(...)) -> str:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
         email = payload.get("sub")
         if not email:
-            pass
+            raise InvalidTokenException()
         
         user = await collection_name.find_one({"email": email})
         if not user:
-           pass
+           raise UserNotFoundException()
 
         return str(user["_id"])
 
     except JWTError:
-        pass
+        raise InvalidTokenException()
 
 @user_training_router.post("/training")
 async def submit_training(
@@ -43,6 +44,6 @@ async def submit_training(
 async def get_training(user_id: str = Depends(get_user_id_from_token)):
     result = await getTimePerWeek(user_id=user_id)
     if not result:
-        pass
+        raise EmptyStatisticsException()
 
     return {"sessions_per_week": result.get("sessions_per_week")}
