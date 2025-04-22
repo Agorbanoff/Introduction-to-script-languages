@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Depends, Header
 from model.user_training_entity import UserTraining
-from service.user_training_service import TimePerWeek, getTimePerWeek, changeWorkoutPlan
+from service.user_training_service import TimePerWeek, getTimePerWeek
 from exceptions.exceptions import InvalidTokenException, UserNotFoundException, EmptyStatisticsException
 from config.db_config import collection_name
 from jose import jwt, JWTError

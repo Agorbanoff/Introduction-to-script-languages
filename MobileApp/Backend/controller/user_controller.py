@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Body
-from service.user_credentials_service import signUp, logIn, findUsername, changeUsername, changePassword, deleteAccount
+from fastapi import APIRouter, Depends, Header
+from service.user_credentials_service import signUp, logIn, findUsername
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from config.db_config import collection_name
 from jose import jwt, JWTError
