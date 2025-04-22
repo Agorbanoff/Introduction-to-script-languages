@@ -26,7 +26,7 @@ def add_exception_handlers(app: FastAPI):
     async def email_used_handler(request: Request, exc: EmailAlreadyUsedException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
-    @app.exception_handler(InvalidTokenFormatException)
+    @app.exception_handler(InvalidTokenException)
     async def invalid_token_format_handler(request: Request, exc: InvalidTokenFormatException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
