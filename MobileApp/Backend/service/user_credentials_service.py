@@ -1,4 +1,5 @@
 import bcrypt
+from bson import ObjectId
 from jose import jwt
 from datetime import datetime, timedelta
 import os
@@ -78,8 +79,11 @@ async def logOut():
 async def deleteAccount():
     pass
 
-async def findUsername():
-    pass
+async def findUsername(user_id: str):
+    user = await collection_name.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise UserNotFoundException()
+    return user["username"]
 
 async def changeUsername():
     pass
