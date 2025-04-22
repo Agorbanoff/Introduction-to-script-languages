@@ -13,6 +13,11 @@ async def getStatistics(user_id: str, age: int, weight: int, height: int, gender
         "bfp": BFP
     })
 
+async def  getBFP(user_id: str):
+    return await collection_statistics.find_one({
+        "user_id": user_id,
+    })
+
 async def calculateBFP(user_id: str, weight: int, height: int, age: int, gender: int):
 
     BMI = weight / ((height / 100) ** 2)

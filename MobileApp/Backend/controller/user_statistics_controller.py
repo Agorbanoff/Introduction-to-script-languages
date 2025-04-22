@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from model.user_statistics_entity import UserCredentials
-from service.user_statistics_service import getStatistics
+from service.user_statistics_service import getStatistics, getBFP
 from config.db_config import collection_name
 from jose import jwt, JWTError
 import os
@@ -48,3 +48,11 @@ async def submit_statistics(
     )
 
     return {"message": "Statistics saved and BFP calculated"}
+
+@user_statistics_router.get("/statistics")
+async def get_BFP(user_id: str = Depends(get_user_id_from_token)):
+    result = await getBFP(user_id=user_id)
+    if not result:
+        pass
+
+    return {"BFP": result.get("bfp")}
