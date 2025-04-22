@@ -23,7 +23,7 @@ export default function App() {
       const token = await AsyncStorage.getItem('token');
 
       if (!token) {
-        setInitialRoute('login');
+        setInitialRoute('signup');
         return;
       }
 
@@ -36,22 +36,36 @@ export default function App() {
         });
 
         if (res.ok) {
+          const contentType = res.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Invalid JSON response');
+          }
+
           const data = await res.json();
-          await AsyncStorage.setItem('sessionsPerWeek', data.sessions_per_week.toString());
-          setInitialRoute('gym');
+          if (data.sessions_per_week) {
+            await AsyncStorage.setItem('sessionsPerWeek', data.sessions_per_week.toString());
+            setInitialRoute('gym');
+          } else {
+            setInitialRoute('status');
+          }
         } else {
-          setInitialRoute('status'); // No training info yet
+          throw new Error('Unauthorized or deleted user');
         }
       } catch (error) {
-        console.error('❌ Auto-login error:', error);
-        setInitialRoute('login');
+        console.error('❌ Redirecting to signup. Reason:', error.message);
+
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('email');
+        await AsyncStorage.removeItem('sessionsPerWeek');
+
+        setInitialRoute('signup');
       }
     };
 
     checkLogin();
   }, []);
 
-  if (!initialRoute) return null; // You can show a loading screen here
+  if (!initialRoute) return null; // Optional loading screen here
 
   return (
     <NavigationContainer>

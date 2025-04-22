@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,11 @@ import {
   Image,
   ImageBackground,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+
 
 const meals = {
   breakfast: [
@@ -302,28 +305,69 @@ const meals = {
   ],
 };
 
-const DietPlanScreen = ({ navigation }) => {
+export default function DietPlanScreen({ navigation }) {
+  const [bfp, setBfp] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // 1) Grab your token from storage
+        const token = await AsyncStorage.getItem('token');
+        if (!token) throw new Error('No access token found');
+
+        // 2) GET the saved BFP 
+        const res = await fetch('https://gymax.onrender.com/stats/statistics', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { bfp } = await res.json();
+
+        setBfp(bfp);
+
+        // 3) If not underweight, send to the general plan
+        if (bfp >= 20) {
+          navigation.replace('GeneralDietScreen');
+          return;
+        }
+      } catch (err) {
+        console.error('Failed to load BFP:', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [navigation]);
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#1db344" />
+      </View>
+    );
+  }
+
   const renderMealCategory = (category) => (
     <View style={styles.categoryContainer}>
       <Text style={styles.mealTypeHeader}>{category.toUpperCase()}</Text>
       <FlatList
         horizontal
         data={meals[category]}
+        keyExtractor={(item) => category + item.name}
+        showsHorizontalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.dishCard}
-            onPress={() => navigation.navigate('recipe', { meal: item })}
+            onPress={() => navigation.navigate('RecipeScreen', { meal: item })}
           >
             <Image source={item.image} style={styles.dishImage} />
             <Text style={styles.dishText}>{item.name}</Text>
             <Text style={styles.calories}>{item.calories} calories</Text>
           </TouchableOpacity>
         )}
-        keyExtractor={(item) => `${category}-${item.name}`}
-        showsHorizontalScrollIndicator={false}
       />
     </View>
   );
+
 
   return (
     <ImageBackground
@@ -414,5 +458,3 @@ const styles = StyleSheet.create({
     borderTopColor: '#333',
   },
 });
-
-export default DietPlanScreen;
