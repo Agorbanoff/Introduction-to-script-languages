@@ -1,4 +1,3 @@
-# utils/token_utils.py
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from exceptions.exceptions import InvalidTokenException, UserNotFoundException

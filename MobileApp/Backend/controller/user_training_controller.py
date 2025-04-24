@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Body, Depends, Header
+from fastapi import APIRouter, Depends
 from model.user_training_entity import UserTraining
 from service.user_training_service import TimePerWeek, getTimePerWeek
 from exceptions.exceptions import EmptyStatisticsException
-from config.db_config import collection_name
-from MobileApp.Backend.util.token import get_user_id_from_token
+from util.token import get_user_id_from_token
 
 user_training_router = APIRouter()
 

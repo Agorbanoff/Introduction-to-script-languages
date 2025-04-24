@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends
 from model.user_statistics_entity import UserCredentials
 from service.user_statistics_service import getStatistics, getBFP
 from exceptions.exceptions import EmptyStatisticsException
-from MobileApp.Backend.util.token import get_user_id_from_token
+from util.token import get_user_id_from_token
 
 user_statistics_router = APIRouter()
 

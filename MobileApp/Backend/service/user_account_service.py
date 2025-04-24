@@ -1,6 +1,6 @@
 import bcrypt
 from bson import ObjectId
-from MobileApp.Backend.util.token import create_access_token
+from util.token import create_access_token
 
 from config.db_config import collection_name
 from model.user_credentials_entity import UserSignUp, UserLogIn

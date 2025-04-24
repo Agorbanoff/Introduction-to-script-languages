@@ -1,6 +1,4 @@
-from bson import ObjectId
 from config.db_config import collection_training
-from exceptions.exceptions import StatisticsNotFoundException
 
 async def TimePerWeek(user_id: str, times: int):
     await collection_training.insert_one({
