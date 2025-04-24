@@ -1,8 +1,6 @@
 import bcrypt
 from bson import ObjectId
-from jose import jwt
-from datetime import datetime, timedelta
-import os
+from MobileApp.Backend.util.token import create_access_token
 
 from config.db_config import collection_name
 from model.user_credentials_entity import UserSignUp, UserLogIn
@@ -11,9 +9,6 @@ from exceptions.exceptions import (
     InvalidPasswordException,
     EmailAlreadyUsedException
 )
-JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_SECONDS = int(timedelta(days=30).total_seconds())
 
 def hashingPassword(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
@@ -21,13 +16,6 @@ def hashingPassword(password: str) -> str:
 
 def verifyPassword(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
-
-
-def create_access_token(data: dict, expires_delta: int = JWT_EXPIRE_SECONDS) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(seconds=expires_delta)
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
 async def signUp(user: UserSignUp) -> dict:
