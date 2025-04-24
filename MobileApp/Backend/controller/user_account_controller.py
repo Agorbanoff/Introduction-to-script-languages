@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Header
-from service.user_credentials_service import signUp, logIn, findUsername
+from service.user_account_service import signUp, logIn, findUsername
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from MobileApp.Backend.util.token import get_user_id_from_token
 

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from controller.user_controller import user_router
+from controller.user_account_controller import user_router
 from controller.user_statistics_controller import user_statistics_router
 from controller.user_training_controller import user_training_router
 from exceptions.global_exception_handler import add_exception_handlers
