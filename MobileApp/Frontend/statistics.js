@@ -24,6 +24,7 @@ export default function StatisticsPage({ navigation }) {
   const [gender, setGender] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
+<<<<<<< HEAD
   useEffect(() => {
     const bootstrap = async () => {
       // 1) get token
@@ -54,6 +55,8 @@ export default function StatisticsPage({ navigation }) {
     bootstrap();
   }, []);
   // Get user email from AsyncStorage
+=======
+>>>>>>> 331d1792bb70c95ae66da5d0f56b9f0748fa4251
   useEffect(() => {
     const getEmail = async () => {
       const storedEmail = await AsyncStorage.getItem('email');
@@ -63,8 +66,18 @@ export default function StatisticsPage({ navigation }) {
   }, []);
 
   const handleSubmit = async () => {
-    if (!height || !weight || !age || !gender) {
-      alert('Please fill out all fields before submitting.');
+    const w = Number(weight);
+    const h = Number(height);
+    const a = Number(age);
+    const normalizedGender = gender.toLowerCase().trim();
+
+    if (
+      !gender ||
+      isNaN(w) || w <= 0 || w >= 400 ||
+      isNaN(h) || h <= 50 || h >= 300 ||
+      isNaN(a) || a < 5 || a > 120
+    ) {
+      Alert.alert('Validation Error', 'Please fill all fields with valid values.');
       return;
     }
 
@@ -75,18 +88,25 @@ export default function StatisticsPage({ navigation }) {
         return;
       }
 
+      console.log("Submitting stats:", {
+        gender: normalizedGender,
+        weight: w,
+        height: h,
+        age: a
+      });
+
       const response = await fetch('https://gymax.onrender.com/stats/statistics', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          age: parseInt(age),
-          gender: gender,
-          user_email: userEmail,
+          gender: normalizedGender,
+          weight: w,
+          height: h,
+          age: a,
         }),
       });
 

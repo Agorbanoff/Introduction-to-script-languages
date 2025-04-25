@@ -1,7 +1,8 @@
 from config.db_config import collection_statistics
+from model.user_statistics_entity import Gender
 
-async def getStatistics(user_id: str, age: int, weight: int, height: int, gender: str):
-    gender_int = 1 if gender == "male" else 0
+async def getStatistics(user_id: str, age: int, weight: int, height: int, gender: Gender):
+    gender_int = 1 if gender == Gender.male else 0  
     BFP = await calculateBFP(user_id, weight, height, age, gender_int)
 
     await collection_statistics.insert_one({
@@ -9,9 +10,10 @@ async def getStatistics(user_id: str, age: int, weight: int, height: int, gender
         "age": age,
         "weight": weight,
         "height": height,
-        "gender": gender,
+        "gender": gender.value, 
         "bfp": BFP
     })
+
 
 async def  getBFP(user_id: str):
     return await collection_statistics.find_one({
