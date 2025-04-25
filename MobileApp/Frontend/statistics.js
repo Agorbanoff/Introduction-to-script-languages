@@ -56,7 +56,6 @@ export default function StatisticsPage({ navigation }) {
           weight: parseFloat(weight),
           age: parseInt(age),
           gender: gender,
-          user_email: userEmail,
         }),
       });
 
