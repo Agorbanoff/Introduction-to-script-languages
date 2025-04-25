@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StatusBar,
@@ -19,6 +19,42 @@ export default function StatusPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
   const [warningMessage, setWarningMessage] = useState("");
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
+  const [bfp, setBfp] = useState(null);
+
+   // fetch body fat percentage on mount
+   useEffect(() => {
+    const fetchBfp = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          Alert.alert('Error', 'User not authenticated.');
+          return;
+        }
+        const res = await fetch('https://gymax.onrender.com/stats/statistics', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) {
+          throw new Error('Failed to fetch body fat percentage');
+        }
+        const data = await res.json();
+        // assume backend returns { bodyFatPercentage: number }
+        setBfp(data.BFP);
+      } catch (err) {
+        console.error('BFP fetch error:', err);
+        Alert.alert('Error', 'Could not load your body fat data.');
+      }
+    };
+
+    fetchBfp();
+  }, []);
+
+  // determine statuses once we have bfp
+  const bodyStatus     = bfp > 25 ? 'overweight'  : 'underweight';
+  const calorieStatus  = bfp > 25 ? 'deficit'     : 'surplus';
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
@@ -117,7 +153,8 @@ export default function StatusPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>
-                We've estimated that you're underweight. We recommend that you eat in a calorie surplus.
+              {`We've estimated that you're ${bodyStatus}.\n`}
+              {`We recommend that you eat in a caloric ${calorieStatus}.`}
               </Text>
               <Text style={styles.label}>How many times per week do you want to train?</Text>
 
