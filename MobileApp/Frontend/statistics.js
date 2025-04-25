@@ -23,7 +23,6 @@ export default function StatisticsPage({ navigation }) {
   const [gender, setGender] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
-  // Get user email from AsyncStorage
   useEffect(() => {
     const getEmail = async () => {
       const storedEmail = await AsyncStorage.getItem('email');
@@ -33,8 +32,17 @@ export default function StatisticsPage({ navigation }) {
   }, []);
 
   const handleSubmit = async () => {
-    if (!height || !weight || !age || !gender) {
-      alert('Please fill out all fields before submitting.');
+    const w = Number(weight);
+    const h = Number(height);
+    const a = Number(age);
+
+    if (
+      !gender ||
+      isNaN(w) || w <= 0 || w >= 400 ||
+      isNaN(h) || h <= 50 || h >= 300 ||
+      isNaN(a) || a < 5 || a > 120
+    ) {
+      Alert.alert('Validation Error', 'Please fill all fields with valid values.');
       return;
     }
 
@@ -44,6 +52,14 @@ export default function StatisticsPage({ navigation }) {
         alert('User not authenticated.');
         return;
       }
+
+      console.log("Submitting stats:", {
+        gender,
+        weight: w,
+        height: h,
+        age: a
+      });
+
       const response = await fetch('https://gymax.onrender.com/stats/statistics', {
         method: 'POST',
         headers: {
@@ -53,12 +69,12 @@ export default function StatisticsPage({ navigation }) {
         },
         body: JSON.stringify({
           gender: gender,
-          weight: Number(weight),
-          height: Number(height),
-          age: Number(age)
+          weight: w,
+          height: h,
+          age: a,
         }),
       });
-      
+
       const data = await response.json();
       console.log('Statistics response:', data);
 
