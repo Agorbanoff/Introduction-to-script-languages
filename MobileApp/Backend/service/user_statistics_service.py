@@ -10,7 +10,7 @@ async def getStatistics(user_id: str, age: int, weight: int, height: int, gender
         "age": age,
         "weight": weight,
         "height": height,
-        "gender": gender.value,  
+        "gender": gender.value, 
         "bfp": BFP
     })
 

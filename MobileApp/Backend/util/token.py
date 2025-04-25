@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from fastapi import Header
 from jose import jwt, JWTError
 from exceptions.exceptions import InvalidTokenException, UserNotFoundException
 from config.db_config import collection_name
@@ -23,7 +24,7 @@ def create_access_token(email: str, expires_delta: int = JWT_EXPIRE_SECONDS) -> 
 JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
 JWT_ALGORITHM = "HS256"
 
-async def get_user_id_from_token(authorization: str) -> str:
+async def get_user_id_from_token(authorization: str = Header(...)) -> str:
     if not authorization.startswith("Bearer "):
         raise InvalidTokenException()
 
