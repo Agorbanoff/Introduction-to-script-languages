@@ -17,12 +17,42 @@ import {
 } from 'react-native';
 
 export default function StatisticsPage({ navigation }) {
+  const [username, setUsername] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
+  useEffect(() => {
+    const bootstrap = async () => {
+      // 1) get token
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'User not authenticated.');
+        return;
+      }
+
+      // 2) fetch profile
+      try {
+        const res = await fetch('https://gymax.onrender.com/auth/getusername', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!res.ok) throw new Error('Failed to load profile');
+        const { username: nameFromServer } = await res.json();
+        setUsername(nameFromServer);
+      } catch (err) {
+        console.error('Profile fetch error:', err);
+        Alert.alert('Error', 'Could not load user info.');
+      }
+    };
+
+    bootstrap();
+  }, []);
   // Get user email from AsyncStorage
   useEffect(() => {
     const getEmail = async () => {
@@ -88,7 +118,8 @@ export default function StatisticsPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>
-                Hello, Alex! {'\n'} Let's gather some statistics about you!
+              {`Hello, ${username || 'there'}!`}{'\n'}
+              Let's gather some statistics about you!
               </Text>
             </SafeAreaView>
 
