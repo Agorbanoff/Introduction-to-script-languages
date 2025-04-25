@@ -24,7 +24,6 @@ export default function StatisticsPage({ navigation }) {
   const [gender, setGender] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
-<<<<<<< HEAD
   useEffect(() => {
     const bootstrap = async () => {
       // 1) get token
@@ -55,8 +54,6 @@ export default function StatisticsPage({ navigation }) {
     bootstrap();
   }, []);
   // Get user email from AsyncStorage
-=======
->>>>>>> 331d1792bb70c95ae66da5d0f56b9f0748fa4251
   useEffect(() => {
     const getEmail = async () => {
       const storedEmail = await AsyncStorage.getItem('email');
