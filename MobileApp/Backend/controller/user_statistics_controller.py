@@ -1,32 +1,39 @@
-from fastapi import APIRouter, Depends
-from model.user_statistics_entity import UserCredentials
-from service.user_statistics_service import getStatistics, getBFP
+from fastapi import APIRouter, Depends, Request
 from exceptions.exceptions import EmptyStatisticsException
+from service.user_statistics_service import getStatistics, getBFP
 from util.token import get_user_id_from_token
 
 user_statistics_router = APIRouter()
 
 @user_statistics_router.post("/statistics")
-async def submit_statistics(
-    stats: UserCredentials,
+async def debug_submit_statistics(
+    request: Request,
     user_id: str = Depends(get_user_id_from_token)
 ):
-    print("📥 Received:", stats)
+    try:
+        body = await request.json()
+        print("🔥 RAW BODY:", body)
 
-    await getStatistics(
-        user_id=user_id,
-        age=stats.age,
-        weight=stats.weight,
-        height=stats.height,
-        gender=stats.gender
-    )
+        if not all(k in body for k in ("age", "weight", "height", "gender")):
+            raise EmptyStatisticsException()
 
-    return {"message": "Statistics saved and BFP calculated"}
+        await getStatistics(
+            user_id=user_id,
+            age=body["age"],
+            weight=body["weight"],
+            height=body["height"],
+            gender=body["gender"]
+        )
+
+        return {"message": "Statistics saved successfully!"}
+
+    except Exception as e:
+        print("❌ Error in /statistics:", e)
+        raise
 
 @user_statistics_router.get("/statistics")
 async def get_BFP(user_id: str = Depends(get_user_id_from_token)):
     result = await getBFP(user_id=user_id)
     if not result:
         raise EmptyStatisticsException()
-
     return {"BFP": result.get("bfp")}

@@ -35,6 +35,7 @@ export default function StatisticsPage({ navigation }) {
     const w = Number(weight);
     const h = Number(height);
     const a = Number(age);
+    const normalizedGender = gender.toLowerCase().trim();
 
     if (
       !gender ||
@@ -54,7 +55,7 @@ export default function StatisticsPage({ navigation }) {
       }
 
       console.log("Submitting stats:", {
-        gender,
+        gender: normalizedGender,
         weight: w,
         height: h,
         age: a
@@ -68,7 +69,7 @@ export default function StatisticsPage({ navigation }) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          gender: gender,
+          gender: normalizedGender,
           weight: w,
           height: h,
           age: a,
