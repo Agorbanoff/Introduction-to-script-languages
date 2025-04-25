@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from model.user_statistics_entity import UserCredentials
 from service.user_statistics_service import getStatistics, getBFP
 from exceptions.exceptions import EmptyStatisticsException
@@ -8,19 +8,10 @@ user_statistics_router = APIRouter()
 
 @user_statistics_router.post("/statistics")
 async def submit_statistics(
-    request: Request,
+    stats: UserCredentials,
     user_id: str = Depends(get_user_id_from_token)
 ):
-    try:
-        raw_body = await request.json()
-        print("📥 RAW JSON from client:", raw_body)
-        stats = UserCredentials(**raw_body)
-    except Exception as e:
-        print("❌ Error parsing request body:", e)
-        raise
-
-    if None in (stats.age, stats.weight, stats.height, stats.gender):
-        raise EmptyStatisticsException()
+    print("📥 Received:", stats)
 
     await getStatistics(
         user_id=user_id,
