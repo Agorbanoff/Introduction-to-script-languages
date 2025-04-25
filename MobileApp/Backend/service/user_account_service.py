@@ -66,3 +66,35 @@ async def findUsername(user_id: str):
     if not user:
         raise UserNotFoundException()
     return user["username"]
+
+async def changeUsername(user_id: str, new_username):
+       user = await collection_name.find_one({"_id": ObjectId(user_id)})
+       if not user:
+           raise UserNotFoundException()
+       
+       await collection_name.update_one(
+           {"_id": ObjectId(user_id)},
+            {"$set": {"username": new_username}}
+       )
+
+       return user["username"]
+
+async def changePassword(user_id: str, new_pass):
+    user = await collection_name.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise UserNotFoundException()
+    
+    await collection_name.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"password": new_pass}}
+    )
+
+    return user["password"]
+
+async def deleteAccount(user_id: str):
+    result = await collection_name.delete_one({"_id": ObjectId(user_id)})
+
+    if result.deleted_count == 0:
+        raise UserNotFoundException()
+
+    return {"message": "Account deleted successfully"}
