@@ -1,15 +1,67 @@
 // SettingsScreen.js
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('email');
+    navigation.navigate('signup');
+  };
+
+  const handleDeleteAccount = () => {
+    setConfirmDelete(true);
+  };
+
+  const cancelDelete = () => {
+    setConfirmDelete(false);
+  };
+
+  const confirmDeleteAccount = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('Not authenticated');
+
+      const res = await fetch(
+        'https://gymax.onrender.com/auth/deleteaccount',
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete (${res.status})`);
+      }
+
+      // clear everything and go back to signup
+      await AsyncStorage.clear();
+      navigation.navigate('signup');
+    } catch (err) {
+      console.error('Delete account error:', err);
+      // You could show an inline error here if desired
+    } finally {
+      setLoading(false);
+      setConfirmDelete(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -26,6 +78,7 @@ export default function SettingsScreen({ navigation }) {
                 navigation.navigate('changecredentials', { mode: 'username' })
               }
             />
+
             <SettingsButton
               icon="lock-closed-outline"
               text="Change Password"
@@ -33,21 +86,53 @@ export default function SettingsScreen({ navigation }) {
                 navigation.navigate('changecredentials', { mode: 'password' })
               }
             />
+
             <SettingsButton
               icon="fitness-outline"
               text="Change Workout Plan"
               onPress={() => navigation.navigate('status')}
             />
-            <SettingsButton
-              icon="trash-outline"
-              text="Delete Account"
-              onPress={() => console.log('Delete Account')}
-            />
+
             <SettingsButton
               icon="log-out-outline"
               text="Log out"
-              onPress={() => navigation.navigate('signup')}
+              onPress={handleLogout}
             />
+
+            <SettingsButton
+              icon="trash-outline"
+              text="Delete Account"
+              onPress={handleDeleteAccount}
+            />
+
+            {confirmDelete && (
+              <View style={styles.warningContainer}>
+                <Text style={styles.warningText}>
+                  Deleting your account cannot be undone.{'\n'}
+                  Are you sure you want to continue?
+                </Text>
+                <View style={styles.confirmRow}>
+                  <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={confirmDeleteAccount}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      <Text style={styles.confirmButtonText}>Continue</Text>
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.cancelButton}
+                    onPress={cancelDelete}
+                    disabled={loading}
+                  >
+                    <Text style={styles.cancelButtonText}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
           </View>
 
           <View style={styles.navBar}>
@@ -77,12 +162,8 @@ function SettingsButton({ icon, text, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  backgroundImage: {
-    flex: 1,
-  },
+  container: { flex: 1 },
+  backgroundImage: { flex: 1 },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(33, 33, 33, 0.85)',
@@ -114,6 +195,49 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     fontSize: 18,
+  },
+  warningContainer: {
+    width: '80%',
+    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  warningText: {
+    color: '#FFA500',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  confirmRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: '#d32f2f',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#555',
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginLeft: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
   navBar: {
     width: '100%',
