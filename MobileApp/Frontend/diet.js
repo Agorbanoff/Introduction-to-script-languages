@@ -626,11 +626,11 @@ export default function DietPlanScreen({ navigation }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { bfp } = await res.json();
+        const { BFP } = await res.json();
 
-        setBfp(bfp);
+        setBfp(BFP);
 
-        if (bfp > 25) {
+        if (BFP > 25) {
           setMeals(cuttingMeals);
         } else {
           setMeals(bulkingMeals);
