@@ -1,4 +1,5 @@
 // ChangeCredentialsPage.js
+
 import React, { useState } from 'react';
 import {
   View,
@@ -37,7 +38,7 @@ export default function ChangeCredentialsPage() {
 
     let url;
     let payload = {};
-    let method = mode === 'username' ? 'PUT' : 'POST';
+    const method = 'PUT';  // use PUT for everything
 
     if (mode === 'username') {
       if (!newUsername.trim()) {
@@ -47,12 +48,16 @@ export default function ChangeCredentialsPage() {
       url = 'https://gymax.onrender.com/auth/changeusername';
       payload = { new_username: newUsername.trim() };
     } else {
+      // password flow
       if (!oldPassword || !newPassword) {
         Alert.alert('Error', 'Please enter both current and new password.');
         return;
       }
       url = 'https://gymax.onrender.com/auth/changepassword';
-      payload = { old_password: oldPassword, new_password: newPassword };
+      payload = {
+        current_password: oldPassword,
+        new_password: newPassword,
+      };
     }
 
     try {
@@ -73,10 +78,9 @@ export default function ChangeCredentialsPage() {
         );
         navigation.goBack();
       } else {
-        // build a user-friendly error message
         let errorMessage = 'Update failed';
         if (Array.isArray(data.detail)) {
-          errorMessage = data.detail.map(err => err.msg || JSON.stringify(err)).join('\n');
+          errorMessage = data.detail.map(err => err.msg).join('\n');
         } else if (typeof data.detail === 'string') {
           errorMessage = data.detail;
         } else if (typeof data.message === 'string') {
