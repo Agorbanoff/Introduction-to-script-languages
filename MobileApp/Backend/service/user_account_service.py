@@ -79,17 +79,22 @@ async def changeUsername(user_id: str, new_username):
 
        return user["username"]
 
-async def changePassword(user_id: str, new_pass):
+async def changePassword(user_id: str, current_password: str, new_password: str):
     user = await collection_name.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise UserNotFoundException()
-    
+
+    if not verifyPassword(current_password, user["password"]):
+        raise InvalidPasswordException()
+
+    new_hashed_password = hashingPassword(new_password)
+
     await collection_name.update_one(
         {"_id": ObjectId(user_id)},
-        {"$set": {"password": new_pass}}
+        {"$set": {"password": new_hashed_password}}
     )
 
-    return user["password"]
+    return {"message": "Password changed successfully"}
 
 async def deleteAccount(user_id: str):
     result = await collection_name.delete_one({"_id": ObjectId(user_id)})

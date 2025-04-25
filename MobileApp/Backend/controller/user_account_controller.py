@@ -20,7 +20,7 @@ async def get_username(user_id: str = Depends(get_user_id_from_token)):
 
 @user_router.put("/changeusername")
 async def change_username(
-    new_username: str = Body(...),
+    new_username: str = Body(..., embed=True),
     user_id: str = Depends(get_user_id_from_token)
 ):
     username = await changeUsername(user_id, new_username)
@@ -28,11 +28,12 @@ async def change_username(
 
 @user_router.put("/changepassword")
 async def change_password(
-    new_pass: str = Body(...),
+    current_password: str = Body(..., embed=True),
+    new_password: str = Body(..., embed=True),
     user_id: str = Depends(get_user_id_from_token)
 ):
-    password = await changePassword(user_id, new_pass)
-    return {"message": "Username updated successfully", "new_password": password}
+    result = await changePassword(user_id, current_password, new_password)
+    return result
 
 @user_router.delete("/deleteaccount")
 async def delete_account(user_id: str = Depends(get_user_id_from_token)):

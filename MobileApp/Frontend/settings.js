@@ -36,7 +36,7 @@ export default function SettingsScreen({ navigation }) {
             <SettingsButton
               icon="fitness-outline"
               text="Change Workout Plan"
-              onPress={() => console.log('Change Workout Plan')}
+              onPress={() => navigation.navigate('status')}
             />
             <SettingsButton
               icon="trash-outline"

@@ -25,8 +25,8 @@ export default function ChangeCredentialsPage() {
 
   // form state
   const [newUsername, setNewUsername] = useState('');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [oldPassword, setOldPassword]   = useState('');
+  const [newPassword, setNewPassword]   = useState('');
 
   const handleSubmit = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -37,33 +37,27 @@ export default function ChangeCredentialsPage() {
 
     let url;
     let payload = {};
+    let method = mode === 'username' ? 'PUT' : 'POST';
 
     if (mode === 'username') {
-      if (!newUsername.trim() || !oldPassword) {
-        Alert.alert('Error', 'Please enter both new username and current password.');
+      if (!newUsername.trim()) {
+        Alert.alert('Error', 'Please enter a new username.');
         return;
       }
-      url = 'https://gymax.onrender.com/user/change-username';
-      payload = {
-        new_username: newUsername.trim(),
-        password: oldPassword,
-      };
+      url = 'https://gymax.onrender.com/auth/changeusername';
+      payload = { new_username: newUsername.trim() };
     } else {
-      // mode === 'password'
       if (!oldPassword || !newPassword) {
         Alert.alert('Error', 'Please enter both current and new password.');
         return;
       }
-      url = 'https://gymax.onrender.com/user/change-password';
-      payload = {
-        old_password: oldPassword,
-        new_password: newPassword,
-      };
+      url = 'https://gymax.onrender.com/auth/changepassword';
+      payload = { old_password: oldPassword, new_password: newPassword };
     }
 
     try {
       const res = await fetch(url, {
-        method: 'POST',
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -79,7 +73,16 @@ export default function ChangeCredentialsPage() {
         );
         navigation.goBack();
       } else {
-        Alert.alert('Error', data.detail || data.message || 'Update failed');
+        // build a user-friendly error message
+        let errorMessage = 'Update failed';
+        if (Array.isArray(data.detail)) {
+          errorMessage = data.detail.map(err => err.msg || JSON.stringify(err)).join('\n');
+        } else if (typeof data.detail === 'string') {
+          errorMessage = data.detail;
+        } else if (typeof data.message === 'string') {
+          errorMessage = data.message;
+        }
+        Alert.alert('Error', errorMessage);
       }
     } catch (err) {
       console.error('Network error:', err);
@@ -102,25 +105,16 @@ export default function ChangeCredentialsPage() {
             <Text style={styles.title}>
               {mode === 'username' ? 'Change Username' : 'Change Password'}
             </Text>
+
             <View style={styles.form}>
               {mode === 'username' ? (
-                <>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="New Username"
-                    placeholderTextColor="#aaa"
-                    value={newUsername}
-                    onChangeText={setNewUsername}
-                  />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Current Password"
-                    placeholderTextColor="#aaa"
-                    secureTextEntry
-                    value={oldPassword}
-                    onChangeText={setOldPassword}
-                  />
-                </>
+                <TextInput
+                  style={styles.input}
+                  placeholder="New Username"
+                  placeholderTextColor="#aaa"
+                  value={newUsername}
+                  onChangeText={setNewUsername}
+                />
               ) : (
                 <>
                   <TextInput
@@ -141,12 +135,14 @@ export default function ChangeCredentialsPage() {
                   />
                 </>
               )}
+
               <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>
                   {mode === 'username' ? 'Update Username' : 'Update Password'}
                 </Text>
               </TouchableOpacity>
             </View>
+
             <StatusBar style="auto" />
           </SafeAreaView>
         </TouchableWithoutFeedback>
