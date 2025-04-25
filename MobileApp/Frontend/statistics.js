@@ -44,21 +44,21 @@ export default function StatisticsPage({ navigation }) {
         alert('User not authenticated.');
         return;
       }
-
       const response = await fetch('https://gymax.onrender.com/stats/statistics', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          age: parseInt(age),
           gender: gender,
+          weight: Number(weight),
+          height: Number(height),
+          age: Number(age)
         }),
       });
-
+      
       const data = await response.json();
       console.log('Statistics response:', data);
 

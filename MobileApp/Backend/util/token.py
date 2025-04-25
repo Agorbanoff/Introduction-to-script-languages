@@ -10,11 +10,13 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_SECONDS = int(timedelta(days=30).total_seconds())
 
 
-def create_access_token(data: dict, expires_delta: int = JWT_EXPIRE_SECONDS) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(seconds=expires_delta)
-    to_encode.update({"exp": expire})
+def create_access_token(email: str, expires_delta: int = JWT_EXPIRE_SECONDS) -> str:
+    to_encode = {
+        "sub": email,
+        "exp": datetime.utcnow() + timedelta(seconds=expires_delta)
+    }
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
 
 
 #validating the token

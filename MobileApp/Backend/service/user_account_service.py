@@ -30,7 +30,7 @@ async def signUp(user: UserSignUp) -> dict:
         "password": hashed_pass
     })
     
-    token = create_access_token({"sub": user.email})
+    token = create_access_token(user.email)
 
     return {
         "message": "User registered successfully",
@@ -50,7 +50,7 @@ async def logIn(user: UserLogIn) -> dict:
     if not verifyPassword(user.password, existing_user["password"]):
         raise InvalidPasswordException()
 
-    token = create_access_token({"sub": user.email})
+    token = create_access_token(user.email)
 
     return {
         "access_token": token,
