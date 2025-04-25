@@ -11,6 +11,7 @@ async def debug_submit_statistics(
     user_id: str = Depends(get_user_id_from_token)
 ):
     try:
+        print("🔐 Headers:", request.headers)
         body = await request.json()
         print("🔥 RAW BODY:", body)
 
