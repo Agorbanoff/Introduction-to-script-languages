@@ -135,7 +135,7 @@ const workoutPlans = {
   CORE_MOBILITY: {
     title: 'CORE MOBILITY',
     subtitle: 'Core strength & mobility work',
-    image: require('./Images/PushImage.jpg'),
+    image: require('./Images/CoreImage.jpg'),
     exercises: [
       { id: 1, name: 'Warmup', sets: 1, reps: 'N/A', description: '5-min light jog + dynamic stretches' },
       { id: 2, name: 'Plank Hold', sets: 3, reps: '30-60 sec', description: 'Core activation' },

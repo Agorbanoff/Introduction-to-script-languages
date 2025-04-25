@@ -12,6 +12,7 @@ import GymPage from './gym';
 import DietPage from './diet';
 import WorkoutPage from './workout';
 import RecipePage from './recipe';
+import ChangeCredentialsPage from './changeCredentials';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +80,7 @@ export default function App() {
         <Stack.Screen name="gym" component={GymPage} options={{ headerShown: false }} />
         <Stack.Screen name="workout" component={WorkoutPage} options={{ headerShown: false }} />
         <Stack.Screen name="recipe" component={RecipePage} options={{ headerShown: false }} />
+        <Stack.Screen name="changecredentials" component={ChangeCredentialsPage} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

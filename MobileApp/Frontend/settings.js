@@ -1,3 +1,4 @@
+// SettingsScreen.js
 import React from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const SettingsScreen = ({ navigation }) => {
+export default function SettingsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ImageBackground
@@ -18,11 +19,35 @@ const SettingsScreen = ({ navigation }) => {
       >
         <View style={styles.overlay}>
           <View style={styles.settingsContainer}>
-            <SettingsButton icon="person-outline" text="Change Username" onPress={() => console.log('Change Username')} />
-            <SettingsButton icon="lock-closed-outline" text="Change Password" onPress={() => console.log('Change Password')} />
-            <SettingsButton icon="fitness-outline" text="Change Workout Plan" onPress={() => console.log('Change Workout Plan')} />
-            <SettingsButton icon="trash-outline" text="Delete Account" onPress={() => console.log('Delete Account')} />
-            <SettingsButton icon="trash-outline" text="Log out" onPress={() => navigation.navigate('signup')} />
+            <SettingsButton
+              icon="person-outline"
+              text="Change Username"
+              onPress={() =>
+                navigation.navigate('changecredentials', { mode: 'username' })
+              }
+            />
+            <SettingsButton
+              icon="lock-closed-outline"
+              text="Change Password"
+              onPress={() =>
+                navigation.navigate('changecredentials', { mode: 'password' })
+              }
+            />
+            <SettingsButton
+              icon="fitness-outline"
+              text="Change Workout Plan"
+              onPress={() => console.log('Change Workout Plan')}
+            />
+            <SettingsButton
+              icon="trash-outline"
+              text="Delete Account"
+              onPress={() => console.log('Delete Account')}
+            />
+            <SettingsButton
+              icon="log-out-outline"
+              text="Log out"
+              onPress={() => navigation.navigate('signup')}
+            />
           </View>
 
           <View style={styles.navBar}>
@@ -40,16 +65,16 @@ const SettingsScreen = ({ navigation }) => {
       </ImageBackground>
     </View>
   );
-};
+}
 
-const SettingsButton = ({ icon, text, onPress }) => (
-  <TouchableOpacity style={styles.button} onPress={onPress}>
-    <Ionicons name={icon} size={24} color="white" style={styles.icon} />
-    <Text style={styles.buttonText}>{text}</Text>
-  </TouchableOpacity>
-);
-
-export default SettingsScreen;
+function SettingsButton({ icon, text, onPress }) {
+  return (
+    <TouchableOpacity style={styles.button} onPress={onPress}>
+      <Ionicons name={icon} size={24} color="black" />
+      <Text style={styles.buttonText}>{text}</Text>
+    </TouchableOpacity>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -61,23 +86,23 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(33, 33, 33, 0.85)',
-    justifyContent: 'space-between',  
-    paddingVertical: 20, 
+    justifyContent: 'space-between',
+    paddingVertical: 20,
   },
   settingsContainer: {
     flexGrow: 1,
-    justifyContent: 'center',  
+    justifyContent: 'center',
     alignItems: 'center',
   },
   button: {
     flexDirection: 'row',
     backgroundColor: '#1db344',
-    paddingVertical: 20,  
-    paddingHorizontal: 40,  
+    paddingVertical: 20,
+    paddingHorizontal: 40,
     borderRadius: 10,
-    marginBottom: 15, 
+    marginBottom: 15,
     alignItems: 'center',
-    width: '80%', 
+    width: '80%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -85,20 +110,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonText: {
+    marginLeft: 10,
     fontWeight: 'bold',
     color: 'black',
-    fontSize: 18,  
-    marginLeft: 10,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    color: 'black',
+    fontSize: 18,
   },
   navBar: {
-    width: '100%',  
-    position: 'absolute',  
-    bottom: 0,  
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
     height: 60,
     backgroundColor: '#111',
     flexDirection: 'row',
