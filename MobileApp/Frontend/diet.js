@@ -13,8 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
-
-const meals = {
+const bulkingMeals = {
   breakfast: [
     {
       name: 'Scrambled eggs with spinach and toast',
@@ -305,18 +304,324 @@ const meals = {
   ],
 };
 
+const cuttingMeals = {
+  breakfast: [
+    {
+      name: 'Greek Yogurt with Berries & Chia Seeds',
+      image: require('./Images/fbreakfast1.png'),
+      calories: '250',
+      fat: '5g',
+      carbs: '18g',
+      protein: '20g',
+      time: '5 minutes',
+      ingredients: ['3/4 cup Greek yogurt', '1/4 cup berries', '1 tsp chia seeds'],
+      recipe: '1. Scoop Greek yogurt into a bowl.\n2. Top with berries.\n3. Sprinkle chia seeds.',
+      alternatives: [
+        { ingredient: 'chia seeds', alternative: 'flax seeds' },
+        { ingredient: 'berries', alternative: 'kiwi slices' },
+      ],
+    },
+    {
+      name: 'Scrambled Eggs with Spinach and Tomatoes',
+      image: require('./Images/fbreakfast2.png'),
+      calories: '300',
+      fat: '22g',
+      carbs: '5g',
+      protein: '20g',
+      time: '10 minutes',
+      ingredients: ['3 eggs', '1/2 cup spinach', '1/4 cup diced tomatoes'],
+      recipe: '1. Whisk eggs.\n2. Saute spinach and tomatoes.\n3. Add eggs and scramble.',
+      alternatives: [
+        { ingredient: 'eggs', alternative: 'egg whites' },
+        { ingredient: 'spinach', alternative: 'kale' },
+      ],
+    },
+    {
+      name: 'Oatmeal with Cinnamon and Half a Banana',
+      image: require('./Images/fbreakfast3.png'),
+      calories: '220',
+      fat: '3g',
+      carbs: '35g',
+      protein: '6g',
+      time: '7 minutes',
+      ingredients: ['1/2 cup rolled oats', '1 cup almond milk', '1/2 banana', '1/4 tsp cinnamon'],
+      recipe: '1. Cook oats.\n2. Stir in cinnamon.\n3. Top with banana slices.',
+      alternatives: [
+        { ingredient: 'banana', alternative: 'berries' },
+        { ingredient: 'almond milk', alternative: 'oat milk' },
+      ],
+    },
+    {
+      name: 'Protein Smoothie with Spinach & Almond Milk',
+      image: require('./Images/fbreakfast4.png'),
+      calories: '180',
+      fat: '2g',
+      carbs: '8g',
+      protein: '25g',
+      time: '5 minutes',
+      ingredients: ['1 scoop protein powder', '1 cup almond milk', '1/2 banana', '1 cup spinach'],
+      recipe: '1. Blend all ingredients until smooth.',
+      alternatives: [
+        { ingredient: 'almond milk', alternative: 'coconut milk' },
+        { ingredient: 'spinach', alternative: 'kale' },
+      ],
+    },
+    {
+      name: 'Cottage Cheese with Cucumber Slices',
+      image: require('./Images/fbreakfast5.png'),
+      calories: '160',
+      fat: '4g',
+      carbs: '6g',
+      protein: '22g',
+      time: '3 minutes',
+      ingredients: ['1/2 cup cottage cheese', '1/2 cucumber'],
+      recipe: '1. Place cottage cheese in a bowl.\n2. Add cucumber slices.',
+      alternatives: [
+        { ingredient: 'cottage cheese', alternative: 'Greek yogurt' },
+        { ingredient: 'cucumber', alternative: 'celery' },
+      ],
+    },
+  ],
+  lunch: [
+    {
+      name: 'Grilled Chicken Salad with Olive Oil Dressing',
+      image: require('./Images/flunch1.png'),
+      calories: '400',
+      fat: '18g',
+      carbs: '10g',
+      protein: '45g',
+      time: '15 minutes',
+      ingredients: ['1 grilled chicken breast', '2 cups mixed greens', 'cherry tomatoes', 'cucumber', '1 tbsp olive oil'],
+      recipe: '1. Grill chicken.\n2. Toss greens, tomatoes, cucumber.\n3. Drizzle olive oil.',
+      alternatives: [
+        { ingredient: 'olive oil', alternative: 'avocado oil' },
+        { ingredient: 'greens', alternative: 'arugula' },
+      ],
+    },
+    {
+      name: 'Tuna Lettuce Wraps with Avocado',
+      image: require('./Images/flunch2.png'),
+      calories: '280',
+      fat: '12g',
+      carbs: '5g',
+      protein: '32g',
+      time: '10 minutes',
+      ingredients: ['1 can tuna', 'butter lettuce', '1/2 avocado', '1 tbsp Greek yogurt'],
+      recipe: '1. Mix tuna with yogurt.\n2. Fill lettuce wraps.\n3. Add avocado slices.',
+      alternatives: [
+        { ingredient: 'lettuce', alternative: 'cabbage leaves' },
+        { ingredient: 'Greek yogurt', alternative: 'light mayo' },
+      ],
+    },
+    {
+      name: 'Turkey Breast with Steamed Broccoli & Quinoa',
+      image: require('./Images/flunch3.png'),
+      calories: '420',
+      fat: '12g',
+      carbs: '25g',
+      protein: '45g',
+      time: '20 minutes',
+      ingredients: ['1 turkey breast', '1/2 cup quinoa', '1 cup steamed broccoli'],
+      recipe: '1. Grill turkey.\n2. Steam broccoli.\n3. Cook quinoa.\n4. Serve together.',
+      alternatives: [
+        { ingredient: 'quinoa', alternative: 'brown rice' },
+        { ingredient: 'broccoli', alternative: 'green beans' },
+      ],
+    },
+    {
+      name: 'Egg White Omelette with Mushrooms and Arugula',
+      image: require('./Images/flunch4.png'),
+      calories: '180',
+      fat: '4g',
+      carbs: '5g',
+      protein: '28g',
+      time: '8 minutes',
+      ingredients: ['3 egg whites', '1/4 cup mushrooms', '1/2 cup arugula'],
+      recipe: '1. Saute mushrooms.\n2. Add egg whites.\n3. Fold with arugula.',
+      alternatives: [
+        { ingredient: 'arugula', alternative: 'spinach' },
+        { ingredient: 'mushrooms', alternative: 'zucchini' },
+      ],
+    },
+    {
+      name: 'Grilled Salmon with Cucumber-Tomato Salad',
+      image: require('./Images/flunch5.png'),
+      calories: '430',
+      fat: '22g',
+      carbs: '8g',
+      protein: '45g',
+      time: '20 minutes',
+      ingredients: ['1 salmon fillet', 'cucumber', 'cherry tomatoes', 'olive oil'],
+      recipe: '1. Grill salmon.\n2. Toss cucumber and tomatoes.\n3. Drizzle olive oil.',
+      alternatives: [
+        { ingredient: 'salmon', alternative: 'trout' },
+        { ingredient: 'olive oil', alternative: 'lemon dressing' },
+      ],
+    },
+  ],
+  dinner: [
+    {
+      name: 'Baked Cod with Asparagus',
+      image: require('./Images/fdinner1.png'),
+      calories: '350',
+      fat: '10g',
+      carbs: '6g',
+      protein: '40g',
+      time: '20 minutes',
+      ingredients: ['1 cod fillet', 'asparagus', 'olive oil'],
+      recipe: '1. Bake cod and asparagus at 375°F for 15–20 minutes.',
+      alternatives: [
+        { ingredient: 'cod', alternative: 'tilapia' },
+        { ingredient: 'asparagus', alternative: 'green beans' },
+      ],
+    },
+    {
+      name: 'Ground Turkey Stir-Fry with Vegetables',
+      image: require('./Images/fdinner2.png'),
+      calories: '400',
+      fat: '14g',
+      carbs: '12g',
+      protein: '42g',
+      time: '15 minutes',
+      ingredients: ['4 oz ground turkey', 'mixed veggies', '1 tsp soy sauce'],
+      recipe: '1. Saute turkey.\n2. Add veggies.\n3. Stir in soy sauce.',
+      alternatives: [
+        { ingredient: 'soy sauce', alternative: 'coconut aminos' },
+        { ingredient: 'ground turkey', alternative: 'ground chicken' },
+      ],
+    },
+    {
+      name: 'Zucchini Noodles with Marinara & Shrimp',
+      image: require('./Images/fdinner3.png'),
+      calories: '310',
+      fat: '8g',
+      carbs: '10g',
+      protein: '35g',
+      time: '12 minutes',
+      ingredients: ['zucchini noodles', 'shrimp', 'marinara sauce'],
+      recipe: '1. Saute zucchini.\n2. Add marinara sauce.\n3. Top with grilled shrimp.',
+      alternatives: [
+        { ingredient: 'shrimp', alternative: 'chicken breast' },
+        { ingredient: 'zucchini noodles', alternative: 'spaghetti squash' },
+      ],
+    },
+    {
+      name: 'Roasted Chicken Breast with Cauliflower Mash',
+      image: require('./Images/fdinner4.png'),
+      calories: '420',
+      fat: '14g',
+      carbs: '10g',
+      protein: '50g',
+      time: '25 minutes',
+      ingredients: ['chicken breast', 'cauliflower', 'olive oil'],
+      recipe: '1. Roast chicken.\n2. Steam cauliflower.\n3. Blend into mash.',
+      alternatives: [
+        { ingredient: 'chicken', alternative: 'turkey breast' },
+        { ingredient: 'cauliflower', alternative: 'broccoli mash' },
+      ],
+    },
+    {
+      name: 'Beef Strips with Sauteed Green Beans',
+      image: require('./Images/fdinner5.png'),
+      calories: '450',
+      fat: '18g',
+      carbs: '8g',
+      protein: '50g',
+      time: '15 minutes',
+      ingredients: ['beef strips', 'green beans', 'olive oil'],
+      recipe: '1. Saute beef strips.\n2. Add green beans.\n3. Serve hot.',
+      alternatives: [
+        { ingredient: 'beef', alternative: 'bison' },
+        { ingredient: 'green beans', alternative: 'broccoli' },
+      ],
+    },
+  ],
+  snack: [
+    {
+      name: 'Hard-Boiled Eggs',
+      image: require('./Images/fsnack1.png'),
+      calories: '140',
+      fat: '10g',
+      carbs: '1g',
+      protein: '12g',
+      time: '10 minutes',
+      ingredients: ['2 eggs'],
+      recipe: '1. Boil eggs for 9 minutes.\n2. Cool and peel.',
+      alternatives: [
+        { ingredient: 'eggs', alternative: 'egg whites' },
+      ],
+    },
+    {
+      name: 'Almonds (Small Handful)',
+      image: require('./Images/fsnack2.png'),
+      calories: '160',
+      fat: '14g',
+      carbs: '6g',
+      protein: '6g',
+      time: '0 minutes',
+      ingredients: ['15 almonds'],
+      recipe: '1. Grab and snack.',
+      alternatives: [
+        { ingredient: 'almonds', alternative: 'walnuts' },
+      ],
+    },
+    {
+      name: 'Celery Sticks with Hummus',
+      image: require('./Images/fsnack3.png'),
+      calories: '120',
+      fat: '7g',
+      carbs: '8g',
+      protein: '4g',
+      time: '5 minutes',
+      ingredients: ['celery sticks', 'hummus'],
+      recipe: '1. Slice celery.\n2. Dip into hummus.',
+      alternatives: [
+        { ingredient: 'hummus', alternative: 'Greek yogurt dip' },
+      ],
+    },
+    {
+      name: 'Low-Fat Cheese Stick',
+      image: require('./Images/fsnack4.png'),
+      calories: '80',
+      fat: '6g',
+      carbs: '1g',
+      protein: '7g',
+      time: '1 minute',
+      ingredients: ['low-fat mozzarella stick'],
+      recipe: '1. Grab and eat.',
+      alternatives: [
+        { ingredient: 'cheese stick', alternative: 'low-fat cheddar cubes' },
+      ],
+    },
+    {
+      name: 'Sliced Apple with Peanut Butter',
+      image: require('./Images/fsnack5.png'),
+      calories: '150',
+      fat: '7g',
+      carbs: '20g',
+      protein: '3g',
+      time: '3 minutes',
+      ingredients: ['1/2 apple', '1 tsp peanut butter'],
+      recipe: '1. Slice apple.\n2. Spread peanut butter.',
+      alternatives: [
+        { ingredient: 'peanut butter', alternative: 'almond butter' },
+      ],
+    },
+  ],
+};
+
+
 export default function DietPlanScreen({ navigation }) {
   const [bfp, setBfp] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [meals, setMeals] = useState(bulkingMeals); // default bulking
 
   useEffect(() => {
     (async () => {
       try {
-        // 1) Grab your token from storage
         const token = await AsyncStorage.getItem('token');
         if (!token) throw new Error('No access token found');
 
-        // 2) GET the saved BFP 
         const res = await fetch('https://gymax.onrender.com/stats/statistics', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -325,10 +630,10 @@ export default function DietPlanScreen({ navigation }) {
 
         setBfp(bfp);
 
-        // 3) If not underweight, send to the general plan
-        if (bfp >= 20) {
-          navigation.replace('GeneralDietScreen');
-          return;
+        if (bfp > 25) {
+          setMeals(cuttingMeals);
+        } else {
+          setMeals(bulkingMeals);
         }
       } catch (err) {
         console.error('Failed to load BFP:', err);
@@ -368,7 +673,6 @@ export default function DietPlanScreen({ navigation }) {
     </View>
   );
 
-
   return (
     <ImageBackground
       source={require('./Images/homePagePhoto.jpg')}
@@ -396,7 +700,7 @@ export default function DietPlanScreen({ navigation }) {
       </View>
     </ImageBackground>
   );
-};
+}
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -456,5 +760,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#333',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
