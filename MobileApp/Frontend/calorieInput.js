@@ -1,4 +1,4 @@
-// calorieInput.js
+// CalorieInput.js
 import React from 'react';
 import {
   View,
@@ -9,16 +9,63 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { PieChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = width * 0.8;
 
+// Hard-coded values for demo:
+const consumedCalories = 1738;
+const goalCalories = 2000;
+const remainingCalories = Math.max(goalCalories - consumedCalories, 0);
+
 export default function CalorieInput() {
   const navigation = useNavigation();
+
+  const pieData = [
+    {
+      name: 'Consumed',
+      calories: consumedCalories,
+      color: '#FF6384',
+      legendFontColor: '#fff',
+      legendFontSize: 14,
+    },
+    {
+      name: 'Remaining',
+      calories: remainingCalories,
+      color: '#36A2EB',
+      legendFontColor: '#fff',
+      legendFontSize: 14,
+    },
+  ];
+
+  const chartConfig = {
+    backgroundColor: '#111',
+    backgroundGradientFrom: '#111',
+    backgroundGradientTo: '#111',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>FOOD LOG</Text>
+
+      {/* Pie Chart */}
+      <View style={styles.chartWrapper}>
+        <PieChart
+          data={pieData}
+          width={width - 32}      // full width minus padding
+          height={220}
+          chartConfig={chartConfig}
+          accessor="calories"
+          backgroundColor="transparent"
+          paddingLeft="16"
+          absolute               // show raw kcal values
+          hasLegend              // show legend
+        />
+      </View>
 
       {/* Action Buttons */}
       <View style={styles.actions}>
@@ -64,7 +111,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  chartWrapper: {
     marginBottom: 24,
+    backgroundColor: '#111',
   },
   actions: {
     flex: 1,
