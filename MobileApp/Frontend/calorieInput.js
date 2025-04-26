@@ -1,5 +1,5 @@
 // CalorieInput.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,28 +10,57 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { PieChart } from 'react-native-chart-kit';
 
 const { width } = Dimensions.get('window');
-const CARD_SIZE    = width * 0.8;
-const CHART_WIDTH  = width - 32;
-const INITIAL_GOAL = 2000;
+const CARD_SIZE   = width * 0.8;
+const CHART_WIDTH = width - 32;
 
 export default function CalorieInput() {
   const navigation = useNavigation();
 
-  // State
-  const [goalCalories]               = useState(INITIAL_GOAL);
-  const [consumedCalories, setConsumed] = useState(1738);
-  const [manualMode, setManualMode]     = useState(false);
-  const [query, setQuery]               = useState('');
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState('');
-  const [message, setMessage]           = useState('');
+  // --- State
+  const [goalCalories, setGoalCalories]     = useState(2000);
+  const [consumedCalories, setConsumed]     = useState(0);
+  const [manualMode, setManualMode]         = useState(false);
+  const [query, setQuery]                   = useState('');
+  const [loading, setLoading]               = useState(false);
+  const [error, setError]                   = useState('');
+  const [message, setMessage]               = useState('');
+  const [bfpLoading, setBfpLoading]         = useState(true);
 
-  // Handlers
+  // --- Fetch BFP and set goalCalories
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) throw new Error('No access token found');
+
+        const res = await fetch(
+          'https://gymax.onrender.com/stats/statistics',
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const { BFP } = await res.json();
+
+        // set goal based on body fat percentage
+        setGoalCalories(BFP > 25 ? 2000 : 2500);
+      } catch (err) {
+        console.error('Failed to load BFP:', err);
+        // fallback if needed
+        setGoalCalories(2000);
+      } finally {
+        setBfpLoading(false);
+      }
+    })();
+  }, []);
+
+  // --- Handler to start manual entry
   const startManual = () => {
     setError('');
     setMessage('');
@@ -39,6 +68,7 @@ export default function CalorieInput() {
     setManualMode(true);
   };
 
+  // --- Submit to food/search
   const submitManual = async () => {
     if (!query.trim()) {
       setError('Please type something.');
@@ -48,17 +78,17 @@ export default function CalorieInput() {
     setError('');
     try {
       const res = await fetch(
-        `https://gymax.onrender.com/food/search?query=${encodeURIComponent(query)}`
+        `https://gymax.onrender.com/food/search?query=${encodeURIComponent(
+          query
+        )}`
       );
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.detail || data.message || 'Server error');
       }
       setMessage(data.message || '');
-      // extract calories from message
       const m = data.message.match(/Calories:\s*([0-9]+)/i);
       if (m) setConsumed(parseInt(m[1], 10));
-      // remain in manualMode so user sees breakdown
     } catch (err) {
       setError(err.message);
     } finally {
@@ -66,7 +96,16 @@ export default function CalorieInput() {
     }
   };
 
-  // Chart data
+  // --- Show loading until goalCalories is set
+  if (bfpLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#1db344" />
+      </View>
+    );
+  }
+
+  // --- Chart data
   const remainingCalories = Math.max(goalCalories - consumedCalories, 0);
   const pieData = [
     {
@@ -97,6 +136,9 @@ export default function CalorieInput() {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>FOOD LOG</Text>
+        <Text style={styles.subHeader}>
+          Goal: {goalCalories} kcal
+        </Text>
 
         <PieChart
           data={pieData}
@@ -167,7 +209,6 @@ export default function CalorieInput() {
         >
           <Ionicons name="barbell-outline" size={28} color="#1db344" />
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={() =>
             navigation.reset({ index: 0, routes: [{ name: 'diet' }] })
@@ -175,7 +216,6 @@ export default function CalorieInput() {
         >
           <Ionicons name="restaurant-outline" size={28} color="#1db344" />
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={() =>
             navigation.reset({ index: 0, routes: [{ name: 'calorieinput' }] })
@@ -183,7 +223,6 @@ export default function CalorieInput() {
         >
           <Ionicons name="barcode-outline" size={28} color="#1db344" />
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={() =>
             navigation.reset({ index: 0, routes: [{ name: 'settings' }] })
@@ -197,20 +236,23 @@ export default function CalorieInput() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
     backgroundColor: '#111',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  container: { flex: 1, backgroundColor: '#111' },
   scrollContainer: {
     paddingTop: 60,
     paddingBottom: 80, // leave space for nav bar
     alignItems: 'center',
   },
-  header: {
+  header: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+  subHeader: {
     color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    fontSize: 16,
+    marginVertical: 8,
   },
   messageBox: {
     backgroundColor: '#222',
@@ -219,19 +261,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     width: CHART_WIDTH,
   },
-  messageText: {
-    color: '#fff',
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  actions: {
-    marginTop: 32,
-  },
-  manualContainer: {
-    marginTop: 24,
-    width: CHART_WIDTH,
-    alignItems: 'center',
-  },
+  messageText: { color: '#fff', fontSize: 16, lineHeight: 22 },
+  actions: { marginTop: 32 },
+  manualContainer: { marginTop: 24, width: CHART_WIDTH, alignItems: 'center' },
   input: {
     backgroundColor: '#222',
     color: '#fff',
@@ -249,26 +281,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '500',
-  },
-  error: {
-    color: '#f33',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  cancelLink: {
-    marginTop: 12,
-  },
-  cancelText: {
-    color: '#888',
-    fontSize: 16,
-  },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { color: '#fff', fontSize: 18, fontWeight: '500' },
+  error: { color: '#f33', marginTop: 8, textAlign: 'center' },
+  cancelLink: { marginTop: 12 },
+  cancelText: { color: '#888', fontSize: 16 },
   card: {
     width: CARD_SIZE,
     height: CARD_SIZE * 0.4,
@@ -277,12 +294,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cardText: {
-    color: '#fff',
-    fontSize: 18,
-    marginTop: 8,
-    fontWeight: '500',
-  },
+  cardText: { color: '#fff', fontSize: 18, marginTop: 8, fontWeight: '500' },
   navBar: {
     position: 'absolute',
     bottom: 0,
