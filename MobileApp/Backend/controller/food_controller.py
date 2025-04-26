@@ -5,5 +5,5 @@ food_router = APIRouter(prefix="/food", tags=["Food"])
 
 @food_router.get("/search")
 async def search_food(query: str):
-    result = fetch_food_info(query)
+    result = await fetch_food_info(query)
     return result
