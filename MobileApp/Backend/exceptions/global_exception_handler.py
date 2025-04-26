@@ -8,7 +8,8 @@ from exceptions.exceptions import (
     InvalidTokenException,
     EmptyStatisticsException,
     StatisticsNotFoundException,
-    TrainingNotFoundException
+    TrainingNotFoundException,
+    OpenFoodFactsFetchException
 )
 
 def add_exception_handlers(app: FastAPI):
@@ -38,4 +39,8 @@ def add_exception_handlers(app: FastAPI):
 
     @app.exception_handler(TrainingNotFoundException)
     async def training_not_found_handler(request: Request, exc: TrainingNotFoundException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(OpenFoodFactsFetchException)
+    async def openfoodfacts_fetch_handler(request: Request, exc: OpenFoodFactsFetchException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
