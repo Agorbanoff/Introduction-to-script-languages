@@ -125,7 +125,7 @@ export default function LogInPage({ navigation }) {
                   style={styles.button}
                   onPress={() => navigation.navigate('signup')}
                 >
-                  <Text style={styles.buttonText}>Don't Have An Account?</Text>
+                  <Text style={styles.buttonText}>Don't have an account?</Text>
                 </TouchableOpacity>
               </View>
             </View>
