@@ -103,7 +103,7 @@ async def deleteAccount(user_id: str):
     user = await collection_name.delete_one({"_id": ObjectId(user_id)}) 
 
 
-    if user.deleted_count and statistics is None and status is None:
+    if user.deleted_count == 0:
         raise UserNotFoundException()
 
     return {"message": "Account deleted successfully"}
