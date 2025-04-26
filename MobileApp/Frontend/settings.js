@@ -40,7 +40,7 @@ export default function SettingsScreen({ navigation }) {
         {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -50,12 +50,10 @@ export default function SettingsScreen({ navigation }) {
         throw new Error(`Failed to delete (${res.status})`);
       }
 
-      // clear everything and go back to signup
       await AsyncStorage.clear();
       navigation.navigate('signup');
     } catch (err) {
       console.error('Delete account error:', err);
-      // You could show an inline error here if desired
     } finally {
       setLoading(false);
       setConfirmDelete(false);
@@ -108,7 +106,7 @@ export default function SettingsScreen({ navigation }) {
             {confirmDelete && (
               <View style={styles.warningContainer}>
                 <Text style={styles.warningText}>
-                  Deleting your account cannot be undone.{'\n'}
+                  Deleting your account cannot be undone.{"\n"}
                   Are you sure you want to continue?
                 </Text>
                 <View style={styles.confirmRow}>
@@ -134,20 +132,33 @@ export default function SettingsScreen({ navigation }) {
               </View>
             )}
           </View>
-
-          <View style={styles.navBar}>
-            <TouchableOpacity onPress={() => navigation.navigate('gym')}>
-              <Ionicons name="barbell-outline" size={28} color="#1db344" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('diet')}>
-              <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('settings')}>
-              <Ionicons name="settings-outline" size={28} color="#1db344" />
-            </TouchableOpacity>
-          </View>
         </View>
       </ImageBackground>
+
+      <View style={styles.navBar}>
+        <TouchableOpacity
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}
+        >
+          <Ionicons name="barbell-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}
+        >
+          <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('calorieinput')}
+        >
+          <Ionicons name="barcode-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}
+        >
+          <Ionicons name="settings-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

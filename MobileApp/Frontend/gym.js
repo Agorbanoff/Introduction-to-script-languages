@@ -1,3 +1,4 @@
+// gym.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -41,22 +42,30 @@ const GymPage = () => {
   const cycle = ['PUSH', 'PULL', 'LEGS'];
   let schedule = [];
 
-  if (sessionsPerWeek === 1) {
-    schedule = ['FULL-BODY', 'Rest day', 'Rest day', 'Rest day', 'Rest day', 'Rest day', 'Rest day'];
-  } else if (sessionsPerWeek === 2) {
-    schedule = ['UPPER BODY', 'Rest day', 'Rest day', 'Rest day', 'LOWER BODY', 'Rest day', 'Rest day'];
-  } else if (sessionsPerWeek === 3) {
-    schedule = Array.from({ length: totalDays }, (_, i) => i < 3 ? cycle[i] : 'Rest day');
-  } else if (sessionsPerWeek === 4) {
-    schedule = ['UPPER BODY', 'LOWER BODY', 'Rest day', 'UPPER BODY', 'LOWER BODY', 'Rest day', 'Rest day'];
-  } else if (sessionsPerWeek === 5) {
-    schedule = ['PUSH', 'PULL', 'LEGS AND CORE', 'ARM DAY', 'CHEST AND BACK', 'Rest day', 'Rest day'];
-  } else if (sessionsPerWeek === 6) {
-    schedule = ['PUSH', 'PULL', 'LEGS', 'Rest day', 'PUSH', 'PULL', 'LEGS'];
-  } else if (sessionsPerWeek === 7) {
-    schedule = ['PUSH', 'PULL', 'LEGS', 'CORE MOBILITY', 'PUSH', 'PULL', 'LEGS'];
-  } else {
-    schedule = Array.from({ length: totalDays }, (_, i) => i < sessionsPerWeek ? 'Workout' : 'Rest day');
+  switch (sessionsPerWeek) {
+    case 1:
+      schedule = ['FULL-BODY', ...Array(6).fill('Rest day')];
+      break;
+    case 2:
+      schedule = ['UPPER BODY', 'Rest day', 'Rest day', 'Rest day', 'LOWER BODY', 'Rest day', 'Rest day'];
+      break;
+    case 3:
+      schedule = Array.from({ length: totalDays }, (_, i) => (i < 3 ? cycle[i] : 'Rest day'));
+      break;
+    case 4:
+      schedule = ['UPPER BODY', 'LOWER BODY', 'Rest day', 'UPPER BODY', 'LOWER BODY', 'Rest day', 'Rest day'];
+      break;
+    case 5:
+      schedule = ['PUSH', 'PULL', 'LEGS AND CORE', 'ARM DAY', 'CHEST AND BACK', 'Rest day', 'Rest day'];
+      break;
+    case 6:
+      schedule = ['PUSH', 'PULL', 'LEGS', 'Rest day', 'PUSH', 'PULL', 'LEGS'];
+      break;
+    case 7:
+      schedule = ['PUSH', 'PULL', 'LEGS', 'CORE MOBILITY', 'PUSH', 'PULL', 'LEGS'];
+      break;
+    default:
+      schedule = Array.from({ length: totalDays }, (_, i) => (i < sessionsPerWeek ? 'Workout' : 'Rest day'));
   }
 
   const workoutData = schedule.map((type, index) => ({
@@ -69,7 +78,7 @@ const GymPage = () => {
   const todayIndex = (today.getDay() + 6) % 7;
   const displayDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-  const getWeekNumber = (date) => {
+  const getWeekNumber = date => {
     const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     const dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -128,17 +137,12 @@ const GymPage = () => {
                 index === todayIndex && styles.activeCard,
               ]}
               onPress={() => {
-                if (item.type.toUpperCase() === 'REST DAY') {
-                  navigation.navigate('workout', {
-                    workoutType: 'REST DAY',
-                  });
-                } else {
-                  navigation.navigate('workout', {
-                    day: item.id,
-                    workoutType: item.type,
-                    sessionsPerWeek,
-                  });
+                const params = { workoutType: item.type };
+                if (item.type.toUpperCase() !== 'REST DAY') {
+                  params.day = item.id;
+                  params.sessionsPerWeek = sessionsPerWeek;
                 }
+                navigation.navigate('workout', params);
               }}
             >
               <Image source={item.image} style={styles.cardImage} />
@@ -159,10 +163,7 @@ const GymPage = () => {
       <View style={styles.navBar}>
         <TouchableOpacity
           onPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'gym' }],
-            })
+            navigation.reset({ index: 0, routes: [{ name: 'gym' }] })
           }
         >
           <Ionicons name="barbell-outline" size={28} color="#1db344" />
@@ -170,25 +171,28 @@ const GymPage = () => {
 
         <TouchableOpacity
           onPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'diet' }],
-            })
+            navigation.reset({ index: 0, routes: [{ name: 'diet' }] })
           }
         >
           <Ionicons name="restaurant-outline" size={28} color="#1db344" />
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('calorieinput')
+          }
+        >
+          <Ionicons name="barcode-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'settings' }],
-            })
+            navigation.reset({ index: 0, routes: [{ name: 'settings' }] })
           }
         >
           <Ionicons name="settings-outline" size={28} color="#1db344" />
         </TouchableOpacity>
+
+        
       </View>
     </View>
   );

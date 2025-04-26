@@ -13,6 +13,7 @@ import DietPage from './diet';
 import WorkoutPage from './workout';
 import RecipePage from './recipe';
 import ChangeCredentialsPage from './changeCredentials';
+import CalorieInputPage from './calorieInput';
 
 const Stack = createNativeStackNavigator();
 
@@ -81,6 +82,7 @@ export default function App() {
         <Stack.Screen name="workout" component={WorkoutPage} options={{ headerShown: false }} />
         <Stack.Screen name="recipe" component={RecipePage} options={{ headerShown: false }} />
         <Stack.Screen name="changecredentials" component={ChangeCredentialsPage} options={{ headerShown: false }} />
+        <Stack.Screen name="calorieinput" component={CalorieInputPage} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

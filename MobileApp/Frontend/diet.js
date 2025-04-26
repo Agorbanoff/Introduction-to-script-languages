@@ -687,16 +687,39 @@ export default function DietPlanScreen({ navigation }) {
           {renderMealCategory('snack')}
         </ScrollView>
         <View style={styles.navBar}>
-          <TouchableOpacity onPress={() => navigation.navigate('gym')}>
-            <Ionicons name="barbell-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('diet')}>
-            <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('settings')}>
-            <Ionicons name="settings-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-        </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.reset({ index: 0, routes: [{ name: 'gym' }] })
+                  }
+                >
+                  <Ionicons name="barbell-outline" size={28} color="#1db344" />
+                </TouchableOpacity>
+        
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.reset({ index: 0, routes: [{ name: 'diet' }] })
+                  }
+                >
+                  <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('calorieinput')
+                  }
+                >
+                  <Ionicons name="barcode-outline" size={28} color="#1db344" />
+                </TouchableOpacity>
+        
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.reset({ index: 0, routes: [{ name: 'settings' }] })
+                  }
+                >
+                  <Ionicons name="settings-outline" size={28} color="#1db344" />
+                </TouchableOpacity>
+        
+                
+              </View>
       </View>
     </ImageBackground>
   );
