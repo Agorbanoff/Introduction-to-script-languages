@@ -2,7 +2,7 @@ import bcrypt
 from bson import ObjectId
 from util.token import create_access_token
 
-from config.db_config import collection_name
+from config.db_config import collection_name, collection_statistics, collection_training
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from exceptions.exceptions import (
     UserNotFoundException,
@@ -97,9 +97,13 @@ async def changePassword(user_id: str, current_password: str, new_password: str)
     return {"message": "Password changed successfully"}
 
 async def deleteAccount(user_id: str):
-    result = await collection_name.delete_one({"_id": ObjectId(user_id)})
 
-    if result.deleted_count == 0:
+    statistics = await collection_statistics.find_one_and_delete({"_id": ObjectId(user_id)})
+    status = await collection_training.find_one_and_delete({"_id": ObjectId(user_id)})
+    user = await collection_name.delete_one({"_id": ObjectId(user_id)}) 
+
+
+    if user.deleted_count and statistics is None and status is None == 0:
         raise UserNotFoundException()
 
     return {"message": "Account deleted successfully"}
