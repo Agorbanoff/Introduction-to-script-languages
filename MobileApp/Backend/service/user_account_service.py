@@ -98,12 +98,12 @@ async def changePassword(user_id: str, current_password: str, new_password: str)
 
 async def deleteAccount(user_id: str):
 
-    statistics = await collection_statistics.find_one_and_delete({"_id": ObjectId(user_id)})
-    status = await collection_training.find_one_and_delete({"_id": ObjectId(user_id)})
+    statistics = await collection_statistics.find_one_and_delete({"user_id": ObjectId(user_id)})
+    status = await collection_training.find_one_and_delete({"user_id": ObjectId(user_id)})
     user = await collection_name.delete_one({"_id": ObjectId(user_id)}) 
 
 
-    if user.deleted_count and statistics is None and status is None == 0:
+    if user.deleted_count and statistics is None and status is None:
         raise UserNotFoundException()
 
     return {"message": "Account deleted successfully"}

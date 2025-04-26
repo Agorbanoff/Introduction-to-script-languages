@@ -1,4 +1,3 @@
-from bson import ObjectId
 from config.db_config import collection_training
 from exceptions.exceptions import StatisticsNotFoundException
 
@@ -14,13 +13,9 @@ async def getTimePerWeek(user_id: str):
     })
 
 async def changeWorkoutPlan(user_id: str, change_workout: int):
-    times_a_week = await collection_training.find_one({"user_id": ObjectId(user_id)})
-    if not times_a_week:
-        raise StatisticsNotFoundException()
-
     await collection_training.update_one(
-        {"user_id": ObjectId(user_id)},
-        {"$set": {"sessions_per_week": change_workout}}
+        {"user_id": user_id},
+        {"$set": {"sessions_per_week": change_workout}},
+        upsert=True
     )
-
     return change_workout
