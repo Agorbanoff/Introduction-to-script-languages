@@ -1,4 +1,3 @@
-// gym.js
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -123,12 +122,7 @@ const GymPage = () => {
           ))}
         </View>
 
-        <View style={styles.editRow}>
-          <Text style={styles.editText}>Edit</Text>
-          <Ionicons name="pencil" size={16} color="#c33" />
-        </View>
-
-        <ScrollView style={styles.scroll}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
           {workoutData.map((item, index) => (
             <TouchableOpacity
               key={item.id}
@@ -176,6 +170,7 @@ const GymPage = () => {
         >
           <Ionicons name="restaurant-outline" size={28} color="#1db344" />
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() =>
             navigation.navigate('calorieinput')
@@ -191,8 +186,6 @@ const GymPage = () => {
         >
           <Ionicons name="settings-outline" size={28} color="#1db344" />
         </TouchableOpacity>
-
-        
       </View>
     </View>
   );
@@ -257,17 +250,10 @@ const styles = StyleSheet.create({
     color: '#c33',
     fontWeight: 'bold',
   },
-  editRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  editText: {
-    color: '#ccc',
-    marginRight: 6,
-  },
-  scroll: {
-    flex: 1,
+  scrollContent: {
+    paddingBottom: 20,
+    paddingTop: 10,
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: '#222',
