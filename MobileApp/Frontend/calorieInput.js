@@ -50,7 +50,6 @@ export default function CalorieInput() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Text style={styles.header}>FOOD LOG</Text>
 
       {/* Pie Chart */}
@@ -70,14 +69,6 @@ export default function CalorieInput() {
 
       {/* Action Buttons */}
       <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate('ScanBarcode')}
-        >
-          <Ionicons name="barcode-outline" size={48} color="#1db344" />
-          <Text style={styles.cardText}>Scan Food</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.card}
           onPress={() => navigation.navigate('ManualEntry')}
