@@ -1,4 +1,3 @@
-// SettingsScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -15,10 +14,17 @@ export default function SettingsScreen({ navigation }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // --- Logout: clear token and other stored data, then navigate
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('token');
-    await AsyncStorage.removeItem('email');
-    navigation.navigate('signup');
+    setLoading(true);
+    try {
+      await AsyncStorage.clear(); // removes token, email, and all other keys
+    } catch (err) {
+      console.error('Error clearing storage on logout:', err);
+    } finally {
+      setLoading(false);
+      navigation.navigate('signup');
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -46,9 +52,7 @@ export default function SettingsScreen({ navigation }) {
         }
       );
 
-      if (!res.ok) {
-        throw new Error(`Failed to delete (${res.status})`);
-      }
+      if (!res.ok) throw new Error(`Failed to delete (${res.status})`);
 
       await AsyncStorage.clear();
       navigation.navigate('signup');
@@ -72,17 +76,13 @@ export default function SettingsScreen({ navigation }) {
             <SettingsButton
               icon="person-outline"
               text="Change Username"
-              onPress={() =>
-                navigation.navigate('changecredentials', { mode: 'username' })
-              }
+              onPress={() => navigation.navigate('changecredentials', { mode: 'username' })}
             />
 
             <SettingsButton
               icon="lock-closed-outline"
               text="Change Password"
-              onPress={() =>
-                navigation.navigate('changecredentials', { mode: 'password' })
-              }
+              onPress={() => navigation.navigate('changecredentials', { mode: 'password' })}
             />
 
             <SettingsButton
@@ -136,26 +136,18 @@ export default function SettingsScreen({ navigation }) {
       </ImageBackground>
 
       <View style={styles.navBar}>
-        <TouchableOpacity
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}
-        >
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}>
           <Ionicons name="barbell-outline" size={28} color="#1db344" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}
-        >
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}>
           <Ionicons name="restaurant-outline" size={28} color="#1db344" />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('calorieinput')}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate('calorieinput')}>
           <Ionicons name="barcode-outline" size={28} color="#1db344" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}
-        >
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}>
           <Ionicons name="settings-outline" size={28} color="#1db344" />
         </TouchableOpacity>
       </View>
