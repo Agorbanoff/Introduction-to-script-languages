@@ -97,9 +97,6 @@ async def changePassword(user_id: str, current_password: str, new_password: str)
     return {"message": "Password changed successfully"}
 
 async def deleteAccount(user_id: str):
-    # If your stats/training user_id is stored as a STRING, just use `user_id` directly
-    # If you switch them to ObjectId, do: oid = ObjectId(user_id)
-
     stats_res = await collection_statistics.delete_many({ "user_id":user_id })
     train_res = await collection_training.delete_many({ "user_id":user_id })
     user_res  = await collection_name.delete_one({ "_id":ObjectId(user_id) })

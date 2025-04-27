@@ -21,8 +21,42 @@ export default function SignUpPage({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const [usernameError, setUsernameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const validateInputs = () => {
+    let valid = true;
+    setUsernameError('');
+    setEmailError('');
+    setPasswordError('');
+
+    if (username.length < 2 || username.length > 30) {
+      setUsernameError('Username must be between 2 and 30');
+      valid = false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setEmailError('Please enter a valid email');
+      valid = false;
+    }
+
+    if (password.length < 6 || password.length > 50) {
+      setPasswordError('Password must be at least 6');
+      valid = false;
+    }
+
+    return valid;
+  };
+
   const handleSignUp = async () => {
     console.log('🚀 Sign Up button pressed');
+
+    if (!validateInputs()) {
+      return;
+    }
+
     try {
       const response = await fetch('https://gymax.onrender.com/auth/signup', {
         method: 'POST',
@@ -51,15 +85,41 @@ export default function SignUpPage({ navigation }) {
 
       if (response.ok && data.access_token) {
         console.log('✅ Token received:', data.access_token);
-
-        // Store token in AsyncStorage
         await AsyncStorage.setItem('token', data.access_token);
-        await AsyncStorage.setItem('email', email); // Optional: save email too
-
+        await AsyncStorage.setItem('email', email);
         navigation.navigate('statistics');
       } else {
-        console.error('❌ Registration failed:', data);
-        Alert.alert('Error', data.detail || data.message || 'Registration failed');
+        setUsernameError('');
+        setEmailError('');
+        setPasswordError('');
+
+        if (data.detail) {
+          const errorMsg = data.detail.toLowerCase();
+
+          if (errorMsg.includes('email')) {
+            setEmailError('Email already registered');
+          } else if (errorMsg.includes('username')) {
+            setUsernameError('Invalid username');
+          } else if (errorMsg.includes('password')) {
+            setPasswordError('Invalid password');
+          } else {
+            Alert.alert('Error', data.detail);
+          }
+        } else if (data.message) {
+          const errorMsg = data.message.toLowerCase();
+
+          if (errorMsg.includes('email')) {
+            setEmailError('Email already registered');
+          } else if (errorMsg.includes('username')) {
+            setUsernameError('Invalid username');
+          } else if (errorMsg.includes('password')) {
+            setPasswordError('Invalid password');
+          } else {
+            Alert.alert('Error', data.message);
+          }
+        } else {
+          Alert.alert('Error', 'Registration failed');
+        }
       }
     } catch (error) {
       console.error('❌ Network error:', error);
@@ -87,26 +147,29 @@ export default function SignUpPage({ navigation }) {
 
             <View style={styles.container}>
               <TextInput
-                style={styles.input}
-                placeholder="Enter a username"
+                style={[styles.input, usernameError ? styles.inputError : null]}
+                placeholder={usernameError ? usernameError : 'Enter a username'}
                 value={username}
                 onChangeText={setUsername}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={usernameError ? 'red' : '#888'}
               />
+
               <TextInput
-                style={styles.input}
-                placeholder="Enter your email"
+                style={[styles.input, emailError ? styles.inputError : null]}
+                placeholder={emailError ? emailError : 'Enter your email'}
                 value={email}
                 onChangeText={setEmail}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={emailError ? 'red' : '#888'}
+                keyboardType="email-address"
               />
+
               <TextInput
-                style={styles.input}
-                placeholder="Enter a password"
+                style={[styles.input, passwordError ? styles.inputError : null]}
+                placeholder={passwordError ? passwordError : 'Enter a password'}
                 secureTextEntry={true}
                 value={password}
                 onChangeText={setPassword}
-                placeholderTextColor="#aaa"
+                placeholderTextColor={passwordError ? 'red' : '#888'}
               />
 
               <View style={styles.buttonColumn}>
@@ -138,7 +201,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
+    backgroundColor: 'rgba(20, 20, 20, 0.9)', // darker overlay
     justifyContent: 'center',
   },
   frontText: {
@@ -155,15 +218,18 @@ const styles = StyleSheet.create({
     marginBottom: '20%',
   },
   input: {
-    height: 40,
+    height: 45,
     width: '80%',
-    borderColor: 'gray',
+    borderColor: '#555',  // darker border
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 15, // small margin, not big padding
     paddingHorizontal: 10,
-    backgroundColor: 'black',
+    backgroundColor: '#111',  // darker input background
     color: 'white',
+  },
+  inputError: {
+    borderColor: 'red',
   },
   buttonColumn: {
     flexDirection: 'column',

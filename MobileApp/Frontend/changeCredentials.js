@@ -1,12 +1,9 @@
-// ChangeCredentialsPage.js
-
 import React, { useState } from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -22,35 +19,35 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 export default function ChangeCredentialsPage() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { mode } = route.params; // "username" or "password"
+  const { mode } = route.params;
 
-  // form state
   const [newUsername, setNewUsername] = useState('');
-  const [oldPassword, setOldPassword]   = useState('');
-  const [newPassword, setNewPassword]   = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async () => {
     const token = await AsyncStorage.getItem('token');
     if (!token) {
-      Alert.alert('Error', 'Not authenticated.');
+      setErrorMessage('Not authenticated.');
       return;
     }
 
     let url;
     let payload = {};
-    const method = 'PUT';  // use PUT for everything
+    const method = 'PUT';
 
     if (mode === 'username') {
       if (!newUsername.trim()) {
-        Alert.alert('Error', 'Please enter a new username.');
+        setErrorMessage('Please enter a new username.');
         return;
       }
       url = 'https://gymax.onrender.com/auth/changeusername';
       payload = { new_username: newUsername.trim() };
     } else {
-      // password flow
       if (!oldPassword || !newPassword) {
-        Alert.alert('Error', 'Please enter both current and new password.');
+        setErrorMessage('Please enter both current and new password.');
         return;
       }
       url = 'https://gymax.onrender.com/auth/changepassword';
@@ -72,12 +69,13 @@ export default function ChangeCredentialsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        Alert.alert(
-          'Success',
-          mode === 'username' ? 'Username updated!' : 'Password changed!'
-        );
-        navigation.goBack();
+        setSuccessMessage(mode === 'username' ? 'Username updated successfully!' : 'Password changed successfully!');
+        setErrorMessage('');
+        setNewUsername('');
+        setOldPassword('');
+        setNewPassword('');
       } else {
+        setSuccessMessage('');
         let errorMessage = 'Update failed';
         if (Array.isArray(data.detail)) {
           errorMessage = data.detail.map(err => err.msg).join('\n');
@@ -86,11 +84,12 @@ export default function ChangeCredentialsPage() {
         } else if (typeof data.message === 'string') {
           errorMessage = data.message;
         }
-        Alert.alert('Error', errorMessage);
+        setErrorMessage(errorMessage);
       }
     } catch (err) {
       console.error('Network error:', err);
-      Alert.alert('Error', 'Network error, please try again.');
+      setSuccessMessage('');
+      setErrorMessage('Network error, please try again.');
     }
   };
 
@@ -109,6 +108,13 @@ export default function ChangeCredentialsPage() {
             <Text style={styles.title}>
               {mode === 'username' ? 'Change Username' : 'Change Password'}
             </Text>
+
+            {successMessage ? (
+              <Text style={styles.successText}>{successMessage}</Text>
+            ) : null}
+            {errorMessage ? (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            ) : null}
 
             <View style={styles.form}>
               {mode === 'username' ? (
@@ -145,6 +151,10 @@ export default function ChangeCredentialsPage() {
                   {mode === 'username' ? 'Update Username' : 'Update Password'}
                 </Text>
               </TouchableOpacity>
+
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.backButtonText}>Back to Settings</Text>
+              </TouchableOpacity>
             </View>
 
             <StatusBar style="auto" />
@@ -169,7 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#1db344',
-    marginBottom: 30,
+    marginBottom: 20,
   },
   form: {
     alignItems: 'center',
@@ -183,19 +193,44 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'gray',
     paddingHorizontal: 10,
-    marginBottom: 20,
+    marginBottom: 15,
   },
   button: {
     width: '80%',
     backgroundColor: '#1db344',
-    padding: 14,
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 10,
+    marginVertical: 10,
   },
   buttonText: {
     color: 'black',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  backButton: {
+    width: '80%',
+    backgroundColor: '#1db344', // dark button
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  backButtonText: {
+    color: 'black',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  successText: {
+    color: 'lightgreen',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 15,
   },
 });

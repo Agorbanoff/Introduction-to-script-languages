@@ -24,16 +24,19 @@ export default function StatisticsPage({ navigation }) {
   const [gender, setGender] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
+  const [genderError, setGenderError] = useState('');
+  const [heightError, setHeightError] = useState('');
+  const [weightError, setWeightError] = useState('');
+  const [ageError, setAgeError] = useState('');
+
   useEffect(() => {
     const bootstrap = async () => {
-      // 1) get token
       const token = await AsyncStorage.getItem('token');
       if (!token) {
         Alert.alert('Error', 'User not authenticated.');
         return;
       }
 
-      // 2) fetch profile
       try {
         const res = await fetch('https://gymax.onrender.com/auth/getusername', {
           method: 'GET',
@@ -53,7 +56,7 @@ export default function StatisticsPage({ navigation }) {
 
     bootstrap();
   }, []);
-  // Get user email from AsyncStorage
+
   useEffect(() => {
     const getEmail = async () => {
       const storedEmail = await AsyncStorage.getItem('email');
@@ -68,15 +71,30 @@ export default function StatisticsPage({ navigation }) {
     const a = Number(age);
     const normalizedGender = gender.toLowerCase().trim();
 
-    if (
-      !gender ||
-      isNaN(w) || w <= 0 || w >= 400 ||
-      isNaN(h) || h <= 50 || h >= 300 ||
-      isNaN(a) || a < 5 || a > 120
-    ) {
-      Alert.alert('Validation Error', 'Please fill all fields with valid values.');
-      return;
+    let valid = true;
+    setGenderError('');
+    setHeightError('');
+    setWeightError('');
+    setAgeError('');
+
+    if (!normalizedGender || (normalizedGender !== 'male' && normalizedGender !== 'female')) {
+      setGenderError('Select male or female');
+      valid = false;
     }
+    if (isNaN(h) || h <= 50 || h >= 300) {
+      setHeightError('Enter your legit height');
+      valid = false;
+    }
+    if (isNaN(w) || w <= 0 || w >= 400) {
+      setWeightError('Enter your legit weight');
+      valid = false;
+    }
+    if (isNaN(a) || a < 5 || a > 120) {
+      setAgeError('Enter your legit age');
+      valid = false;
+    }
+
+    if (!valid) return;
 
     try {
       const token = await AsyncStorage.getItem('token');
@@ -84,13 +102,6 @@ export default function StatisticsPage({ navigation }) {
         alert('User not authenticated.');
         return;
       }
-
-      console.log("Submitting stats:", {
-        gender: normalizedGender,
-        weight: w,
-        height: h,
-        age: a
-      });
 
       const response = await fetch('https://gymax.onrender.com/stats/statistics', {
         method: 'POST',
@@ -147,8 +158,12 @@ export default function StatisticsPage({ navigation }) {
                   style={[
                     styles.genderButton,
                     gender === 'male' && styles.genderButtonSelected,
+                    genderError ? styles.genderButtonError : null,
                   ]}
-                  onPress={() => setGender('male')}
+                  onPress={() => {
+                    setGender('male');
+                    if (genderError) setGenderError('');
+                  }}
                 >
                   <Text
                     style={[
@@ -164,8 +179,12 @@ export default function StatisticsPage({ navigation }) {
                   style={[
                     styles.genderButton,
                     gender === 'female' && styles.genderButtonSelected,
+                    genderError ? styles.genderButtonError : null,
                   ]}
-                  onPress={() => setGender('female')}
+                  onPress={() => {
+                    setGender('female');
+                    if (genderError) setGenderError('');
+                  }}
                 >
                   <Text
                     style={[
@@ -178,35 +197,38 @@ export default function StatisticsPage({ navigation }) {
                 </TouchableOpacity>
               </View>
 
-              {gender ? (
-                <Text style={styles.selectedGenderText}>
-                  Selected: {gender.charAt(0).toUpperCase() + gender.slice(1)}
-                </Text>
-              ) : null}
-
               <TextInput
-                style={styles.input}
-                placeholder="Enter your height (cm)"
+                style={[styles.input, heightError ? styles.inputError : null]}
+                placeholder={heightError ? heightError : 'Enter your height (cm)'}
                 keyboardType="numeric"
                 value={height}
-                onChangeText={setHeight}
-                placeholderTextColor="#aaa"
+                onChangeText={(text) => {
+                  setHeight(text);
+                  if (heightError) setHeightError('');
+                }}
+                placeholderTextColor={heightError ? 'red' : '#888'}
               />
               <TextInput
-                style={styles.input}
-                placeholder="Enter your weight (kg)"
+                style={[styles.input, weightError ? styles.inputError : null]}
+                placeholder={weightError ? weightError : 'Enter your weight (kg)'}
                 keyboardType="numeric"
                 value={weight}
-                onChangeText={setWeight}
-                placeholderTextColor="#aaa"
+                onChangeText={(text) => {
+                  setWeight(text);
+                  if (weightError) setWeightError('');
+                }}
+                placeholderTextColor={weightError ? 'red' : '#888'}
               />
               <TextInput
-                style={styles.input}
-                placeholder="Enter your age"
+                style={[styles.input, ageError ? styles.inputError : null]}
+                placeholder={ageError ? ageError : 'Enter your age'}
                 keyboardType="numeric"
                 value={age}
-                onChangeText={setAge}
-                placeholderTextColor="#aaa"
+                onChangeText={(text) => {
+                  setAge(text);
+                  if (ageError) setAgeError('');
+                }}
+                placeholderTextColor={ageError ? 'red' : '#888'}
               />
 
               <View style={styles.buttonColumn}>
@@ -231,7 +253,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
+    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
   },
   frontText: {
@@ -271,6 +293,9 @@ const styles = StyleSheet.create({
   genderButtonSelected: {
     backgroundColor: '#1db344',
   },
+  genderButtonError: {
+    borderColor: 'red',
+  },
   genderButtonText: {
     color: '#fff',
     fontSize: 16,
@@ -279,22 +304,19 @@ const styles = StyleSheet.create({
   genderButtonTextSelected: {
     color: '#000',
   },
-  selectedGenderText: {
-    color: '#ccc',
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
   input: {
-    height: 40,
+    height: 45,
     width: '80%',
-    borderColor: 'gray',
+    borderColor: '#555',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 15,
     paddingHorizontal: 10,
-    backgroundColor: 'black',
+    backgroundColor: '#111',
     color: 'white',
+  },
+  inputError: {
+    borderColor: 'red',
   },
   buttonColumn: {
     flexDirection: 'column',
