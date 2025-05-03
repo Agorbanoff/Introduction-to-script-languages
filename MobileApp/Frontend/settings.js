@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
 
 export default function SettingsScreen({ navigation }) {
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -23,7 +24,13 @@ export default function SettingsScreen({ navigation }) {
       console.error('Error clearing storage on logout:', err);
     } finally {
       setLoading(false);
-      navigation.navigate('signup');
+      
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'signup' }], // replace with your login screen name
+        })
+      );
     }
   };
 

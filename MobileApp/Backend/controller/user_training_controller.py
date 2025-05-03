@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from model.user_training_entity import UserTraining
-from service.user_training_service import TimePerWeek, changeWorkoutPlan, getTimePerWeek
-from exceptions.exceptions import EmptyStatisticsException
+from service.user_training_service import TimePerWeek, changeWorkoutPlan, getTimePerWeek, CalculateStreak
+from exceptions.exceptions import EmptyStatisticsException, UserNotFoundException
 from util.token import get_user_id_from_token
 from fastapi import Body
 
@@ -31,3 +31,11 @@ async def change_workout_plan(
 ):
     sessions_per_week = await changeWorkoutPlan(user_id, change_workout)
     return {"message": "workout plan changed successfully"}
+
+@user_training_router.post("/streak")
+async def user_streak(user_id: str = Depends(get_user_id_from_token)):
+    streak = await CalculateStreak(user_id)
+    if not streak:
+        raise UserNotFoundException
+    
+    return {"message": streak.get("streak")}
