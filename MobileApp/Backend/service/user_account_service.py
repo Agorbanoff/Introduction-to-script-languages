@@ -10,19 +10,19 @@ from exceptions.exceptions import (
     EmailAlreadyUsedException
 )
 
-def hashingPassword(password: str) -> str:
+def hashing_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
-def verifyPassword(password: str, hashed: str) -> bool:
+def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
 
-async def signUp(user: UserSignUp) -> dict:
+async def sign_up(user: UserSignUp) -> dict:
     if await collection_name.find_one({"email": user.email}):
         raise EmailAlreadyUsedException()
 
-    hashed_pass = hashingPassword(user.password)
+    hashed_pass = hashing_password(user.password)
 
     result = await collection_name.insert_one({
         "username": user.username,
@@ -42,12 +42,12 @@ async def signUp(user: UserSignUp) -> dict:
         }
     }
 
-async def logIn(user: UserLogIn) -> dict:
+async def log_in(user: UserLogIn) -> dict:
     existing_user = await collection_name.find_one({"email": user.email})
     if not existing_user:
         raise UserNotFoundException()
 
-    if not verifyPassword(user.password, existing_user["password"]):
+    if not verify_password(user.password, existing_user["password"]):
         raise InvalidPasswordException()
 
     token = create_access_token(user.email)
@@ -61,13 +61,13 @@ async def logIn(user: UserLogIn) -> dict:
         }
     }
 
-async def findUsername(user_id: str):
+async def find_username(user_id: str):
     user = await collection_name.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise UserNotFoundException()
     return user["username"]
 
-async def changeUsername(user_id: str, new_username):
+async def change_username(user_id: str, new_username):
        user = await collection_name.find_one({"_id": ObjectId(user_id)})
        if not user:
            raise UserNotFoundException()
@@ -79,15 +79,15 @@ async def changeUsername(user_id: str, new_username):
 
        return user["username"]
 
-async def changePassword(user_id: str, current_password: str, new_password: str):
+async def change_password(user_id: str, current_password: str, new_password: str):
     user = await collection_name.find_one({"_id": ObjectId(user_id)})
     if not user:
         raise UserNotFoundException()
 
-    if not verifyPassword(current_password, user["password"]):
+    if not verify_password(current_password, user["password"]):
         raise InvalidPasswordException()
 
-    new_hashed_password = hashingPassword(new_password)
+    new_hashed_password = hashing_password(new_password)
 
     await collection_name.update_one(
         {"_id": ObjectId(user_id)},
@@ -96,7 +96,7 @@ async def changePassword(user_id: str, current_password: str, new_password: str)
 
     return {"message": "Password changed successfully"}
 
-async def deleteAccount(user_id: str):
+async def delete_account(user_id: str):
     stats_res = await collection_statistics.delete_many({ "user_id":user_id })
     train_res = await collection_training.delete_many({ "user_id":user_id })
     user_res  = await collection_name.delete_one({ "_id":ObjectId(user_id) })

@@ -21,9 +21,6 @@ def create_access_token(email: str, expires_delta: int = JWT_EXPIRE_SECONDS) -> 
 
 
 #validating the token
-JWT_SECRET = os.getenv("JWT_SECRET", "fallback-secret-dev-key")
-JWT_ALGORITHM = "HS256"
-
 async def get_user_id_from_token(authorization: str = Header(...)) -> str:
     if not authorization.startswith("Bearer "):
         raise InvalidTokenException()

@@ -4,19 +4,19 @@ from pymongo import ReturnDocument
 from config.db_config import collection_training
 from exceptions.exceptions import StatisticsNotFoundException, UserNotFoundException
 
-async def TimePerWeek(user_id: str, times: int):
+async def time_per_week(user_id: str, times: int):
     await collection_training.update_one(
         {"user_id": user_id},
         {"$set": {"sessions_per_week": times}},
         upsert=True
     )
 
-async def getTimePerWeek(user_id: str):
+async def get_time_per_week(user_id: str):
     return await collection_training.find_one({
         "user_id": user_id,
     })
 
-async def changeWorkoutPlan(user_id: str, change_workout: int):
+async def change_workout_plan(user_id: str, change_workout: int):
     await collection_training.update_one(
         {"user_id": user_id},
         {"$set": {"sessions_per_week": change_workout}},
@@ -26,7 +26,7 @@ async def changeWorkoutPlan(user_id: str, change_workout: int):
 
 
 
-async def CalculateStreak(user_id: str):
+async def calculate_streak(user_id: str):
     user_data = await collection_training.find_one({"user_id": user_id})
 
     if not user_data:
