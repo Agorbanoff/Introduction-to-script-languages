@@ -31,7 +31,7 @@ async def sign_up(user: UserSignUp) -> dict:
         "password": hashed_pass
     })
 
-    email = user["email"]
+    email = user.email
 
     refresh_token = create_refresh_token(email)
     access_token = create_access_token(email)
@@ -57,7 +57,7 @@ async def log_in(user: UserLogIn) -> dict:
     if not verify_password(user.password, existing_user["password"]):
         raise InvalidPasswordException()
 
-    email = user["email"]
+    email = user.email
 
     refresh_token = create_refresh_token(email)
     access_token = create_access_token(email)
