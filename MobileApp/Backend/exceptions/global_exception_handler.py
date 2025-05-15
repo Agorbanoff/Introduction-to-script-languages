@@ -9,7 +9,8 @@ from exceptions.exceptions import (
     EmptyStatisticsException,
     StatisticsNotFoundException,
     TrainingNotFoundException,
-    OpenFoodFactsFetchException
+    OpenFoodFactsFetchException,
+    RefreshTokenMismatchException
 )
 
 def add_exception_handlers(app: FastAPI):
@@ -27,6 +28,10 @@ def add_exception_handlers(app: FastAPI):
 
     @app.exception_handler(InvalidTokenException)
     async def invalid_token_format_handler(request: Request, exc: InvalidTokenException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(RefreshTokenMismatchException)
+    async def refresh_token_mismatch_handler(request: Request, exc: RefreshTokenMismatchException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
     @app.exception_handler(EmptyStatisticsException)

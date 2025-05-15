@@ -1,8 +1,9 @@
 import bcrypt
 from bson import ObjectId
-from util.token import create_access_token
+from util.token import create_access_token, create_refresh_token
 
-from config.db_config import collection_name, collection_statistics, collection_training
+from token_service import save_refresh_token
+from config.db_config import collection_name, collection_statistics, collection_training, collection_token
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from exceptions.exceptions import (
     UserNotFoundException,
@@ -29,12 +30,18 @@ async def sign_up(user: UserSignUp) -> dict:
         "email": user.email,
         "password": hashed_pass
     })
-    
-    token = create_access_token(user.email)
+
+    email = user["email"]
+
+    refresh_token = create_refresh_token(email)
+    access_token = create_access_token(email)
+
+    await save_refresh_token(refresh_token)
 
     return {
         "message": "User registered successfully",
-        "access_token": token,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": {
             "username": user.username,
@@ -50,10 +57,16 @@ async def log_in(user: UserLogIn) -> dict:
     if not verify_password(user.password, existing_user["password"]):
         raise InvalidPasswordException()
 
-    token = create_access_token(user.email)
+    email = user["email"]
+
+    refresh_token = create_refresh_token(email)
+    access_token = create_access_token(email)
+
+    await save_refresh_token(refresh_token)
 
     return {
-        "access_token": token,
+        "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": {
             "id": str(existing_user["_id"]),
@@ -109,3 +122,6 @@ async def delete_account(user_id: str):
         "deleted_statistics": stats_res.deleted_count,
         "deleted_training":   train_res.deleted_count
     }
+
+async def log_out(user_id: str):
+    await collection_token.delete_one({"_id": ObjectId(user_id)})

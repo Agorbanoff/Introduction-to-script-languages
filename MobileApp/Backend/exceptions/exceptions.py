@@ -13,6 +13,9 @@ class InvalidPasswordException(HTTPException):
     def __init__(self):
         super().__init__(status_code=401, detail="Incorrect password")
 
+class RefreshTokenMismatchException(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=401, detail="Refresh token does not match stored token")
 
 class EmailAlreadyUsedException(HTTPException):
     def __init__(self):
