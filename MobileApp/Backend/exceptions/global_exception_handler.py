@@ -10,7 +10,9 @@ from exceptions.exceptions import (
     StatisticsNotFoundException,
     TrainingNotFoundException,
     OpenFoodFactsFetchException,
-    RefreshTokenMismatchException
+    RefreshTokenMismatchException,
+    ItemNotFoundException,
+    ServerUnavailableException
 )
 
 def add_exception_handlers(app: FastAPI):
@@ -48,4 +50,12 @@ def add_exception_handlers(app: FastAPI):
 
     @app.exception_handler(OpenFoodFactsFetchException)
     async def openfoodfacts_fetch_handler(request: Request, exc: OpenFoodFactsFetchException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(ItemNotFoundException)
+    async def item_not_found_handler(request: Request, exc: ItemNotFoundException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(ServerUnavailableException)
+    async def server_unavailable_handler(request: Request, exc: ServerUnavailableException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})

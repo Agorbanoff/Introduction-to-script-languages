@@ -2,7 +2,7 @@ import bcrypt
 from bson import ObjectId
 from util.token import create_access_token, create_refresh_token
 
-from token_service import save_refresh_token
+from service.token_service import save_refresh_token
 from config.db_config import collection_name, collection_statistics, collection_training, collection_token
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from exceptions.exceptions import (

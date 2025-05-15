@@ -21,7 +21,6 @@ class EmailAlreadyUsedException(HTTPException):
     def __init__(self):
         super().__init__(status_code=400, detail="Email is already registered")
 
-
 class InvalidTokenException(HTTPException):
     def __init__(self):
         super().__init__(status_code=401, detail="Invalid token format")
@@ -40,3 +39,13 @@ class StatisticsNotFoundException(HTTPException):
 class TrainingNotFoundException(HTTPException):
     def __init__(self):
         super().__init__(status_code=404, detail="No training data found for this user")
+
+class ItemNotFoundException(HTTPException):
+    def __init__(self, item_name: str = "Item"):
+        super().__init__(status_code=404, detail=f"{item_name} not found")
+
+
+class ServerUnavailableException(HTTPException):
+    def __init__(self):
+        super().__init__(status_code=500, detail="Server is currently unavailable. Please try again later.")
+
