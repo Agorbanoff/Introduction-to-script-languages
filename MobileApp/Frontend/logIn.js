@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StatusBar } from 'expo-status-bar';
 import {
-  StyleSheet,
-  Text,
+  Alert,
   View,
-  SafeAreaView,
+  Text,
   TextInput,
   TouchableOpacity,
+  StyleSheet,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  SafeAreaView,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import * as SecureStore from 'expo-secure-store';
+import { setAccessToken } from './authManager';
 
 export default function LogInPage({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -43,57 +43,33 @@ export default function LogInPage({ navigation }) {
   };
 
   const handleLogin = async () => {
-    if (!validateInputs()) {
-      return;
-    }
+    if (!validateInputs()) return;
 
     try {
-      const response = await fetch('https://gymax.onrender.com/auth/login/', {
+      const response = await fetch('https://gymax.onrender.com/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       });
 
-      const text = await response.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error('❌ Response not JSON:', text);
-        Alert.alert('Error', 'Invalid server response.');
-        return;
-      }
+      const data = await response.json();
 
-      console.log('Login response:', data);
+      if (response.ok && data.access_token && data.refresh_token) {
+        // Save tokens
+        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
+        setAccessToken(data.access_token);
 
-      if (response.ok && data.access_token) {
-        console.log('✅ Token:', data.access_token);
-
-        await AsyncStorage.setItem('token', data.access_token);
-        await AsyncStorage.setItem('email', email);
-
+        // Try to get training info
         const trainingResponse = await fetch('https://gymax.onrender.com/stats/training', {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${data.access_token}`,
-          },
+          headers: { Authorization: `Bearer ${data.access_token}` },
         });
 
         if (trainingResponse.ok) {
           const trainingData = await trainingResponse.json();
-          console.log('Training info:', trainingData);
-
           const sessions = trainingData.sessions_per_week;
-          await AsyncStorage.setItem('sessionsPerWeek', sessions.toString());
-
           navigation.navigate('gym', { sessionsPerWeek: sessions });
         } else {
-          console.log('⚠️ No training data found, redirecting to StatusPage');
           navigation.navigate('status');
         }
       } else {
@@ -102,25 +78,18 @@ export default function LogInPage({ navigation }) {
 
         if (data.detail) {
           const errorMsg = data.detail.toLowerCase();
-
-          if (errorMsg.includes('email')) {
-            setEmailError('Invalid email');
-          } else if (errorMsg.includes('password')) {
-            setPasswordError('Invalid password');
-          } else if (errorMsg.includes('credentials')) {
+          if (errorMsg.includes('email')) setEmailError('Invalid email');
+          else if (errorMsg.includes('password')) setPasswordError('Invalid password');
+          else if (errorMsg.includes('credentials')) {
             setEmailError('Invalid credentials');
             setPasswordError('Invalid credentials');
-          } else {
-            Alert.alert('Error', data.detail);
-          }
-        } else if (data.message) {
-          Alert.alert('Error', data.message);
+          } else Alert.alert('Error', data.detail);
         } else {
-          Alert.alert('Error', 'Login failed');
+          Alert.alert('Error', data.message || 'Login failed');
         }
       }
     } catch (error) {
-      console.error('❌ Network error:', error);
+      console.error('❌ Login error:', error);
       Alert.alert('Error', 'Network or server error');
     }
   };
@@ -143,8 +112,8 @@ export default function LogInPage({ navigation }) {
 
             <View style={styles.container}>
               <TextInput
-                style={[styles.input, emailError ? styles.inputError : null]}
-                placeholder={emailError ? emailError : 'Enter your email'}
+                style={[styles.input, emailError && styles.inputError]}
+                placeholder={emailError || 'Enter your email'}
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text);
@@ -155,9 +124,9 @@ export default function LogInPage({ navigation }) {
               />
 
               <TextInput
-                style={[styles.input, passwordError ? styles.inputError : null]}
-                placeholder={passwordError ? passwordError : 'Enter your password'}
-                secureTextEntry={true}
+                style={[styles.input, passwordError && styles.inputError]}
+                placeholder={passwordError || 'Enter your password'}
+                secureTextEntry
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
@@ -195,7 +164,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(20, 20, 20, 0.9)', // darker background
+    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
   },
   frontText: {
@@ -217,13 +186,13 @@ const styles = StyleSheet.create({
     borderColor: '#555',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 15, 
+    marginBottom: 15,
     paddingHorizontal: 10,
-    backgroundColor: '#111', 
+    backgroundColor: '#111',
     color: 'white',
   },
   inputError: {
-    borderColor: 'red', 
+    borderColor: 'red',
   },
   buttonColumn: {
     flexDirection: 'column',
