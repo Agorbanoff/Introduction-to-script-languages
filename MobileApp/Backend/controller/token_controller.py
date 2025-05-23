@@ -19,6 +19,6 @@ async def generate_new_access_token(refresh_token: str):
         await log_out(str(user["_id"]))
         raise RefreshTokenMismatchException()
 
-    access_token = await create_access_token(email)
+    access_token = create_access_token(email)
 
     return {"access_token": access_token, "token_type": "bearer"}

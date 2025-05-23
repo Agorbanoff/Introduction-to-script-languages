@@ -4,10 +4,12 @@ import requests
 from dotenv import load_dotenv
 from exceptions.exceptions import OpenFoodFactsFetchException
 
+
 load_dotenv()
 
 OPENFOODFACTS_URL = os.getenv("OPENFOODFACTS_URL")
 
+#getting quantity and food name from the query
 
 def extract_quantity_and_food(query: str):
     match = re.match(r"(\d+)\s+(.+)", query)
@@ -17,6 +19,7 @@ def extract_quantity_and_food(query: str):
         return quantity, food_name
     return 1, query  
 
+#making the api call and formatting the response to be readable to use for frontend
 
 def format_food_info(product: dict, quantity: int) -> str:
     name = product.get("product_name", "Unknown food")
@@ -47,6 +50,7 @@ def format_food_info(product: dict, quantity: int) -> str:
         f"- Carbohydrates: {total_carbs}g"
     )
 
+#fetching food info from openfoodfacts
 
 def fetch_food_info(query: str):
     quantity, food_query = extract_quantity_and_food(query)

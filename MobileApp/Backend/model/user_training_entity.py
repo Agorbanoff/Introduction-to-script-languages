@@ -9,4 +9,3 @@ class UserTraining(BaseModel):
     default=None,
     description="Last time when streak was updated"
 )
-

@@ -11,7 +11,6 @@ JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_SECONDS = int(timedelta(minutes=15).total_seconds())
 REFRESH_EXPIRE_SECONDS = int(timedelta(days=30).total_seconds())
 
-
 def create_token(email: str, expires_delta: int, token_type: str = "access") -> str:
     to_encode = {
         "sub": email,
@@ -43,7 +42,6 @@ def verify_token(token: str, expected_type: str) -> Dict[str, Any]:
         return payload
     except JWTError:
         raise InvalidTokenException()
-
 
 def verify_refresh_token(refresh_token: str) -> str:
     payload = verify_token(refresh_token, "refresh")

@@ -5,9 +5,6 @@ from controller.user_statistics_controller import user_statistics_router
 from controller.user_training_controller import user_training_router
 from controller.token_controller import token_router
 from exceptions.global_exception_handler import add_exception_handlers
-
-
-
 app = FastAPI()
 
 add_exception_handlers(app)

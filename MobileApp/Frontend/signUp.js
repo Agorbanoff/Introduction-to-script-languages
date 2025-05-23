@@ -1,130 +1,76 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StatusBar } from 'expo-status-bar';
 import {
-  StyleSheet,
-  Text,
+  Alert,
   View,
-  SafeAreaView,
   TextInput,
   TouchableOpacity,
-  ImageBackground,
+  Text,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  SafeAreaView,
+  ImageBackground,
 } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { setAccessToken } from './authManager';
 
-export default function SignUpPage({ navigation }) {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const [usernameError, setUsernameError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+const SignUpPage = ({ navigation }) => {
+  const [form, setForm] = useState({ username: '', email: '', password: '' });
+  const [errors, setErrors] = useState({ username: '', email: '', password: '' });
 
   const validateInputs = () => {
     let valid = true;
-    setUsernameError('');
-    setEmailError('');
-    setPasswordError('');
+    const newErrors = { username: '', email: '', password: '' };
 
-    if (username.length < 2 || username.length > 30) {
-      setUsernameError('Username must be between 2 and 30');
+    if (form.username.trim().length < 2 || form.username.length > 30) {
+      newErrors.username = 'Username must be between 2 and 30 characters.';
       valid = false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
+    if (!emailRegex.test(form.email)) {
+      newErrors.email = 'Invalid email format.';
       valid = false;
     }
 
-    if (password.length < 6 || password.length > 50) {
-      setPasswordError('Password must be at least 6');
+    if (form.password.length < 6 || form.password.length > 50) {
+      newErrors.password = 'Password must be between 6 and 50 characters.';
       valid = false;
     }
 
+    setErrors(newErrors);
     return valid;
   };
 
   const handleSignUp = async () => {
-    console.log('🚀 Sign Up button pressed');
-
-    if (!validateInputs()) {
-      return;
-    }
+    if (!validateInputs()) return;
 
     try {
       const response = await fetch('https://gymax.onrender.com/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          email: email,
-          password: password,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
 
-      const text = await response.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        console.error('❌ Response not JSON:', text);
-        Alert.alert('Error', 'Server returned invalid response.');
-        return;
-      }
+      const data = await response.json();
 
-      console.log('Response status:', response.status);
-      console.log('Response data:', data);
-
-      if (response.ok && data.access_token) {
-        console.log('✅ Token received:', data.access_token);
-        await AsyncStorage.setItem('token', data.access_token);
-        await AsyncStorage.setItem('email', email);
+      if (response.ok && data.access_token && data.refresh_token) {
+        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
+        setAccessToken(data.access_token);
         navigation.navigate('statistics');
       } else {
-        setUsernameError('');
-        setEmailError('');
-        setPasswordError('');
-
-        if (data.detail) {
-          const errorMsg = data.detail.toLowerCase();
-
-          if (errorMsg.includes('email')) {
-            setEmailError('Email already registered');
-          } else if (errorMsg.includes('username')) {
-            setUsernameError('Invalid username');
-          } else if (errorMsg.includes('password')) {
-            setPasswordError('Invalid password');
-          } else {
-            Alert.alert('Error', data.detail);
-          }
-        } else if (data.message) {
-          const errorMsg = data.message.toLowerCase();
-
-          if (errorMsg.includes('email')) {
-            setEmailError('Email already registered');
-          } else if (errorMsg.includes('username')) {
-            setUsernameError('Invalid username');
-          } else if (errorMsg.includes('password')) {
-            setPasswordError('Invalid password');
-          } else {
-            Alert.alert('Error', data.message);
-          }
-        } else {
-          Alert.alert('Error', 'Registration failed');
-        }
+        Alert.alert('Error', data?.detail || data?.message || 'Registration failed.');
       }
     } catch (error) {
-      console.error('❌ Network error:', error);
-      Alert.alert('Error', 'Network or server error');
+      console.error('❌ Signup error:', error);
+      Alert.alert('Network Error', 'Please try again later.');
     }
+  };
+
+  const updateField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -147,29 +93,29 @@ export default function SignUpPage({ navigation }) {
 
             <View style={styles.container}>
               <TextInput
-                style={[styles.input, usernameError ? styles.inputError : null]}
-                placeholder={usernameError ? usernameError : 'Enter a username'}
-                value={username}
-                onChangeText={setUsername}
-                placeholderTextColor={usernameError ? 'red' : '#888'}
+                style={[styles.input, errors.username && styles.inputError]}
+                placeholder={errors.username || 'Enter a username'}
+                value={form.username}
+                onChangeText={(text) => updateField('username', text)}
+                placeholderTextColor={errors.username ? 'red' : '#888'}
               />
 
               <TextInput
-                style={[styles.input, emailError ? styles.inputError : null]}
-                placeholder={emailError ? emailError : 'Enter your email'}
-                value={email}
-                onChangeText={setEmail}
-                placeholderTextColor={emailError ? 'red' : '#888'}
+                style={[styles.input, errors.email && styles.inputError]}
+                placeholder={errors.email || 'Enter your email'}
+                value={form.email}
+                onChangeText={(text) => updateField('email', text)}
+                placeholderTextColor={errors.email ? 'red' : '#888'}
                 keyboardType="email-address"
               />
 
               <TextInput
-                style={[styles.input, passwordError ? styles.inputError : null]}
-                placeholder={passwordError ? passwordError : 'Enter a password'}
+                style={[styles.input, errors.password && styles.inputError]}
+                placeholder={errors.password || 'Enter a password'}
                 secureTextEntry={true}
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor={passwordError ? 'red' : '#888'}
+                value={form.password}
+                onChangeText={(text) => updateField('password', text)}
+                placeholderTextColor={errors.password ? 'red' : '#888'}
               />
 
               <View style={styles.buttonColumn}>
@@ -185,14 +131,14 @@ export default function SignUpPage({ navigation }) {
                 </TouchableOpacity>
               </View>
             </View>
-
-            <StatusBar style="auto" />
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </ImageBackground>
   );
-}
+};
+
+export default SignUpPage;
 
 const styles = StyleSheet.create({
   backgroundImage: {
@@ -201,7 +147,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(20, 20, 20, 0.9)', // darker overlay
+    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
   },
   frontText: {
@@ -220,12 +166,12 @@ const styles = StyleSheet.create({
   input: {
     height: 45,
     width: '80%',
-    borderColor: '#555',  // darker border
+    borderColor: '#555',
     borderWidth: 1,
     borderRadius: 8,
-    marginBottom: 15, // small margin, not big padding
+    marginBottom: 15,
     paddingHorizontal: 10,
-    backgroundColor: '#111',  // darker input background
+    backgroundColor: '#111',
     color: 'white',
   },
   inputError: {

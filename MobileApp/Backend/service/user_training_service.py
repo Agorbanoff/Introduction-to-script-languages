@@ -2,7 +2,7 @@ import datetime
 
 from pymongo import ReturnDocument
 from config.db_config import collection_training
-from exceptions.exceptions import StatisticsNotFoundException, UserNotFoundException
+from exceptions.exceptions import UserNotFoundException
 
 async def time_per_week(user_id: str, times: int):
     await collection_training.update_one(

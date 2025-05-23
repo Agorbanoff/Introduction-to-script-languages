@@ -25,4 +25,3 @@ async def calculate_bfp(user_id: str, weight: int, height: int, age: int, gender
     bmi = weight / ((height / 100) ** 2)
     bfp = 1.2 * bmi + 0.23 * age - 10.8 * gender - 5.4
     return round(bfp, 1)
-

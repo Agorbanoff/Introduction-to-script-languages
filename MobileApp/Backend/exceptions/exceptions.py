@@ -48,4 +48,3 @@ class ItemNotFoundException(HTTPException):
 class ServerUnavailableException(HTTPException):
     def __init__(self):
         super().__init__(status_code=500, detail="Server is currently unavailable. Please try again later.")
-

@@ -36,7 +36,7 @@ async def sign_up(user: UserSignUp) -> dict:
     refresh_token = create_refresh_token(email)
     access_token = create_access_token(email)
 
-    await save_refresh_token(refresh_token)
+    await save_refresh_token(email)
 
     return {
         "message": "User registered successfully",
@@ -62,7 +62,7 @@ async def log_in(user: UserLogIn) -> dict:
     refresh_token = create_refresh_token(email)
     access_token = create_access_token(email)
 
-    await save_refresh_token(refresh_token)
+    await save_refresh_token(email)
 
     return {
         "access_token": access_token,
@@ -125,3 +125,4 @@ async def delete_account(user_id: str):
 
 async def log_out(user_id: str):
     await collection_token.delete_one({"_id": ObjectId(user_id)})
+    return {"message": "Logged out"}
