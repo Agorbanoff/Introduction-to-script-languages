@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import {
   StyleSheet,
@@ -15,6 +14,7 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
+import { authFetch } from './authFetch';
 
 export default function StatisticsPage({ navigation }) {
   const [username, setUsername] = useState('');
@@ -22,7 +22,6 @@ export default function StatisticsPage({ navigation }) {
   const [weight, setWeight] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
-  const [userEmail, setUserEmail] = useState('');
 
   const [genderError, setGenderError] = useState('');
   const [heightError, setHeightError] = useState('');
@@ -30,39 +29,26 @@ export default function StatisticsPage({ navigation }) {
   const [ageError, setAgeError] = useState('');
 
   useEffect(() => {
-    const bootstrap = async () => {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        Alert.alert('Error', 'User not authenticated.');
-        return;
-      }
-
+    const fetchUsername = async () => {
       try {
-        const res = await fetch('https://gymax.onrender.com/auth/getusername', {
+        const res = await authFetch('https://gymax.onrender.com/auth/getusername', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
           },
         });
+
         if (!res.ok) throw new Error('Failed to load profile');
+
         const { username: nameFromServer } = await res.json();
         setUsername(nameFromServer);
       } catch (err) {
         console.error('Profile fetch error:', err);
-        Alert.alert('Error', 'Could not load user info.');
+        Alert.alert('Error', 'User not authenticated.');
       }
     };
 
-    bootstrap();
-  }, []);
-
-  useEffect(() => {
-    const getEmail = async () => {
-      const storedEmail = await AsyncStorage.getItem('email');
-      if (storedEmail) setUserEmail(storedEmail);
-    };
-    getEmail();
+    fetchUsername();
   }, []);
 
   const handleSubmit = async () => {
@@ -97,18 +83,11 @@ export default function StatisticsPage({ navigation }) {
     if (!valid) return;
 
     try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        alert('User not authenticated.');
-        return;
-      }
-
-      const response = await fetch('https://gymax.onrender.com/stats/statistics', {
+      const res = await authFetch('https://gymax.onrender.com/stats/statistics', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
         },
         body: JSON.stringify({
           gender: normalizedGender,
@@ -118,10 +97,10 @@ export default function StatisticsPage({ navigation }) {
         }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
       console.log('Statistics response:', data);
 
-      if (response.ok) {
+      if (res.ok) {
         navigation.navigate('status');
       } else {
         Alert.alert('Error', data.message || 'Failed to save statistics');
@@ -146,8 +125,7 @@ export default function StatisticsPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>
-              {`Hello, ${username || 'there'}!`}{'\n'}
-              Let's gather some statistics about you!
+                {`Hello, ${username || 'there'}!`}{'\n'}Let's gather some statistics about you!
               </Text>
             </SafeAreaView>
 
@@ -199,7 +177,7 @@ export default function StatisticsPage({ navigation }) {
 
               <TextInput
                 style={[styles.input, heightError ? styles.inputError : null]}
-                placeholder={heightError ? heightError : 'Enter your height (cm)'}
+                placeholder={heightError || 'Enter your height (cm)'}
                 keyboardType="numeric"
                 value={height}
                 onChangeText={(text) => {
@@ -210,7 +188,7 @@ export default function StatisticsPage({ navigation }) {
               />
               <TextInput
                 style={[styles.input, weightError ? styles.inputError : null]}
-                placeholder={weightError ? weightError : 'Enter your weight (kg)'}
+                placeholder={weightError || 'Enter your weight (kg)'}
                 keyboardType="numeric"
                 value={weight}
                 onChangeText={(text) => {
@@ -221,7 +199,7 @@ export default function StatisticsPage({ navigation }) {
               />
               <TextInput
                 style={[styles.input, ageError ? styles.inputError : null]}
-                placeholder={ageError ? ageError : 'Enter your age'}
+                placeholder={ageError || 'Enter your age'}
                 keyboardType="numeric"
                 value={age}
                 onChangeText={(text) => {

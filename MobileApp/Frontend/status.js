@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StatusBar,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
   Keyboard,
   Alert,
 } from 'react-native';
+import { authFetch } from './authFetch';
 
 export default function StatusPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
@@ -21,27 +21,17 @@ export default function StatusPage({ navigation }) {
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
   const [bfp, setBfp] = useState(null);
 
-   // fetch body fat percentage on mount
-   useEffect(() => {
+  useEffect(() => {
     const fetchBfp = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) {
-          Alert.alert('Error', 'User not authenticated.');
-          return;
-        }
-        const res = await fetch('https://gymax.onrender.com/stats/statistics', {
+        const res = await authFetch('https://gymax.onrender.com/stats/statistics', {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
-        if (!res.ok) {
-          throw new Error('Failed to fetch body fat percentage');
-        }
+
+        if (!res.ok) throw new Error('Failed to fetch body fat percentage');
+
         const data = await res.json();
-        // assume backend returns { bodyFatPercentage: number }
         setBfp(data.BFP);
       } catch (err) {
         console.error('BFP fetch error:', err);
@@ -52,9 +42,8 @@ export default function StatusPage({ navigation }) {
     fetchBfp();
   }, []);
 
-  // determine statuses once we have bfp
-  const bodyStatus     = bfp > 25 ? 'overweight'  : 'underweight';
-  const calorieStatus  = bfp > 25 ? 'deficit'     : 'surplus';
+  const bodyStatus = bfp > 25 ? 'overweight' : 'underweight';
+  const calorieStatus = bfp > 25 ? 'deficit' : 'surplus';
 
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
@@ -77,29 +66,16 @@ export default function StatusPage({ navigation }) {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
-      const email = await AsyncStorage.getItem('email');
-
-      if (!token || !email) {
-        Alert.alert('Error', 'User not authenticated.');
-        return;
-      }
-
-      const response = await fetch('https://gymax.onrender.com/stats/training', {
+      const res = await authFetch('https://gymax.onrender.com/stats/training', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          sessions_per_week: sessionsPerWeek,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessions_per_week: sessionsPerWeek }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
       console.log('Training save response:', data);
 
-      if (response.ok) {
+      if (res.ok) {
         navigation.navigate('gym', { sessionsPerWeek });
       } else {
         Alert.alert(
@@ -108,7 +84,6 @@ export default function StatusPage({ navigation }) {
             ? data.detail.map(d => d.msg).join('\n')
             : data.detail || 'Failed to save training info'
         );
-        
       }
     } catch (error) {
       console.error('❌ Network error:', error);
@@ -153,18 +128,14 @@ export default function StatusPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>
-              {`We've estimated that you're ${bodyStatus}.\n`}
-              {`We recommend that you eat in a caloric ${calorieStatus}.`}
+                {`We've estimated that you're ${bodyStatus}.\n`}
+                {`We recommend that you eat in a caloric ${calorieStatus}.`}
               </Text>
               <Text style={styles.label}>How many times per week do you want to train?</Text>
 
-              <View style={styles.daysRow}>
-                {renderDayButtons()}
-              </View>
+              <View style={styles.daysRow}>{renderDayButtons()}</View>
 
-              <Text style={styles.sessionsText}>
-                {sessionsPerWeek} session(s) per week
-              </Text>
+              <Text style={styles.sessionsText}>{sessionsPerWeek} session(s) per week</Text>
 
               {warningMessage ? (
                 <Text style={styles.warningText}>{warningMessage}</Text>

@@ -50,16 +50,34 @@ const SignUpPage = ({ navigation }) => {
     try {
       const response = await fetch('https://gymax.onrender.com/auth/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error('❌ Invalid JSON from backend:', err);
+        Alert.alert('Error', 'Server returned invalid response');
+        return;
+      }
 
       if (response.ok && data.access_token && data.refresh_token) {
         await SecureStore.setItemAsync('refresh_token', data.refresh_token);
         setAccessToken(data.access_token);
-        navigation.navigate('statistics');
+
+        // Optional: small delay to make sure RAM token is set before navigating
+        setTimeout(() => {
+          navigation.navigate('statistics');
+        }, 100);
       } else {
         Alert.alert('Error', data?.detail || data?.message || 'Registration failed.');
       }
