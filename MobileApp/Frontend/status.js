@@ -1,3 +1,4 @@
+// status.js
 import React, { useState, useEffect } from 'react';
 import {
   StatusBar,
@@ -17,20 +18,19 @@ import { authFetch } from './authFetch';
 
 export default function StatusPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
-  const [warningMessage, setWarningMessage] = useState("");
+  const [warningMessage, setWarningMessage] = useState('');
   const [warningAcknowledged, setWarningAcknowledged] = useState(false);
   const [bfp, setBfp] = useState(null);
 
+  // 1) Load body-fat percentage on mount
   useEffect(() => {
     const fetchBfp = async () => {
       try {
-        const res = await authFetch('https://gymax.onrender.com/stats/statistics', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
+        const res = await authFetch(
+          'https://gymax.onrender.com/stats/statistics',
+          { method: 'GET' }
+        );
         if (!res.ok) throw new Error('Failed to fetch body fat percentage');
-
         const data = await res.json();
         setBfp(data.BFP);
       } catch (err) {
@@ -38,27 +38,26 @@ export default function StatusPage({ navigation }) {
         Alert.alert('Error', 'Could not load your body fat data.');
       }
     };
-
     fetchBfp();
   }, []);
 
-  const bodyStatus = bfp > 25 ? 'overweight' : 'underweight';
-  const calorieStatus = bfp > 25 ? 'deficit' : 'surplus';
-
+  // 2) Determine warning based on chosen sessions/week
   const getTrainingAdvice = () => {
     if (sessionsPerWeek < 3) {
-      return "Training less than 3 times a week may not provide optimal progress. Consider increasing to 3-5 sessions.\nAre you sure you want to continue?";
-    } else if (sessionsPerWeek === 6) {
-      return "Training more than 5 times a week can be intense. Ensure you are getting enough rest.\nAre you sure you want to continue?";
-    } else if (sessionsPerWeek === 7) {
-      return "Training 7 days a week is only recommended for advanced individuals with carefully planned recovery.\nAre you sure you want to continue?";
+      return 'Training less than 3 times a week may not provide optimal progress. Consider increasing to 3–5 sessions.\nAre you sure you want to continue?';
     }
-    return "";
+    if (sessionsPerWeek === 6) {
+      return 'Training more than 5 times a week can be intense. Ensure you are getting enough rest.\nAre you sure you want to continue?';
+    }
+    if (sessionsPerWeek === 7) {
+      return 'Training 7 days a week is only recommended for advanced individuals with carefully planned recovery.\nAre you sure you want to continue?';
+    }
+    return '';
   };
 
+  // 3) Handle “Get started” press
   const handleGetStartedPress = async () => {
     const advice = getTrainingAdvice();
-
     if (advice && !warningAcknowledged) {
       setWarningMessage(advice);
       setWarningAcknowledged(true);
@@ -66,53 +65,57 @@ export default function StatusPage({ navigation }) {
     }
 
     try {
-      const res = await authFetch('https://gymax.onrender.com/stats/training', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessions_per_week: sessionsPerWeek }),
-      });
-
+      const res = await authFetch(
+        'https://gymax.onrender.com/stats/training',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessions_per_week: sessionsPerWeek }),
+        }
+      );
       const data = await res.json();
       console.log('Training save response:', data);
 
       if (res.ok) {
         navigation.navigate('gym', { sessionsPerWeek });
       } else {
-        Alert.alert(
-          'Error',
-          Array.isArray(data.detail)
-            ? data.detail.map(d => d.msg).join('\n')
-            : data.detail || 'Failed to save training info'
-        );
+        const msg = Array.isArray(data.detail)
+          ? data.detail.map(d => d.msg).join('\n')
+          : data.detail || 'Failed to save training info';
+        Alert.alert('Error', msg);
       }
-    } catch (error) {
-      console.error('❌ Network error:', error);
+    } catch (err) {
+      console.error('Network error:', err);
       Alert.alert('Error', 'Network error while sending training info');
     }
   };
 
-  const renderDayButtons = () => {
-    return [...Array(7)].map((_, i) => {
-      const day = i + 1;
-      const isSelected = sessionsPerWeek === day;
-
+  // Render buttons 1–7
+  const renderDayButtons = () =>
+    [1, 2, 3, 4, 5, 6, 7].map(day => {
+      const isSel = sessionsPerWeek === day;
       return (
         <TouchableOpacity
           key={day}
-          style={[styles.dayButton, isSelected && styles.dayButtonSelected]}
+          style={[styles.dayButton, isSel && styles.dayButtonSelected]}
           onPress={() => {
             setSessionsPerWeek(day);
             setWarningMessage('');
             setWarningAcknowledged(false);
           }}
         >
-          <Text style={[styles.dayButtonText, isSelected && styles.dayButtonTextSelected]}>
+          <Text
+            style={[styles.dayButtonText, isSel && styles.dayButtonTextSelected]}
+          >
             {day}
           </Text>
         </TouchableOpacity>
       );
     });
-  };
+
+  const bodyStatus =
+    bfp != null ? (bfp > 25 ? 'overweight' : 'underweight') : '';
+  const calorieStatus = bfp != null ? (bfp > 25 ? 'deficit' : 'surplus') : '';
 
   return (
     <ImageBackground
@@ -127,23 +130,33 @@ export default function StatusPage({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.overlay}>
             <SafeAreaView>
-              <Text style={styles.frontText}>
-                {`We've estimated that you're ${bodyStatus}.\n`}
-                {`We recommend that you eat in a caloric ${calorieStatus}.`}
+              {bfp != null && (
+                <Text style={styles.frontText}>
+                  {`We've estimated that you're ${bodyStatus}.\n`}
+                  {`We recommend that you eat in a caloric ${calorieStatus}.`}
+                </Text>
+              )}
+
+              <Text style={styles.label}>
+                How many times per week do you want to train?
               </Text>
-              <Text style={styles.label}>How many times per week do you want to train?</Text>
 
               <View style={styles.daysRow}>{renderDayButtons()}</View>
 
-              <Text style={styles.sessionsText}>{sessionsPerWeek} session(s) per week</Text>
+              <Text style={styles.sessionsText}>
+                {sessionsPerWeek} session(s) per week
+              </Text>
 
-              {warningMessage ? (
+              {warningMessage.length > 0 && (
                 <Text style={styles.warningText}>{warningMessage}</Text>
-              ) : null}
+              )}
             </SafeAreaView>
 
             <View style={styles.container}>
-              <TouchableOpacity style={styles.button} onPress={handleGetStartedPress}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleGetStartedPress}
+              >
                 <Text style={styles.buttonText}>Get started</Text>
               </TouchableOpacity>
             </View>
@@ -185,8 +198,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 10,
-    marginBottom: 10,
+    marginVertical: 10,
   },
   dayButton: {
     backgroundColor: '#222',
