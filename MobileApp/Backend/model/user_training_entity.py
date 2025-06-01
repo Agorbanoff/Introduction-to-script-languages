@@ -17,5 +17,5 @@ class UserTraining(BaseModel):
 
 class Sessions(BaseModel):
     sessions_per_week: int = Field(..., ge=1, le=7)
-    streak: Optional[int]
-    last_streak_update: Optional[datetime]
+    streak: Optional[int] = None
+    last_streak_update: Optional[datetime] = None
