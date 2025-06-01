@@ -7,12 +7,10 @@ from util.token import get_user_id_from_token
 
 ai_router = APIRouter()
 
-class GoalOnlyRequest(BaseModel):
-    goal: str
+
 
 @ai_router.post("/generateplan", response_model=UserTraining)
 async def generate_plan(
-    data: GoalOnlyRequest,
     user_id: str = Depends(get_user_id_from_token)
 ):
     # Get the user's statistics
@@ -38,7 +36,6 @@ async def generate_plan(
         sessions_per_week=stats["sessions_per_week"],
         streak=stats.get("streak", 0),
         last_streak_update=stats.get("last_streak_update"),
-        goal=data.goal,
         plan_raw=raw_plan,
         plan_json=parsed_plan
     )
