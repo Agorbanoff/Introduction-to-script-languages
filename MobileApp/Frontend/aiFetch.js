@@ -18,7 +18,7 @@ import { authFetch } from "./authFetch"; // your existing helper
 import { Ionicons } from "@expo/vector-icons"; // optional: for send/back icons
 
 // Replace this with your actual AI chat endpoint
-const AI_CHAT_URL = "https://gymax.onrender.com/ai/chat";
+const AI_CHAT_URL = "https://gymax.onrender.com/ai/generateplan";
 
 export default function AIFitnessChat({ navigation }) {
   const [inputText, setInputText] = useState("");

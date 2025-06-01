@@ -5,12 +5,12 @@ from service import ai_service
 from config.db_config import collection_statistics, collection_training
 from util.token import get_user_id_from_token
 
-router = APIRouter()
+ai_router = APIRouter()
 
 class GoalOnlyRequest(BaseModel):
     goal: str
 
-@router.post("/generateplan", response_model=UserTraining)
+@ai_router.post("/generateplan", response_model=UserTraining)
 async def generate_plan(
     data: GoalOnlyRequest,
     user_id: str = Depends(get_user_id_from_token)
