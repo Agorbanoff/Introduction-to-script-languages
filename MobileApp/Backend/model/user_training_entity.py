@@ -18,6 +18,5 @@ class UserTraining(BaseModel):
         default=None,
         description="Last time when streak was updated"
     )
-    goal: str = Field(..., description="Goal of training")
     plan_raw: Optional[str] = None
     plan_json: Optional[List[WorkoutDay]] = None
