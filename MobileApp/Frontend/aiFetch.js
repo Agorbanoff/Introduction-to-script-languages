@@ -1,264 +1,276 @@
-import React, { useState } from 'react';
+// Frontend/AIFitnessChat.js
+
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
+  ScrollView,
   ImageBackground,
-  ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native';
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { authFetch } from "./authFetch"; // your existing helper
+import { Ionicons } from "@expo/vector-icons"; // optional: for send/back icons
 
-export default function SettingsScreen({ navigation }) {
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [loading, setLoading] = useState(false);
+// Replace this with your actual AI chat endpoint
+const AI_CHAT_URL = "https://gymax.onrender.com/ai/chat";
 
-  // --- Logout: clear token and other stored data, then navigate
-  const handleLogout = async () => {
-    setLoading(true);
+export default function AIFitnessChat({ navigation }) {
+  const [inputText, setInputText] = useState("");
+  const [messages, setMessages] = useState([
+    {
+      id: 0,
+      text: "Hi! I’m your AI fitness assistant. How can I help you today?",
+      sender: "bot",
+      timestamp: new Date(),
+    },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef(null);
+
+  // Automatically scroll to bottom when messages change
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
+  const sendMessage = async () => {
+    const trimmed = inputText.trim();
+    if (!trimmed) return;
+
+    // 1) Add the user message to chat
+    const userMsg = {
+      id: Date.now(), // simple unique ID
+      text: trimmed,
+      sender: "user",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputText("");
+    Keyboard.dismiss();
+
+    // 2) Call AI endpoint
+    setIsLoading(true);
     try {
-      await AsyncStorage.clear(); // removes token, email, and all other keys
-    } catch (err) {
-      console.error('Error clearing storage on logout:', err);
+      const res = await authFetch(AI_CHAT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: trimmed }),
+      });
+
+      if (!res.ok) {
+        // If we get a non‐200 response, show a fallback
+        const errJson = await res.json();
+        console.warn("AI Chat error response:", errJson);
+        const fallbackMsg = {
+          id: Date.now() + 1,
+          text: "Sorry, I couldn’t reach the AI server. Try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, fallbackMsg]);
+      } else {
+        const { reply } = await res.json();
+        // 3) Append the AI’s reply
+        const botMsg = {
+          id: Date.now() + 1,
+          text: reply,
+          sender: "bot",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, botMsg]);
+      }
+    } catch (error) {
+      console.error("Network or AI Chat error:", error);
+      const botMsg = {
+        id: Date.now() + 1,
+        text: "Network error. Please check your connection and try again.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMsg]);
     } finally {
-      setLoading(false);
-      
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: 'signup' }], // replace with your login screen name
-        })
-      );
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteAccount = () => {
-    setConfirmDelete(true);
-  };
-
-  const cancelDelete = () => {
-    setConfirmDelete(false);
-  };
-
-  const confirmDeleteAccount = async () => {
-    setLoading(true);
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) throw new Error('Not authenticated');
-
-      const res = await fetch(
-        'https://gymax.onrender.com/auth/deleteaccount',
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!res.ok) throw new Error(`Failed to delete (${res.status})`);
-
-      await AsyncStorage.clear();
-      navigation.navigate('signup');
-    } catch (err) {
-      console.error('Delete account error:', err);
-    } finally {
-      setLoading(false);
-      setConfirmDelete(false);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('./Images/homePagePhoto.jpg')}
-        style={styles.backgroundImage}
-        resizeMode="cover"
+  const renderMessageBubble = (msg) => {
+    const isUser = msg.sender === "user";
+    return (
+      <View
+        key={msg.id}
+        style={[
+          styles.bubbleContainer,
+          isUser ? styles.userBubbleContainer : styles.botBubbleContainer,
+        ]}
       >
-        <View style={styles.overlay}>
-          <View style={styles.settingsContainer}>
-            <SettingsButton
-              icon="person-outline"
-              text="Change Username"
-              onPress={() => navigation.navigate('changecredentials', { mode: 'username' })}
-            />
-
-            <SettingsButton
-              icon="lock-closed-outline"
-              text="Change Password"
-              onPress={() => navigation.navigate('changecredentials', { mode: 'password' })}
-            />
-
-            <SettingsButton
-              icon="fitness-outline"
-              text="Change Workout Plan"
-              onPress={() => navigation.navigate('status')}
-            />
-
-            <SettingsButton
-              icon="log-out-outline"
-              text="Log out"
-              onPress={handleLogout}
-            />
-
-            <SettingsButton
-              icon="trash-outline"
-              text="Delete Account"
-              onPress={handleDeleteAccount}
-            />
-
-            {confirmDelete && (
-              <View style={styles.warningContainer}>
-                <Text style={styles.warningText}>
-                  Deleting your account cannot be undone.{"\n"}
-                  Are you sure you want to continue?
-                </Text>
-                <View style={styles.confirmRow}>
-                  <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={confirmDeleteAccount}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <ActivityIndicator color="white" />
-                    ) : (
-                      <Text style={styles.confirmButtonText}>Continue</Text>
-                    )}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={cancelDelete}
-                    disabled={loading}
-                  >
-                    <Text style={styles.cancelButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          </View>
+        <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
+          <Text style={[styles.bubbleText, isUser && styles.userBubbleText]}>
+            {msg.text}
+          </Text>
+          <Text style={styles.bubbleTime}>
+            {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </Text>
         </View>
-      </ImageBackground>
-
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}>
-          <Ionicons name="barbell-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}>
-          <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('calorieinput')}>
-          <Ionicons name="barcode-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}>
-          <Ionicons name="settings-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
       </View>
-    </View>
-  );
-}
+    );
+  };
 
-function SettingsButton({ icon, text, onPress }) {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
-      <Ionicons name={icon} size={24} color="black" />
-      <Text style={styles.buttonText}>{text}</Text>
-    </TouchableOpacity>
+    <ImageBackground
+      source={require("./Images/gymPhoto.jpg")} // reuse your background if desired
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.innerContainer}>
+            {/* Top bar with back arrow */}
+            <View style={styles.topBar}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color="#FFF" />
+              </TouchableOpacity>
+              <Text style={styles.topBarTitle}>AI Fitness Chat</Text>
+            </View>
+
+            {/* Scrollable chat area */}
+            <ScrollView
+              style={styles.chatArea}
+              contentContainerStyle={styles.chatContent}
+              ref={scrollViewRef}
+            >
+              {messages.map((m) => renderMessageBubble(m))}
+            </ScrollView>
+
+            {/* Input row */}
+            <View style={styles.inputRow}>
+              <TextInput
+                value={inputText}
+                onChangeText={setInputText}
+                placeholder="Type your question..."
+                placeholderTextColor="#888"
+                style={styles.textInput}
+                multiline
+                editable={!isLoading}
+              />
+              <TouchableOpacity
+                style={[styles.sendButton, isLoading && styles.sendButtonDisabled]}
+                onPress={sendMessage}
+                disabled={isLoading}
+              >
+                <Ionicons
+                  name="send"
+                  size={20}
+                  color={isLoading ? "#555" : "#1db344"}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: { flex: 1, backgroundColor: "#000" },
   container: { flex: 1 },
-  backgroundImage: { flex: 1 },
-  overlay: {
+  innerContainer: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
+    backgroundColor: "rgba(33,33,33,0.85)",
   },
-  settingsContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  button: {
-    flexDirection: 'row',
-    backgroundColor: '#1db344',
-    paddingVertical: 20,
-    paddingHorizontal: 40,
-    borderRadius: 10,
-    marginBottom: 15,
-    alignItems: 'center',
-    width: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonText: {
-    marginLeft: 10,
-    fontWeight: 'bold',
-    color: 'black',
-    fontSize: 18,
-  },
-  warningContainer: {
-    width: '80%',
-    padding: 12,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  warningText: {
-    color: '#FFA500',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  confirmRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  confirmButton: {
-    flex: 1,
-    backgroundColor: '#d32f2f',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginRight: 8,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#555',
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginLeft: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  navBar: {
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
+  topBar: {
     height: 60,
-    backgroundColor: '#111',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderColor: "#333",
+  },
+  topBarTitle: {
+    color: "#FFF",
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 12,
+  },
+  chatArea: {
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  chatContent: {
+    paddingVertical: 10,
+  },
+  bubbleContainer: {
+    flexDirection: "row",
+    marginVertical: 4,
+  },
+  userBubbleContainer: {
+    justifyContent: "flex-end",
+  },
+  botBubbleContainer: {
+    justifyContent: "flex-start",
+  },
+  bubble: {
+    maxWidth: "80%",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+  },
+  userBubble: {
+    backgroundColor: "#1db344",
+    borderBottomRightRadius: 0,
+  },
+  botBubble: {
+    backgroundColor: "#222",
+    borderBottomLeftRadius: 0,
+  },
+  bubbleText: {
+    color: "#FFF",
+    fontSize: 16,
+  },
+  userBubbleText: {
+    color: "#000",
+  },
+  bubbleTime: {
+    fontSize: 10,
+    color: "#AAA",
+    marginTop: 4,
+    alignSelf: "flex-end",
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#111",
     borderTopWidth: 1,
-    borderTopColor: '#333',
+    borderColor: "#333",
+  },
+  textInput: {
+    flex: 1,
+    minHeight: 40,
+    maxHeight: 100,
+    color: "#FFF",
+    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#222",
+    borderRadius: 20,
+  },
+  sendButton: {
+    marginLeft: 8,
+    padding: 8,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 });

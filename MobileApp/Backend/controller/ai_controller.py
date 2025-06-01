@@ -10,7 +10,7 @@ router = APIRouter()
 class GoalOnlyRequest(BaseModel):
     goal: str
 
-@router.post("/generate_plan", response_model=UserTraining)
+@router.post("/generateplan", response_model=UserTraining)
 async def generate_plan(
     data: GoalOnlyRequest,
     user_id: str = Depends(get_user_id_from_token)
