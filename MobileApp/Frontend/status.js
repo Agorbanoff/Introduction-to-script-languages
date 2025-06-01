@@ -77,7 +77,7 @@ export default function StatusPage({ navigation }) {
       console.log('Training save response:', data);
 
       if (res.ok) {
-        navigation.navigate('gym', { sessionsPerWeek });
+        navigation.navigate('aiFetch', { sessionsPerWeek });
       } else {
         const msg = Array.isArray(data.detail)
           ? data.detail.map(d => d.msg).join('\n')

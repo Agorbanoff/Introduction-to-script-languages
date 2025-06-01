@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from model.user_training_entity import UserTraining
+from model.user_training_entity import Sessions
 from service.user_training_service import (
                                             time_per_week,
                                            change_workout_plan,
@@ -13,7 +13,7 @@ from fastapi import Body
 user_training_router = APIRouter()
 @user_training_router.post("/training")
 async def submit_training(
-    training: UserTraining,
+    training: Sessions,
     user_id: str = Depends(get_user_id_from_token)
 ):
     await time_per_week(user_id = user_id, times = training.sessions_per_week)
