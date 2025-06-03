@@ -12,7 +12,8 @@ from exceptions.exceptions import (
     OpenFoodFactsFetchException,
     RefreshTokenMismatchException,
     ItemNotFoundException,
-    ServerUnavailableException
+    ServerUnavailableException,
+    AIModelInferenceException
 )
 
 def add_exception_handlers(app: FastAPI):
@@ -58,4 +59,8 @@ def add_exception_handlers(app: FastAPI):
 
     @app.exception_handler(ServerUnavailableException)
     async def server_unavailable_handler(request: Request, exc: ServerUnavailableException):
+        return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+    @app.exception_handler(AIModelInferenceException)
+    async def server_unavailable_handler(request: Request, exc: AIModelInferenceException):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})

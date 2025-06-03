@@ -2,13 +2,17 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from model.user_training_entity import WorkoutDay, Exercise
 from typing import List
 import torch
-import re
+from exceptions.exceptions import AIModelInferenceException
 
+# Load tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("google/flan-t5-base")
 model = AutoModelForSeq2SeqLM.from_pretrained("google/flan-t5-base")
+
+# choosing device that will run the ai
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
+# after running the ai telling him how to respond and to what
 def build_prompt(stats: dict) -> str:
     return (
         f"You are a certified personal trainer.\n"
@@ -31,30 +35,48 @@ def build_prompt(stats: dict) -> str:
         f" • Output only those seven lines—no extra headers or commentary.\n"
     )
 
-
-
 def generate_ai_plan(prompt: str) -> str:
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    outputs = model.generate(**inputs, max_new_tokens=512)
-    return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    try:
+        inputs = tokenizer(prompt, return_tensors="pt").to(device)
+        outputs = model.generate(**inputs, max_new_tokens=512)
+        return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    except Exception as e:
+        print(f"[AI Error] {e}")
+        raise AIModelInferenceException()
 
+#making the ai workout plan better structured for the frontend later
 def parse_plan(text: str) -> List[WorkoutDay]:
     days = []
-    for line in text.strip().split("\n"):
+    lines = text.replace("\r\n", "\n").strip().split("\n")
+
+    if len(lines) != 7:
+        raise ValueError("Expected 7 lines, one for each day of the week.")
+
+    for line in lines:
         if ":" not in line:
-            continue
-        day, rest = line.split(":", 1)
+            raise ValueError(f"Invalid format, missing colon in: {line}")
+
+        day_part, exercises_part = line.split(":", 1)
+        day = day_part.strip()
         exercises = []
-        for ex in rest.split(","):
-            parts = ex.strip().rsplit(" ", 1)
-            if len(parts) == 2 and 'x' in parts[1]:
-                name = parts[0].strip()
-                try:
-                    sets, reps = map(int, parts[1].lower().split("x"))
-                    exercises.append(Exercise(name=name, sets=sets, reps=reps))
-                except:
-                    exercises.append(Exercise(name=name))
-            else:
-                exercises.append(Exercise(name=ex.strip()))
-        days.append(WorkoutDay(day=day.strip(), exercises=exercises))
+
+        for ex in exercises_part.split(","):
+            ex = ex.strip()
+            if ex.lower() == "rest 1x0":
+                exercises.append(Exercise(name="Rest", sets=1, reps=0))
+                continue
+
+            parts = ex.rsplit(" ", 1)
+            if len(parts) != 2 or "x" not in parts[1]:
+                raise ValueError(f"Invalid exercise format in: {ex}")
+
+            name = parts[0].strip()
+            try:
+                sets, reps = map(int, parts[1].lower().split("x"))
+                exercises.append(Exercise(name=name, sets=sets, reps=reps))
+            except Exception:
+                raise ValueError(f"Invalid reps/sets in: {ex}")
+
+        days.append(WorkoutDay(day=day, exercises=exercises))
+
     return days

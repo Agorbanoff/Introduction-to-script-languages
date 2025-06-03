@@ -48,3 +48,7 @@ class ItemNotFoundException(HTTPException):
 class ServerUnavailableException(HTTPException):
     def __init__(self):
         super().__init__(status_code=500, detail="Server is currently unavailable. Please try again later.")
+
+class AIModelInferenceException(HTTPException):
+    def __init__(self, detail: str = "AI model failed to generate a plan"):
+        super().__init__(status_code=500, detail="Error  generating response")
