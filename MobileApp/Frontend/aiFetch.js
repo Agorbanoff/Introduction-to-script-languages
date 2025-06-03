@@ -1,5 +1,5 @@
 // Frontend/AIFitnessChat.js
-
+import { BASE_API } from "./apiConfig";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -17,8 +17,6 @@ import {
 import { authFetch } from "./authFetch"; // your existing helper
 import { Ionicons } from "@expo/vector-icons"; // optional: for send/back icons
 
-// Replace this with your actual AI chat endpoint
-const AI_CHAT_URL = "https://gymax.onrender.com/ai/generateplan";
 
 export default function AIFitnessChat({ navigation }) {
   const [inputText, setInputText] = useState("");
@@ -58,7 +56,7 @@ export default function AIFitnessChat({ navigation }) {
     // 2) Call AI endpoint
     setIsLoading(true);
     try {
-      const res = await authFetch(AI_CHAT_URL, {
+      const res = await authFetch(`${BASE_API}/ai/generateplan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed }),

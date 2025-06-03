@@ -1,6 +1,6 @@
 // authManager.js
 import * as SecureStore from 'expo-secure-store';
-
+import { BASE_API } from "./apiConfig";
 let accessToken = null;
 
 export const setAccessToken = (token) => {
@@ -19,7 +19,7 @@ export const refreshAccessToken = async () => {
 
   if (!refreshToken) throw new Error('No refresh token found');
 
-  const response = await fetch('https://gymax.onrender.com/refresh', {
+  const response = await fetch(`${BASE_API}/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh_token: refreshToken }),
