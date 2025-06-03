@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { BASE_API } from "./apiConfig";
 import {
   StyleSheet,
   Text,
@@ -31,7 +32,7 @@ export default function StatisticsPage({ navigation }) {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const res = await authFetch('https://gymax.onrender.com/auth/getusername', {
+        const res = await authFetch(`${BASE_API}/auth/getusername`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ export default function StatisticsPage({ navigation }) {
     if (!valid) return;
 
     try {
-      const res = await authFetch('https://gymax.onrender.com/stats/statistics', {
+      const res = await authFetch(`${BASE_API}/stats/statistics`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

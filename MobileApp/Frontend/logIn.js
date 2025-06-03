@@ -46,7 +46,7 @@ export default function LogInPage({ navigation }) {
     if (!validateInputs()) return;
 
     try {
-      const response = await fetch('https://gymax.onrender.com/auth/login', {
+      const response = await fetch(`${BASE_API}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -60,7 +60,7 @@ export default function LogInPage({ navigation }) {
         setAccessToken(data.access_token);
 
         // Try to get training info
-        const trainingResponse = await fetch('https://gymax.onrender.com/stats/training', {
+        const trainingResponse = await fetch(`${BASE_API}/stats/training`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${data.access_token}` },
         });

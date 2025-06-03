@@ -1,5 +1,5 @@
 // Frontend/AIFitnessChat.js
-
+import { BASE_API } from "./apiConfig";
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -15,10 +15,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { authFetch } from "./authFetch"; // your existing helper
-import { Ionicons } from "@expo/vector-icons"; // optional: for send/back icons
-
-// Replace this with your actual AI chat endpoint
-const AI_CHAT_URL = "https://gymax.onrender.com/ai/generateplan";
+import { Ionicons } from "@expo/vector-icons"; // for send/back icons
 
 export default function AIFitnessChat({ navigation }) {
   const [inputText, setInputText] = useState("");
@@ -46,7 +43,7 @@ export default function AIFitnessChat({ navigation }) {
 
     // 1) Add the user message to chat
     const userMsg = {
-      id: Date.now(), // simple unique ID
+      id: Date.now(),
       text: trimmed,
       sender: "user",
       timestamp: new Date(),
@@ -58,7 +55,7 @@ export default function AIFitnessChat({ navigation }) {
     // 2) Call AI endpoint
     setIsLoading(true);
     try {
-      const res = await authFetch(AI_CHAT_URL, {
+      const res = await authFetch(`${BASE_API}/ai/generateplan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed }),
@@ -76,11 +73,12 @@ export default function AIFitnessChat({ navigation }) {
         };
         setMessages((prev) => [...prev, fallbackMsg]);
       } else {
-        const { reply } = await res.json();
-        // 3) Append the AI’s reply
+        // Pull out plan_raw instead of expecting 'reply'
+        const data = await res.json();
+        const planText = data.plan_raw || "No plan returned.";
         const botMsg = {
           id: Date.now() + 1,
-          text: reply,
+          text: planText,
           sender: "bot",
           timestamp: new Date(),
         };
@@ -124,7 +122,7 @@ export default function AIFitnessChat({ navigation }) {
 
   return (
     <ImageBackground
-      source={require("./Images/gymPhoto.jpg")} // reuse your background if desired
+      source={require("./Images/gymPhoto.jpg")} // replace with your own background if needed
       style={styles.background}
       resizeMode="cover"
     >

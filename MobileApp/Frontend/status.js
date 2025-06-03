@@ -1,5 +1,6 @@
 // status.js
 import React, { useState, useEffect } from 'react';
+import { BASE_API } from "./apiConfig";
 import {
   StatusBar,
   StyleSheet,
@@ -27,7 +28,7 @@ export default function StatusPage({ navigation }) {
     const fetchBfp = async () => {
       try {
         const res = await authFetch(
-          'https://gymax.onrender.com/stats/statistics',
+          `${BASE_API}/stats/statistics`,
           { method: 'GET' }
         );
         if (!res.ok) throw new Error('Failed to fetch body fat percentage');
@@ -66,7 +67,7 @@ export default function StatusPage({ navigation }) {
 
     try {
       const res = await authFetch(
-        'https://gymax.onrender.com/stats/training',
+        `${BASE_API}/stats/training`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

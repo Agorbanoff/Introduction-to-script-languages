@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BASE_API } from "./apiConfig";
 import {
   Alert,
   View,
@@ -48,7 +49,7 @@ const SignUpPage = ({ navigation }) => {
     if (!validateInputs()) return;
 
     try {
-      const response = await fetch('https://gymax.onrender.com/auth/signup', {
+      const response = await fetch(`${BASE_API}/auth/signup`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
