@@ -3,7 +3,6 @@ from exceptions.exceptions import EmptyStatisticsException
 from service.user_statistics_service import get_statistics, get_bfp
 from util.token import get_user_id_from_token
 from model.user_statistics_entity import Gender
-
 user_statistics_router = APIRouter()
 
 @user_statistics_router.post("/statistics")

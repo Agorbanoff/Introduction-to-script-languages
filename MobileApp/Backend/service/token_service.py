@@ -5,7 +5,7 @@ from bson import ObjectId
 from util.token import (
     create_access_token,
     create_refresh_token,
-    verify_refresh_token,
+    verify_refresh_token, get_user_id_from_token,
 )
 from exceptions.exceptions import InvalidTokenException, UserNotFoundException
 from config.db_config import collection_name, collection_token
@@ -81,3 +81,9 @@ async def get_new_token(user_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         raise InvalidTokenException() from e
+
+async def delete_refresh_token(user_id: str) -> str:
+    result = await collection_token.delete_one({"_id": ObjectId(user_id)})
+    if result.deleted_count == 0:
+        raise InvalidTokenException()
+    return "Token deleted successfully!"

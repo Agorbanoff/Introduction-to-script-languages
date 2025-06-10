@@ -8,6 +8,7 @@ from service.user_account_service import (sign_up,
                                           change_password,
                                           delete_account,
                                           log_out)
+from service.token_service import delete_refresh_token
 user_router = APIRouter()
 
 @user_router.post("/signup")
@@ -40,4 +41,4 @@ async def delete_account(user_id: str = Depends(get_user_id_from_token)):
     return await delete_account(user_id)
 @user_router.post("/logout")
 async def log_out(user_id: str = Depends(get_user_id_from_token)):
-    return await log_out(user_id)
+    return await delete_refresh_token(user_id)
