@@ -1,4 +1,6 @@
+// DietPlanScreen.js
 import React, { useState, useEffect } from 'react';
+import { BASE_API } from './apiConfig';
 import {
   View,
   Text,
@@ -10,7 +12,8 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAccessToken } from './authManager';
+import {authFetch} from './authFetch';
 import { Ionicons } from '@expo/vector-icons';
 
 const bulkingMeals = {
@@ -330,7 +333,7 @@ const cuttingMeals = {
       protein: '20g',
       time: '10 minutes',
       ingredients: ['3 eggs', '1/2 cup spinach', '1/4 cup diced tomatoes'],
-      recipe: '1. Whisk eggs.\n2. Saute spinach and tomatoes.\n3. Add eggs and scramble.',
+      recipe: '1. Whisk eggs.\n2. Sauté spinach and tomatoes.\n3. Add eggs and scramble.',
       alternatives: [
         { ingredient: 'eggs', alternative: 'egg whites' },
         { ingredient: 'spinach', alternative: 'kale' },
@@ -437,7 +440,7 @@ const cuttingMeals = {
       protein: '28g',
       time: '8 minutes',
       ingredients: ['3 egg whites', '1/4 cup mushrooms', '1/2 cup arugula'],
-      recipe: '1. Saute mushrooms.\n2. Add egg whites.\n3. Fold with arugula.',
+      recipe: '1. Sauté mushrooms.\n2. Add egg whites.\n3. Fold with arugula.',
       alternatives: [
         { ingredient: 'arugula', alternative: 'spinach' },
         { ingredient: 'mushrooms', alternative: 'zucchini' },
@@ -484,7 +487,7 @@ const cuttingMeals = {
       protein: '42g',
       time: '15 minutes',
       ingredients: ['4 oz ground turkey', 'mixed veggies', '1 tsp soy sauce'],
-      recipe: '1. Saute turkey.\n2. Add veggies.\n3. Stir in soy sauce.',
+      recipe: '1. Sauté turkey.\n2. Add veggies.\n3. Stir in soy sauce.',
       alternatives: [
         { ingredient: 'soy sauce', alternative: 'coconut aminos' },
         { ingredient: 'ground turkey', alternative: 'ground chicken' },
@@ -499,7 +502,7 @@ const cuttingMeals = {
       protein: '35g',
       time: '12 minutes',
       ingredients: ['zucchini noodles', 'shrimp', 'marinara sauce'],
-      recipe: '1. Saute zucchini.\n2. Add marinara sauce.\n3. Top with grilled shrimp.',
+      recipe: '1. Sauté zucchini.\n2. Add marinara sauce.\n3. Top with grilled shrimp.',
       alternatives: [
         { ingredient: 'shrimp', alternative: 'chicken breast' },
         { ingredient: 'zucchini noodles', alternative: 'spaghetti squash' },
@@ -529,7 +532,7 @@ const cuttingMeals = {
       protein: '50g',
       time: '15 minutes',
       ingredients: ['beef strips', 'green beans', 'olive oil'],
-      recipe: '1. Saute beef strips.\n2. Add green beans.\n3. Serve hot.',
+      recipe: '1. Sauté beef strips.\n2. Add green beans.\n3. Serve hot.',
       alternatives: [
         { ingredient: 'beef', alternative: 'bison' },
         { ingredient: 'green beans', alternative: 'broccoli' },
@@ -610,7 +613,6 @@ const cuttingMeals = {
   ],
 };
 
-
 export default function DietPlanScreen({ navigation }) {
   const [bfp, setBfp] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -619,17 +621,21 @@ export default function DietPlanScreen({ navigation }) {
   useEffect(() => {
     (async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        // 1) Get the in-memory access token
+        const token = getAccessToken();
         if (!token) throw new Error('No access token found');
 
-        const res = await fetch('https://gymax.onrender.com/stats/statistics', {
-          headers: { Authorization: `Bearer ${token}` },
+        // 2) Use authFetch so that the Authorization header is applied (and token refreshing happens if needed)
+        const res = await authFetch(`${BASE_API}/stats/statistics`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { BFP } = await res.json();
 
+        const { BFP } = await res.json();
         setBfp(BFP);
 
+        // 3) Choose meal plan based on BFP
         if (BFP > 25) {
           setMeals(cuttingMeals);
         } else {
@@ -687,39 +693,22 @@ export default function DietPlanScreen({ navigation }) {
           {renderMealCategory('snack')}
         </ScrollView>
         <View style={styles.navBar}>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.reset({ index: 0, routes: [{ name: 'gym' }] })
-                  }
-                >
-                  <Ionicons name="barbell-outline" size={28} color="#1db344" />
-                </TouchableOpacity>
-        
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.reset({ index: 0, routes: [{ name: 'diet' }] })
-                  }
-                >
-                  <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate('calorieinput')
-                  }
-                >
-                  <Ionicons name="barcode-outline" size={28} color="#1db344" />
-                </TouchableOpacity>
-        
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.reset({ index: 0, routes: [{ name: 'settings' }] })
-                  }
-                >
-                  <Ionicons name="settings-outline" size={28} color="#1db344" />
-                </TouchableOpacity>
-        
-                
-              </View>
+          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}>
+            <Ionicons name="barbell-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}>
+            <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('calorieinput')}>
+            <Ionicons name="barcode-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}>
+            <Ionicons name="settings-outline" size={28} color="#1db344" />
+          </TouchableOpacity>
+        </View>
       </View>
     </ImageBackground>
   );

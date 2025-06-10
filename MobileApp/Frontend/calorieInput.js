@@ -1,4 +1,6 @@
+// CalorieInput.js
 import React, { useState, useEffect } from 'react';
+import { BASE_API } from './apiConfig';
 import {
   View,
   Text,
@@ -9,10 +11,11 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { PieChart } from 'react-native-chart-kit';
+// ↓ Import your new token getter instead of AsyncStorage:
+import { getAccessToken } from './authManager';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE   = width * 0.4;
@@ -50,9 +53,9 @@ export default function CalorieInput() {
   useEffect(() => {
     (async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        const token = getAccessToken(); 
         if (!token) throw new Error('No access token found');
-        const res = await fetch('https://gymax.onrender.com/stats/statistics', {
+        const res = await fetch(`${BASE_API}/stats/statistics`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -101,7 +104,8 @@ export default function CalorieInput() {
     setSearchError('');
     try {
       const res = await fetch(
-        `https://gymax.onrender.com/food/search?query=${encodeURIComponent(query)}`
+        `${BASE_API}/food/search?query=${encodeURIComponent(query)}`,
+        // No token required for public food search, assuming it’s public.
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || data.message || 'Server error');
@@ -138,11 +142,14 @@ export default function CalorieInput() {
   // --- Add entry (for both modes)
   const addEntry = async (entry) => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = getAccessToken();
       if (!token) throw new Error('No access token');
       await fetch('https://gymax.onrender.com/stats/log', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(entry),
       });
       setLoggedFoods(prev => [...prev, entry]);
@@ -183,11 +190,25 @@ export default function CalorieInput() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>FOOD LOG</Text>
         <Text style={styles.subHeader}>Goal: {goalCalories} kcal</Text>
-        <PieChart data={pieData} width={CHART_WIDTH} height={220} chartConfig={chartConfig} accessor="calories" backgroundColor="transparent" paddingLeft="16" absolute hasLegend />
+        <PieChart
+          data={pieData}
+          width={CHART_WIDTH}
+          height={220}
+          chartConfig={chartConfig}
+          accessor="calories"
+          backgroundColor="transparent"
+          paddingLeft="16"
+          absolute
+          hasLegend
+        />
 
         {loggedFoods.length > 0 && (
           <View style={styles.logList}>
-            {loggedFoods.map((f,i) => <Text key={i} style={styles.logItem}>• {f.description}: {f.calories} kcal</Text>)}
+            {loggedFoods.map((f, i) => (
+              <Text key={i} style={styles.logItem}>
+                • {f.description}: {f.calories} kcal
+              </Text>
+            ))}
           </View>
         )}
 
@@ -208,13 +229,31 @@ export default function CalorieInput() {
         {/* Search Mode UI */}
         {searchMode && (
           <View style={styles.manualContainer}>
-            <TextInput style={styles.input} placeholder="e.g. 1 banana" placeholderTextColor="#888" value={query} onChangeText={setQuery} multiline />
+            <TextInput
+              style={styles.input}
+              placeholder="e.g. 1 banana"
+              placeholderTextColor="#888"
+              value={query}
+              onChangeText={setQuery}
+              multiline
+            />
             {searchError ? <Text style={styles.error}>{searchError}</Text> : null}
-            <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={submitSearch} disabled={loading}>
-              {loading ? <ActivityIndicator color="#fff"/> : <Text style={styles.buttonText}>Get Calories</Text>}
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={submitSearch}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Get Calories</Text>
+              )}
             </TouchableOpacity>
             {searchEntry && !loading && (
-              <TouchableOpacity style={styles.addButton} onPress={() => addEntry(searchEntry)}>
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => addEntry(searchEntry)}
+              >
                 <Text style={styles.addButtonText}>Add to Log</Text>
               </TouchableOpacity>
             )}
@@ -227,16 +266,35 @@ export default function CalorieInput() {
         {/* Calculator Mode UI */}
         {calcMode && (
           <View style={styles.manualContainer}>
-            <TextInput style={styles.input} placeholder="Calories per 100g" placeholderTextColor="#888" keyboardType="numeric" value={calsPer100} onChangeText={setCalsPer100} />
-            <TextInput style={[styles.input, { marginTop: 12 }]} placeholder="Grams" placeholderTextColor="#888" keyboardType="numeric" value={grams} onChangeText={setGrams} />
+            <TextInput
+              style={styles.input}
+              placeholder="Calories per 100g"
+              placeholderTextColor="#888"
+              keyboardType="numeric"
+              value={calsPer100}
+              onChangeText={setCalsPer100}
+            />
+            <TextInput
+              style={[styles.input, { marginTop: 12 }]}
+              placeholder="Grams"
+              placeholderTextColor="#888"
+              keyboardType="numeric"
+              value={grams}
+              onChangeText={setGrams}
+            />
             {calcError ? <Text style={styles.error}>{calcError}</Text> : null}
             <TouchableOpacity style={styles.button} onPress={calculateEntry}>
               <Text style={styles.buttonText}>Calculate</Text>
             </TouchableOpacity>
             {calcEntry && (
               <>
-                <Text style={styles.resultText}>{calcEntry.description}: {calcEntry.calories} kcal</Text>
-                <TouchableOpacity style={styles.addButton} onPress={() => addEntry(calcEntry)}>
+                <Text style={styles.resultText}>
+                  {calcEntry.description}: {calcEntry.calories} kcal
+                </Text>
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={() => addEntry(calcEntry)}
+                >
                   <Text style={styles.addButtonText}>Add to Log</Text>
                 </TouchableOpacity>
               </>
@@ -250,35 +308,62 @@ export default function CalorieInput() {
 
       {/* Bottom Nav Bar */}
       <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => navigation.reset({ index:0, routes:[{ name:'gym' }] })}><Ionicons name="barbell-outline" size={28} color="#1db344"/></TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.reset({ index:0, routes:[{ name:'diet' }] })}><Ionicons name="restaurant-outline" size={28} color="#1db344"/></TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.reset({ index:0, routes:[{ name:'calorieinput' }] })}><Ionicons name="barcode-outline" size={28} color="#1db344"/></TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.reset({ index:0, routes:[{ name:'settings' }] })}><Ionicons name="settings-outline" size={28} color="#1db344"/></TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}>
+          <Ionicons name="barbell-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}>
+          <Ionicons name="restaurant-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'calorieinput' }] })}>
+          <Ionicons name="barcode-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}>
+          <Ionicons name="settings-outline" size={28} color="#1db344" />
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: { flex:1, backgroundColor:'#111', justifyContent:'center', alignItems:'center' },
-  container: { flex:1, backgroundColor:'#111' },
-  scrollContainer:{ paddingTop:60,paddingBottom:80,alignItems:'center' },
-  header: { color:'#fff',fontSize:22,fontWeight:'bold' },
-  subHeader:{ color:'#fff',fontSize:16,marginVertical:8 },
-  logList:{ width:CHART_WIDTH,marginTop:16 },
-  logItem:{ color:'#fff',fontSize:14,marginBottom:4 },
-  actionsRow:{ flexDirection:'row', justifyContent:'space-around', width:CHART_WIDTH, marginTop:32 },
-  manualContainer:{ marginTop:24,width:CHART_WIDTH,alignItems:'center' },
-  input:{ backgroundColor:'#222',color:'#fff',borderRadius:8,padding:12,fontSize:16,width:'100%',textAlignVertical:'top' },
-  button:{ marginTop:16,width:'100%',backgroundColor:'#1db344',paddingVertical:14,borderRadius:8,alignItems:'center' },
-  addButton:{ marginTop:12,width:'100%',backgroundColor:'#36A2EB',paddingVertical:14,borderRadius:8,alignItems:'center' },
-  cancelLink:{ marginTop:12 },
-  cancelText:{ color:'#888',fontSize:16 },
-  card:{ width:CARD_SIZE, height:CARD_SIZE, backgroundColor:'#222',borderRadius:12,alignItems:'center',justifyContent:'center',marginHorizontal:8 },
-  cardText:{ color:'#fff',fontSize:16,marginTop:8,fontWeight:'500',textAlign:'center' },
-  resultText:{ color:'#fff',fontSize:16,marginTop:12 },
-  buttonText:{ color:'#fff',fontSize:18,fontWeight:'500' },
-  addButtonText:{ color:'#fff',fontSize:18,fontWeight:'500' },
-  error:{ color:'#f33',marginTop:8,textAlign:'center' },
-  navBar:{ position:'absolute',bottom:0,width:'100%',height:60,backgroundColor:'#111',flexDirection:'row',justifyContent:'space-around',alignItems:'center',borderTopWidth:1,borderTopColor:'#333' },
+  loadingContainer: { flex: 1, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: '#111' },
+  scrollContainer: { paddingTop: 60, paddingBottom: 80, alignItems: 'center' },
+  header: { color: '#fff', fontSize: 22, fontWeight: 'bold' },
+  subHeader: { color: '#fff', fontSize: 16, marginVertical: 8 },
+  logList: { width: CHART_WIDTH, marginTop: 16 },
+  logItem: { color: '#fff', fontSize: 14, marginBottom: 4 },
+  actionsRow: { flexDirection: 'row', justifyContent: 'space-around', width: CHART_WIDTH, marginTop: 32 },
+  manualContainer: { marginTop: 24, width: CHART_WIDTH, alignItems: 'center' },
+  input: {
+    backgroundColor: '#222',
+    color: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    width: '100%',
+    textAlignVertical: 'top',
+  },
+  button: { marginTop: 16, width: '100%', backgroundColor: '#1db344', paddingVertical: 14, borderRadius: 8, alignItems: 'center' },
+  addButton: { marginTop: 12, width: '100%', backgroundColor: '#36A2EB', paddingVertical: 14, borderRadius: 8, alignItems: 'center' },
+  cancelLink: { marginTop: 12 },
+  cancelText: { color: '#888', fontSize: 16 },
+  card: { width: CARD_SIZE, height: CARD_SIZE, backgroundColor: '#222', borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginHorizontal: 8 },
+  cardText: { color: '#fff', fontSize: 16, marginTop: 8, fontWeight: '500', textAlign: 'center' },
+  resultText: { color: '#fff', fontSize: 16, marginTop: 12 },
+  buttonText: { color: '#fff', fontSize: 18, fontWeight: '500' },
+  addButtonText: { color: '#fff', fontSize: 18, fontWeight: '500' },
+  error: { color: '#f33', marginTop: 8, textAlign: 'center' },
+  navBar: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 60,
+    backgroundColor: '#111',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
 });
