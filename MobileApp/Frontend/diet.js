@@ -311,7 +311,7 @@ const cuttingMeals = {
   breakfast: [
     {
       name: 'Greek Yogurt with Berries & Chia Seeds',
-      image: require('./Images/fbreakfast1.png'),
+      image: require('./Images/Fbreakfast1.png'),
       calories: '250',
       fat: '5g',
       carbs: '18g',
@@ -326,7 +326,7 @@ const cuttingMeals = {
     },
     {
       name: 'Scrambled Eggs with Spinach and Tomatoes',
-      image: require('./Images/fbreakfast2.png'),
+      image: require('./Images/Fbreakfast2.png'),
       calories: '300',
       fat: '22g',
       carbs: '5g',
@@ -341,7 +341,7 @@ const cuttingMeals = {
     },
     {
       name: 'Oatmeal with Cinnamon and Half a Banana',
-      image: require('./Images/fbreakfast3.png'),
+      image: require('./Images/Fbreakfast3.png'),
       calories: '220',
       fat: '3g',
       carbs: '35g',
@@ -356,7 +356,7 @@ const cuttingMeals = {
     },
     {
       name: 'Protein Smoothie with Spinach & Almond Milk',
-      image: require('./Images/fbreakfast4.png'),
+      image: require('./Images/Fbreakfast4.png'),
       calories: '180',
       fat: '2g',
       carbs: '8g',
@@ -371,7 +371,7 @@ const cuttingMeals = {
     },
     {
       name: 'Cottage Cheese with Cucumber Slices',
-      image: require('./Images/fbreakfast5.png'),
+      image: require('./Images/Fbreakfast5.png'),
       calories: '160',
       fat: '4g',
       carbs: '6g',
@@ -388,7 +388,7 @@ const cuttingMeals = {
   lunch: [
     {
       name: 'Grilled Chicken Salad with Olive Oil Dressing',
-      image: require('./Images/flunch1.png'),
+      image: require('./Images/Flunch1.png'),
       calories: '400',
       fat: '18g',
       carbs: '10g',
@@ -403,7 +403,7 @@ const cuttingMeals = {
     },
     {
       name: 'Tuna Lettuce Wraps with Avocado',
-      image: require('./Images/flunch2.png'),
+      image: require('./Images/Flunch2.png'),
       calories: '280',
       fat: '12g',
       carbs: '5g',
@@ -418,7 +418,7 @@ const cuttingMeals = {
     },
     {
       name: 'Turkey Breast with Steamed Broccoli & Quinoa',
-      image: require('./Images/flunch3.png'),
+      image: require('./Images/Flunch3.png'),
       calories: '420',
       fat: '12g',
       carbs: '25g',
@@ -433,7 +433,7 @@ const cuttingMeals = {
     },
     {
       name: 'Egg White Omelette with Mushrooms and Arugula',
-      image: require('./Images/flunch4.png'),
+      image: require('./Images/Flunch4.png'),
       calories: '180',
       fat: '4g',
       carbs: '5g',
@@ -448,7 +448,7 @@ const cuttingMeals = {
     },
     {
       name: 'Grilled Salmon with Cucumber-Tomato Salad',
-      image: require('./Images/flunch5.png'),
+      image: require('./Images/Flunch5.png'),
       calories: '430',
       fat: '22g',
       carbs: '8g',
