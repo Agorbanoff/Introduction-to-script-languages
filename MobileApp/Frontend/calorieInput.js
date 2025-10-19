@@ -144,7 +144,7 @@ export default function CalorieInput() {
     try {
       const token = getAccessToken();
       if (!token) throw new Error('No access token');
-      await fetch('https://gymax.onrender.com/stats/log', {
+      await fetch(`${BASE_API}/search`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
