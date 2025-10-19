@@ -41,4 +41,4 @@ async def delete_account(user_id: str = Depends(get_user_id_from_token)):
     return await delete_account(user_id)
 @user_router.post("/logout")
 async def log_out(user_id: str = Depends(get_user_id_from_token)):
-    return await delete_refresh_token(user_id)
+    return await log_out(user_id)

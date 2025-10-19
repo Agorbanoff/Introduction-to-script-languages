@@ -24,8 +24,6 @@ async def change_workout_plan(user_id: str, change_workout: int):
     )
     return change_workout
 
-
-
 async def calculate_streak(user_id: str):
     user_data = await collection_training.find_one({"user_id": user_id})
 
@@ -53,5 +51,5 @@ async def calculate_streak(user_id: str):
         )
 
         return updated_user["streak"]
-    
+
     return user_data.get("streak", 0)

@@ -4,7 +4,6 @@ import requests
 from dotenv import load_dotenv
 from exceptions.exceptions import OpenFoodFactsFetchException
 
-
 load_dotenv()
 
 OPENFOODFACTS_URL = os.getenv("OPENFOODFACTS_URL")

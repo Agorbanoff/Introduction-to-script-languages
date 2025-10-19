@@ -14,10 +14,8 @@ from exceptions.exceptions import (
 def hashing_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
-
 
 async def sign_up(user: UserSignUp) -> dict:
     if await collection_name.find_one({"email": user.email}):
