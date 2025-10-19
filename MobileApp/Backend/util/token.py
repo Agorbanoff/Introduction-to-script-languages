@@ -24,10 +24,8 @@ def create_token(email: str, expires_delta: int, token_type: str = "access") -> 
 def create_refresh_token(email: str, expire_delta: int = REFRESH_EXPIRE_SECONDS) -> str:
     return create_token(email, expire_delta, "refresh")
 
-
 def create_access_token(email: str, expires_delta: int = JWT_EXPIRE_SECONDS) -> str:
     return create_token(email, expires_delta, "access")
-
 
 def verify_token(token: str, expected_type: str) -> Dict[str, Any]:
     try:

@@ -5,14 +5,13 @@ from bson import ObjectId
 from util.token import (
     create_access_token,
     create_refresh_token,
-    verify_refresh_token, get_user_id_from_token,
+    verify_refresh_token
 )
 from exceptions.exceptions import InvalidTokenException, UserNotFoundException
 from config.db_config import collection_name, collection_token
 
 
 REFRESH_EXPIRE_SECONDS = 30 * 24 * 60 * 60
-
 
 async def save_refresh_token(email: str) -> Dict[str, Any]:
     user = await collection_name.find_one({"email": email})
