@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { PieChart } from 'react-native-chart-kit';
+import CaloriePieChart from './CaloriePieChart';
 // ↓ Import your new token getter instead of AsyncStorage:
 import { getAccessToken } from './authManager';
 
@@ -170,37 +170,14 @@ export default function CalorieInput() {
     );
   }
 
-  // Chart
-  const remaining = Math.max(goalCalories - consumedCalories, 0);
-  const pieData = [
-    { name: 'Consumed', calories: consumedCalories, color: '#FF6384', legendFontColor: '#fff', legendFontSize: 14 },
-    { name: 'Remaining', calories: remaining, color: '#36A2EB', legendFontColor: '#fff', legendFontSize: 14 },
-  ];
-  const chartConfig = {
-    backgroundColor: '#111',
-    backgroundGradientFrom: '#111',
-    backgroundGradientTo: '#111',
-    decimalPlaces: 0,
-    color: o => `rgba(255,255,255,${o})`,
-    labelColor: o => `rgba(255,255,255,${o})`,
-  };
+  // Chart: use CaloriePieChart component
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.header}>FOOD LOG</Text>
         <Text style={styles.subHeader}>Goal: {goalCalories} kcal</Text>
-        <PieChart
-          data={pieData}
-          width={CHART_WIDTH}
-          height={220}
-          chartConfig={chartConfig}
-          accessor="calories"
-          backgroundColor="transparent"
-          paddingLeft="16"
-          absolute
-          hasLegend
-        />
+        <CaloriePieChart consumed={consumedCalories} goal={goalCalories} />
 
         {loggedFoods.length > 0 && (
           <View style={styles.logList}>
