@@ -1,55 +1,52 @@
-Gymax is a personalized fitness and nutrition engine powering a modern React Native mobile app through a clean, flexible FastAPI backend.
+Gymax is a lightweight, adaptive fitness and nutrition engine powering a personalized workout and calorie-tracking mobile application.
 
-Built for users who want adaptive workout plans, precise calorie tracking, and meal recommendations tailored to their unique body stats and goals.
-Gymax combines static formulas with dynamic trend-based algorithms to deliver accurate maintenance estimates and fully customized training plans.
+Built with FastAPI and React Native, Gymax exposes simple, focused endpoints that allow users to generate custom workout plans, estimate real maintenance calories from weight trends, log nutrition, and receive meals tailored to their needs.
 
 ✨ Features
 
--> Personalized workout generation (Push, Pull, Legs, Upper/Lower, Full Body, custom splits)
+Personalized workout generator (Push, Pull, Legs, Upper/Lower, Full Body, custom splits)
 
--> Adaptive metabolism engine using weight-trend analysis
+Adaptive metabolism engine (trend-based calorie maintenance)
 
--> Daily calorie and macro tracking
+Calorie and macro tracking
 
--> Meal recommendations based on user stats and goals
+Meal recommendation engine
 
--> Secure JWT authentication (access + refresh tokens)
+Secure JWT auth (access + refresh tokens)
 
--> User statistics storage (height, weight, age, sex, activity level)
+User statistics (age, weight, height, sex, activity)
 
--> Clean modular architecture (workouts, nutrition, analytics, auth)
+Extendable modular architecture (analytics, AI logic, meal plans, progression)
 
--> Fully mobile-optimized API responses
-
--> Extendable system for future analytics, AI logic, and meal planning
-
-📦 Example Workout Generation Request
+📦 Example Workout Request
 {
   "goal": "muscle_gain",
-  "experience": "intermediate",
-  "daysPerWeek": 4,
+  "experience": "beginner",
+  "daysPerWeek": 3,
   "preferences": {
-    "split": "upper_lower",
-    "equipment": ["dumbbells", "bench"]
+    "split": "full_body",
+    "equipment": ["dumbbells"]
   }
 }
 
-📤 Example Response
+📤 Example Workout Response
 {
   "plan": {
     "days": [
       {
-        "name": "Upper Body",
+        "name": "Full Body A",
         "exercises": [
-          { "name": "Bench Press", "sets": 4, "reps": 8 },
-          { "name": "Dumbbell Row", "sets": 4, "reps": 10 }
+          { "name": "Dumbbell Squat", "sets": 3, "reps": 10 },
+          { "name": "Push-Up", "sets": 3, "reps": 12 },
+          { "name": "Bent-Over Row", "sets": 3, "reps": 10 }
         ]
       },
       {
-        "name": "Lower Body",
+        "name": "Full Body B",
         "exercises": [
-          { "name": "Squat", "sets": 4, "reps": 8 },
-          { "name": "Romanian Deadlift", "sets": 3, "reps": 10 }
+          { "name": "Romanian Deadlift", "sets": 3, "reps": 10 },
+          { "name": "Shoulder Press", "sets": 3, "reps": 12 },
+          { "name": "Lat Pulldown", "sets": 3, "reps": 12 }
         ]
       }
     ]
@@ -58,127 +55,110 @@ Gymax combines static formulas with dynamic trend-based algorithms to deliver ac
 
 🧠 How Gymax Works
 
-Gymax processes training, nutrition, and statistics through four core systems:
+Gymax processes each user through four systems:
 
-1. User Profile & Stats
+1. Validation
 
-The engine reads the stored user data:
+User inputs and preferences are validated:
 
-age, sex, height
+goal exists
 
-weight history
+experience level is valid
 
-activity level
+equipment list is acceptable
 
-training style and preferences
+days per week is within range
 
-These values define the baseline for calories and training recommendations.
+2. Stats & Metabolism Calculation
 
-2. Metabolism & Weight Trend Analysis
+Gymax analyzes weight history, not raw daily weight, using:
 
-Raw weight is noisy, so Gymax calculates:
-
-7–14 day moving average
+moving average trend
 or
 
-linear regression trend (recommended)
+linear regression slope (recommended)
 
-The daily weight slope (dW/dt) helps compute a more accurate:
+Gymax computes realistic maintenance:
 
-real_maintenance = reported_calories - 770 * (dW/dt)
+real_maintenance = calories_logged - 770 * (dW/dt)
 
 
-This makes calorie targets adaptive and personalized.
+This becomes the base for caloric surplus/deficit planning.
 
-3. Workout Plan Engine
+3. Workout Plan Builder (AST)
 
-The backend constructs a structured Workout AST:
+The request is converted into a structured AST:
 
-WorkoutPlan
+WorkoutAST
+ ├── goal
+ ├── experience
  ├── split
  ├── days
- ├── exercises
- └── alternatives
+ └── equipment
 
 
-The AST is then expanded into a full weekly program based on:
+The AST compiles into a structured weekly plan.
 
-goal (fat loss, muscle gain, recomp)
+4. Response Resolution
 
-available equipment
+The workout or meal plan is formatted into clean, predictable JSON optimized for mobile UI rendering.
 
-experience level
-
-exercise difficulty progression
-
-4. Meal Recommendation Engine
-
-Meals are filtered and scored based on:
-
-calorie budget
-
-macro targets
-
-cooking difficulty
-
-goal (surplus/deficit/balance)
-
-Results are delivered in a clean JSON structure ready for mobile UI rendering.
-
-📚 User Stats Example
+📚 User Profile Example
 {
-  "user": {
-    "age": 17,
-    "sex": "male",
-    "height": 178,
-    "weightHistory": [71.2, 71.0, 70.9, 70.7],
-    "activityLevel": "moderate"
-  }
+  "age": 17,
+  "sex": "male",
+  "height": 178,
+  "weightHistory": [71.2, 71.0, 70.9, 70.7],
+  "activityLevel": "moderate"
 }
 
 🚀 Getting Started (FastAPI)
-1. Clone the Repo
+1. Clone the repo
 git clone https://github.com/Agorbanoff/Gymax.git
 cd Gymax
 
-2. Install Backend Dependencies
+2. Install dependencies
 cd backend
 pip install -r requirements.txt
 
-3. Start the Backend
+3. Run the server
 uvicorn app.main:app --reload
 
 🧪 Test an Example Request
 curl -X POST http://localhost:8000/workout/generate \
   -H "Content-Type: application/json" \
-  -d '{"goal": "muscle_gain", "daysPerWeek": 4}'
+  -d '{"goal":"muscle_gain","daysPerWeek":4}'
 
 🧱 Project Roadmap
 
-In-app progress graphs (weight trend, calorie trend)
+Sorting & filtering for meal suggestions
 
-Barcode scanning for calorie tracking
+Pagination for logs and history
 
-Weekly meal planning system
+Food barcode scanning
 
-AI-based workout adaptation from actual performance logs
+AI-adaptive workouts based on performance
 
-Exercise execution analytics
+Weekly meal planning
 
-Social features and shared programs
+Caching repeated meal requests
 
-Cloud sync and multi-device support
+Deep analytics dashboard
+
+Exercise difficulty progression
+
+Multi-device sync
 
 ❗ Error Format
 {
   "error": {
-    "message": "Invalid goal: muscle_gains",
-    "code": "INVALID_GOAL",
-    "path": "goal"
+    "message": "Invalid split: fullb0dy",
+    "code": "INVALID_SPLIT",
+    "path": "preferences.split"
   }
 }
 
 🤝 Contributing
 
-Contributions, ideas, refactors, and architectural improvements are welcome.
-Gymax is designed as an educational and practical project showcasing backend fitness algorithms, trend-based metabolism modeling, and clean mobile-ready API design.
+Pull requests and ideas are welcome.
+Gymax is designed as an educational yet production-ready project demonstrating fitness algorithms, trend-based metabolism modeling, and modular backend architecture.
