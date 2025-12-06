@@ -1,5 +1,3 @@
-Gymax
-
 Gymax is a personalized fitness and nutrition engine powering a modern React Native mobile app through a clean, flexible FastAPI backend.
 
 Built for users who want adaptive workout plans, precise calorie tracking, and meal recommendations tailored to their unique body stats and goals.
@@ -7,23 +5,23 @@ Gymax combines static formulas with dynamic trend-based algorithms to deliver ac
 
 ✨ Features
 
-Personalized workout generation (Push, Pull, Legs, Upper/Lower, Full Body, custom splits)
+-> Personalized workout generation (Push, Pull, Legs, Upper/Lower, Full Body, custom splits)
 
-Adaptive metabolism engine using weight-trend analysis
+-> Adaptive metabolism engine using weight-trend analysis
 
-Daily calorie and macro tracking
+-> Daily calorie and macro tracking
 
-Meal recommendations based on user stats and goals
+-> Meal recommendations based on user stats and goals
 
-Secure JWT authentication (access + refresh tokens)
+-> Secure JWT authentication (access + refresh tokens)
 
-User statistics storage (height, weight, age, sex, activity level)
+-> User statistics storage (height, weight, age, sex, activity level)
 
-Clean modular architecture (workouts, nutrition, analytics, auth)
+-> Clean modular architecture (workouts, nutrition, analytics, auth)
 
-Fully mobile-optimized API responses
+-> Fully mobile-optimized API responses
 
-Extendable system for future analytics, AI logic, and meal planning
+-> Extendable system for future analytics, AI logic, and meal planning
 
 📦 Example Workout Generation Request
 {
