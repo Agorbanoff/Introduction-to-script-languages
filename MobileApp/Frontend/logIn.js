@@ -16,6 +16,7 @@ import {
 import { StatusBar } from 'expo-status-bar';
 import * as SecureStore from 'expo-secure-store';
 import { setAccessToken } from './authManager';
+import { BASE_API } from "./apiConfig";
 
 export default function LogInPage({ navigation }) {
   const [email, setEmail] = useState('');

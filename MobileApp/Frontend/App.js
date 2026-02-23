@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { BASE_API } from "./apiConfig";
 import LoginPage from './logIn';
 import SignUpPage from './signUp';
 import StatisticsPage from './statistics';
@@ -31,7 +31,7 @@ export default function App() {
       }
 
       try {
-        const res = await fetch('https://gymax.onrender.com/stats/training', {
+        const res = await fetch(`${BASE_API}/auth/signup`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
