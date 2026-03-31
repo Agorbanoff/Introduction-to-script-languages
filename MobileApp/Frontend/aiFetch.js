@@ -10,12 +10,12 @@ import {
   Platform,
   StyleSheet,
   ScrollView,
-  ImageBackground,
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
 import { authFetch } from "./authFetch"; // your existing helper
 import { Ionicons } from "@expo/vector-icons"; // for send/back icons
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 export default function AIFitnessChat({ navigation }) {
   const [inputText, setInputText] = useState("");
@@ -121,11 +121,7 @@ export default function AIFitnessChat({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require("./Images/gymPhoto.jpg")} // replace with your own background if needed
-      style={styles.background}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require("./Images/gymPhoto.jpg")}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -175,16 +171,15 @@ export default function AIFitnessChat({ navigation }) {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, backgroundColor: "#000" },
   container: { flex: 1 },
   innerContainer: {
     flex: 1,
-    backgroundColor: "rgba(33,33,33,0.85)",
+    backgroundColor: "rgba(7, 10, 18, 0.58)",
   },
   topBar: {
     height: 60,
@@ -228,7 +223,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
   },
   botBubble: {
-    backgroundColor: "#222",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderBottomLeftRadius: 0,
   },
   bubbleText: {
@@ -249,9 +244,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: "#111",
+    backgroundColor: "rgba(7, 11, 18, 0.78)",
     borderTopWidth: 1,
-    borderColor: "#333",
+    borderColor: "rgba(255,255,255,0.08)",
   },
   textInput: {
     flex: 1,
@@ -261,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: "#222",
+    backgroundColor: "rgba(255,255,255,0.08)",
     borderRadius: 20,
   },
   sendButton: {

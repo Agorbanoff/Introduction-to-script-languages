@@ -1,6 +1,5 @@
 import bcrypt
 from bson import ObjectId
-from util.token import create_access_token, create_refresh_token
 
 from service.token_service import save_refresh_token
 from config.db_config import collection_name, collection_statistics, collection_training, collection_token
@@ -31,16 +30,13 @@ async def sign_up(user: UserSignUp) -> dict:
 
     email = user.email
 
-    refresh_token = create_refresh_token(email)
-    access_token = create_access_token(email)
-
-    await save_refresh_token(email)
+    tokens = await save_refresh_token(email)
 
     return {
         "message": "User registered successfully",
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
+        "access_token": tokens["access_token"],
+        "refresh_token": tokens["refresh_token"],
+        "token_type": tokens["token_type"],
         "user": {
             "username": user.username,
             "email": user.email
@@ -57,15 +53,12 @@ async def log_in(user: UserLogIn) -> dict:
 
     email = user.email
 
-    refresh_token = create_refresh_token(email)
-    access_token = create_access_token(email)
-
-    await save_refresh_token(email)
+    tokens = await save_refresh_token(email)
 
     return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
+        "access_token": tokens["access_token"],
+        "refresh_token": tokens["refresh_token"],
+        "token_type": tokens["token_type"],
         "user": {
             "id": str(existing_user["_id"]),
             "email": existing_user["email"]
@@ -78,17 +71,20 @@ async def find_username(user_id: str):
         raise UserNotFoundException()
     return user["username"]
 
-async def change_username(user_id: str, new_username):
+async def change_username(user_id: str, new_username: str, current_password: str):
        user = await collection_name.find_one({"_id": ObjectId(user_id)})
        if not user:
            raise UserNotFoundException()
-       
+
+       if not verify_password(current_password, user["password"]):
+           raise InvalidPasswordException()
+
        await collection_name.update_one(
            {"_id": ObjectId(user_id)},
             {"$set": {"username": new_username}}
        )
 
-       return user["username"]
+       return new_username
 
 async def change_password(user_id: str, current_password: str, new_password: str):
     user = await collection_name.find_one({"_id": ObjectId(user_id)})

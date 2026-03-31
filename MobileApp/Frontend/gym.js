@@ -11,6 +11,23 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AnimatedScreenView from './AnimatedScreenView';
+import FloatingNavBar from './FloatingNavBar';
+import FuturisticBackdrop from './FuturisticBackdrop';
+
+const workoutImages = {
+  PUSH: require('./Images/PushImage.jpg'),
+  PULL: require('./Images/PullImage.jpg'),
+  LEGS: require('./Images/LegImage.jpg'),
+  LEGS_AND_CORE: require('./Images/LegImage.jpg'),
+  ARM_DAY: require('./Images/ArmImage.jpg'),
+  CHEST_AND_BACK: require('./Images/UpperImage.jpg'),
+  CORE_MOBILITY: require('./Images/CoreImage.jpg'),
+  UPPER_BODY: require('./Images/UpperImage.jpg'),
+  LOWER_BODY: require('./Images/LowerImage.jpg'),
+  FULL_BODY: require('./Images/FullBodyImage.jpg'),
+  REST_DAY: require('./Images/homePagePhoto.jpg'),
+};
 
 const GymPage = () => {
   const navigation = useNavigation();
@@ -20,7 +37,9 @@ const GymPage = () => {
   useEffect(() => {
     const loadSessions = async () => {
       if (route.params?.sessionsPerWeek) {
-        setSessionsPerWeek(route.params.sessionsPerWeek);
+        const nextValue = parseInt(route.params.sessionsPerWeek, 10);
+        setSessionsPerWeek(nextValue);
+        await AsyncStorage.setItem('sessionsPerWeek', String(nextValue));
       } else {
         const stored = await AsyncStorage.getItem('sessionsPerWeek');
         setSessionsPerWeek(stored ? parseInt(stored, 10) : 3);
@@ -70,59 +89,41 @@ const GymPage = () => {
   const workoutData = schedule.map((type, index) => ({
     id: index + 1,
     type,
-    image: require('./Images/gymPhoto.jpg'),
+    image: workoutImages[type.replace(/[\s-]/g, '_').toUpperCase()] || require('./Images/gymPhoto.jpg'),
   }));
 
   const today = new Date();
   const todayIndex = (today.getDay() + 6) % 7;
-  const displayDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-
-  const getWeekNumber = date => {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-  };
-
-  const currentWeek = getWeekNumber(today);
+  const displayDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.header}>WORKOUTS</Text>
-
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
+      <AnimatedScreenView style={styles.content}>
         <View style={styles.dayRow}>
           {displayDays.map((day, index) => (
-            <View key={index} style={styles.dayColumn}>
-              <View
-                style={[
-                  styles.dayCircle,
-                  index === todayIndex && styles.activeDayCircle,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.dayText,
-                    index === todayIndex && styles.activeDayText,
-                  ]}
-                >
-                  {day}
-                </Text>
-              </View>
+            <View
+              key={day}
+              style={[
+                styles.dayPill,
+                index === todayIndex && styles.activeDayPill,
+              ]}
+            >
               <Text
                 style={[
-                  styles.weekLabel,
-                  index === todayIndex && styles.activeWeekLabel,
+                  styles.dayText,
+                  index === todayIndex && styles.activeDayText,
                 ]}
               >
-                WK {currentWeek}
+                {day}
               </Text>
             </View>
           ))}
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
           {workoutData.map((item, index) => (
             <TouchableOpacity
               key={item.id}
@@ -131,7 +132,7 @@ const GymPage = () => {
                 index === todayIndex && styles.activeCard,
               ]}
               onPress={() => {
-                const params = { workoutType: item.type };
+                const params = { workoutType: item.type, dayLabel: displayDays[index] };
                 if (item.type.toUpperCase() !== 'REST DAY') {
                   params.day = item.id;
                   params.sessionsPerWeek = sessionsPerWeek;
@@ -141,53 +142,23 @@ const GymPage = () => {
             >
               <Image source={item.image} style={styles.cardImage} />
               <View style={styles.cardContent}>
-                <Text style={styles.cardId}>{item.id}</Text>
-                <Text style={styles.cardText}>{item.type}</Text>
+                <View style={styles.cardMeta}>
+                  <Text style={styles.cardDay}>{displayDays[index]}</Text>
+                  <Text style={styles.cardText}>{item.type}</Text>
+                </View>
                 <Ionicons
                   name="chevron-forward-outline"
                   size={20}
-                  color="#999"
+                  color="#b8cbc5"
                 />
               </View>
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
+      </AnimatedScreenView>
 
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.reset({ index: 0, routes: [{ name: 'gym' }] })
-          }
-        >
-          <Ionicons name="barbell-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() =>
-            navigation.reset({ index: 0, routes: [{ name: 'diet' }] })
-          }
-        >
-          <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('calorieinput')
-          }
-        >
-          <Ionicons name="barcode-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() =>
-            navigation.reset({ index: 0, routes: [{ name: 'settings' }] })
-          }
-        >
-          <Ionicons name="settings-outline" size={28} color="#1db344" />
-        </TouchableOpacity>
-      </View>
-    </View>
+      <FloatingNavBar navigation={navigation} activeRoute="gym" />
+    </FuturisticBackdrop>
   );
 };
 
@@ -196,7 +167,7 @@ export default GymPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#111',
+    backgroundColor: '#06090d',
   },
   loadingContainer: {
     flex: 1,
@@ -206,71 +177,65 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingTop: 50,
+    paddingTop: 42,
     paddingHorizontal: 16,
-  },
-  header: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
   },
   dayRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 26,
+    backgroundColor: 'rgba(8, 12, 19, 0.58)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  dayColumn: {
-    alignItems: 'center',
-  },
-  dayCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#333',
+  dayPill: {
+    minWidth: 40,
+    paddingHorizontal: 6,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  activeDayCircle: {
-    backgroundColor: '#c33',
+  activeDayPill: {
+    backgroundColor: '#6ff7c7',
   },
   dayText: {
-    color: '#ccc',
+    color: '#d6e5df',
+    fontSize: 12,
+    fontWeight: '700',
   },
   activeDayText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  weekLabel: {
-    color: '#999',
-    fontSize: 10,
-    marginTop: 4,
-  },
-  activeWeekLabel: {
-    color: '#c33',
-    fontWeight: 'bold',
+    color: '#071611',
+    fontWeight: '800',
   },
   scrollContent: {
-    paddingBottom: 20,
-    paddingTop: 10,
+    paddingBottom: 140,
+    paddingTop: 4,
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#222',
-    borderRadius: 12,
-    padding: 10,
+    backgroundColor: 'rgba(11, 16, 24, 0.66)',
+    borderRadius: 28,
+    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
   },
   activeCard: {
     borderWidth: 1,
-    borderColor: '#1db344',
+    borderColor: '#6ff7c7',
+    backgroundColor: 'rgba(111, 247, 199, 0.11)',
   },
   cardImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 82,
+    height: 82,
+    borderRadius: 20,
     marginRight: 12,
   },
   cardContent: {
@@ -278,23 +243,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  cardId: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    width: 30,
-  },
-  cardText: {
-    color: '#ccc',
+  cardMeta: {
     flex: 1,
   },
-  navBar: {
-    height: 60,
-    backgroundColor: '#111',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
+  cardDay: {
+    color: '#9dffe0',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 6,
+    letterSpacing: 1.1,
+    textTransform: 'uppercase',
+  },
+  cardText: {
+    color: '#f1fbf7',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Alert,
   View,
@@ -6,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -14,9 +14,11 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import * as SecureStore from 'expo-secure-store';
-import { setAccessToken } from './authManager';
+import { authFetch } from './authFetch';
+import { storeAuthTokens } from './authManager';
 import { BASE_API } from "./apiConfig";
+import { getApiErrorMessage, parseApiResponse } from './apiResponse';
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 export default function LogInPage({ navigation }) {
   const [email, setEmail] = useState('');
@@ -53,23 +55,28 @@ export default function LogInPage({ navigation }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
 
       if (response.ok && data.access_token && data.refresh_token) {
-        // Save tokens
-        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
-        setAccessToken(data.access_token);
+        await storeAuthTokens({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        });
 
         // Try to get training info
-        const trainingResponse = await fetch(`${BASE_API}/stats/training`, {
+        const trainingResponse = await authFetch(`${BASE_API}/stats/training`, {
           method: 'GET',
-          headers: { Authorization: `Bearer ${data.access_token}` },
         });
 
         if (trainingResponse.ok) {
-          const trainingData = await trainingResponse.json();
+          const trainingData = await parseApiResponse(trainingResponse);
           const sessions = trainingData.sessions_per_week;
-          navigation.navigate('gym', { sessionsPerWeek: sessions });
+          if (typeof sessions === 'number') {
+            await AsyncStorage.setItem('sessionsPerWeek', String(sessions));
+            navigation.navigate('gym', { sessionsPerWeek: sessions });
+            return;
+          }
+          navigation.navigate('status');
         } else {
           navigation.navigate('status');
         }
@@ -77,16 +84,16 @@ export default function LogInPage({ navigation }) {
         setEmailError('');
         setPasswordError('');
 
-        if (data.detail) {
-          const errorMsg = data.detail.toLowerCase();
+        const errorMsg = getApiErrorMessage(data, 'Login failed').toLowerCase();
+        if (errorMsg) {
           if (errorMsg.includes('email')) setEmailError('Invalid email');
           else if (errorMsg.includes('password')) setPasswordError('Invalid password');
           else if (errorMsg.includes('credentials')) {
             setEmailError('Invalid credentials');
             setPasswordError('Invalid credentials');
-          } else Alert.alert('Error', data.detail);
+          } else Alert.alert('Error', getApiErrorMessage(data, 'Login failed'));
         } else {
-          Alert.alert('Error', data.message || 'Login failed');
+          Alert.alert('Error', getApiErrorMessage(data, 'Login failed'));
         }
       }
     } catch (error) {
@@ -96,11 +103,7 @@ export default function LogInPage({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require('./Images/gymPhoto.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -109,6 +112,9 @@ export default function LogInPage({ navigation }) {
           <View style={styles.overlay}>
             <SafeAreaView>
               <Text style={styles.frontText}>Welcome Back!</Text>
+              <Text style={styles.captionText}>
+                Step back into your plan with the same futuristic vibe across the app.
+              </Text>
             </SafeAreaView>
 
             <View style={styles.container}>
@@ -154,26 +160,31 @@ export default function LogInPage({ navigation }) {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   frontText: {
     textAlign: 'center',
-    fontSize: 50,
-    fontWeight: 'bold',
-    color: '#1db344',
-    padding: 30,
+    fontSize: 44,
+    fontWeight: '800',
+    color: '#9dffe0',
+    paddingTop: 30,
+    paddingHorizontal: 30,
+  },
+  captionText: {
+    textAlign: 'center',
+    color: 'rgba(214, 229, 224, 0.74)',
+    fontSize: 15,
+    lineHeight: 22,
+    paddingHorizontal: 34,
+    marginTop: 6,
   },
   container: {
     alignItems: 'center',
@@ -182,14 +193,14 @@ const styles = StyleSheet.create({
     marginBottom: '20%',
   },
   input: {
-    height: 45,
+    height: 48,
     width: '80%',
-    borderColor: '#555',
+    borderColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 18,
     marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: '#111',
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     color: 'white',
   },
   inputError: {
@@ -203,17 +214,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     width: '100%',
     marginVertical: 10,
   },
   buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: '#071611',
+    fontWeight: '800',
     fontSize: 16,
     textAlign: 'center',
   },

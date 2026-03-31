@@ -12,9 +12,10 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
-import { getAccessToken } from './authManager';
 import {authFetch} from './authFetch';
 import { Ionicons } from '@expo/vector-icons';
+import AnimatedScreenView from './AnimatedScreenView';
+import FloatingNavBar from './FloatingNavBar';
 
 const bulkingMeals = {
   breakfast: [
@@ -433,7 +434,7 @@ const cuttingMeals = {
     },
     {
       name: 'Egg White Omelette with Mushrooms and Arugula',
-      image: require('./Images/Flunch4.png'),
+      image: require('./Images/flunch4.png'),
       calories: '180',
       fat: '4g',
       carbs: '5g',
@@ -448,7 +449,7 @@ const cuttingMeals = {
     },
     {
       name: 'Grilled Salmon with Cucumber-Tomato Salad',
-      image: require('./Images/Flunch5.png'),
+      image: require('./Images/flunch5.png'),
       calories: '430',
       fat: '22g',
       carbs: '8g',
@@ -621,11 +622,7 @@ export default function DietPlanScreen({ navigation }) {
   useEffect(() => {
     (async () => {
       try {
-        // 1) Get the in-memory access token
-        const token = getAccessToken();
-        if (!token) throw new Error('No access token found');
-
-        // 2) Use authFetch so that the Authorization header is applied (and token refreshing happens if needed)
+        // Use authFetch so the stored token is applied after app restarts too.
         const res = await authFetch(`${BASE_API}/stats/statistics`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -681,97 +678,148 @@ export default function DietPlanScreen({ navigation }) {
 
   return (
     <ImageBackground
-      source={require('./Images/homePagePhoto.jpg')}
-      style={styles.backgroundImage}
+      source={require('./Images/dietPage.jpg')}
+      style={styles.screen}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 100 }}>
+      <View style={styles.backdropOverlay} />
+      <View style={[styles.glow, styles.glowTop]} />
+      <View style={[styles.glow, styles.glowMiddle]} />
+      <View style={[styles.glow, styles.glowBottom]} />
+
+      <AnimatedScreenView style={styles.overlay}>
+        <View style={styles.headerBlock}>
+          <Text style={styles.headerKicker}>Nutrition</Text>
+          <Text style={styles.headerTitle}>Meal ideas with the same clean futuristic vibe.</Text>
+          <Text style={styles.headerText}>
+            The meals flow now keeps the darker food background, but the accents
+            stay aligned with the rest of the app.
+          </Text>
+        </View>
+
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 140 }}
+        >
           {renderMealCategory('breakfast')}
           {renderMealCategory('lunch')}
           {renderMealCategory('dinner')}
           {renderMealCategory('snack')}
         </ScrollView>
-        <View style={styles.navBar}>
-          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'gym' }] })}>
-            <Ionicons name="barbell-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
+      </AnimatedScreenView>
 
-          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'diet' }] })}>
-            <Ionicons name="restaurant-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.navigate('calorieinput')}>
-            <Ionicons name="barcode-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: 'settings' }] })}>
-            <Ionicons name="settings-outline" size={28} color="#1db344" />
-          </TouchableOpacity>
-        </View>
-      </View>
+      <FloatingNavBar navigation={navigation} activeRoute="diet" />
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  screen: {
     flex: 1,
+    backgroundColor: '#05080b',
+  },
+  backdropOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(5, 8, 11, 0.82)',
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
+    backgroundColor: 'rgba(6, 9, 12, 0.36)',
+    paddingTop: 56,
+    paddingHorizontal: 16,
+  },
+  glow: {
+    position: 'absolute',
+    borderRadius: 999,
+  },
+  glowTop: {
+    width: 260,
+    height: 260,
+    top: -70,
+    right: -80,
+    backgroundColor: 'rgba(57, 215, 157, 0.18)',
+  },
+  glowMiddle: {
+    width: 220,
+    height: 220,
+    top: '30%',
+    left: -80,
+    backgroundColor: 'rgba(93, 140, 255, 0.14)',
+  },
+  glowBottom: {
+    width: 280,
+    height: 280,
+    bottom: 20,
+    right: -90,
+    backgroundColor: 'rgba(255, 113, 95, 0.1)',
+  },
+  headerBlock: {
+    marginBottom: 14,
+    padding: 20,
+    borderRadius: 28,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+  },
+  headerKicker: {
+    color: '#9dffe0',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  headerTitle: {
+    color: '#f8fffd',
+    fontSize: 28,
+    fontWeight: '800',
+    marginBottom: 8,
+  },
+  headerText: {
+    color: 'rgba(218, 230, 226, 0.74)',
+    fontSize: 14,
+    lineHeight: 20,
   },
   scrollView: {
     flex: 1,
   },
   categoryContainer: {
-    marginBottom: 20,
+    marginBottom: 22,
   },
   mealTypeHeader: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    padding: 10,
-    color: '#1db344',
-    textAlign: 'center',
+    fontSize: 19,
+    fontWeight: '800',
+    paddingVertical: 10,
+    color: '#9dffe0',
   },
   dishCard: {
-    backgroundColor: '#fff',
-    width: 160,
-    margin: 10,
-    borderRadius: 10,
-    elevation: 3,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    width: 170,
+    marginRight: 14,
+    borderRadius: 24,
     padding: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.07)',
   },
   dishImage: {
     width: 150,
     height: 150,
-    borderRadius: 10,
+    borderRadius: 18,
   },
   dishText: {
-    color: 'black',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 5,
+    color: '#f7fffb',
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 10,
     textAlign: 'center',
   },
   calories: {
     fontSize: 14,
-    color: 'grey',
+    color: 'rgba(214, 227, 223, 0.7)',
     textAlign: 'center',
-  },
-  navBar: {
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    height: 60,
-    backgroundColor: '#111',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
+    marginTop: 6,
   },
   loaderContainer: {
     flex: 1,

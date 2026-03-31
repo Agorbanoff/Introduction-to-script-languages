@@ -1,127 +1,177 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text as RNText, StyleSheet, Animated } from 'react-native';
-import Svg, { Path, G, Text as SvgText, Circle } from 'react-native-svg';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import Svg, {
+  Circle,
+  Defs,
+  G,
+  LinearGradient,
+  Stop,
+} from 'react-native-svg';
 
-// Animated donut chart using only React Native and react-native-svg (no new packages)
-export default function CaloriePieChart({ consumed = 0, goal = 2000, size = 220, animationDuration = 600 }) {
+export default function CaloriePieChart({
+  consumed = 0,
+  goal = 2000,
+  size = 228,
+  animationDuration = 900,
+}) {
   const clampedGoal = Math.max(0, goal);
-
-  // Animated value (drives slice and number animation)
-  const animated = useRef(new Animated.Value(consumed)).current;
+  const animatedValue = useRef(new Animated.Value(consumed)).current;
+  const haloScale = useRef(new Animated.Value(0.92)).current;
   const [animatedConsumed, setAnimatedConsumed] = useState(consumed);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // animate numeric value
-    Animated.timing(animated, {
-      toValue: consumed,
-      duration: Math.max(80, animationDuration),
-      useNativeDriver: false,
-    }).start();
-
-    // pulse the pill
-    Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 1.06, duration: 140, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 220, useNativeDriver: true }),
+    Animated.parallel([
+      Animated.timing(animatedValue, {
+        toValue: consumed,
+        duration: Math.max(180, animationDuration),
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+      Animated.sequence([
+        Animated.timing(haloScale, {
+          toValue: 1.04,
+          duration: 260,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.spring(haloScale, {
+          toValue: 1,
+          damping: 12,
+          stiffness: 120,
+          mass: 0.9,
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
-  }, [consumed, animationDuration, animated, scaleAnim]);
+  }, [animationDuration, animatedValue, consumed, haloScale]);
 
-  // listen to animated value and reflect into state for path math
   useEffect(() => {
-    const id = animated.addListener(({ value }) => setAnimatedConsumed(value));
-    return () => animated.removeListener(id);
-  }, [animated]);
+    const listener = animatedValue.addListener(({ value }) => {
+      setAnimatedConsumed(value);
+    });
 
-  // use animated value for visuals
-  const consumedValue = Math.max(0, animatedConsumed);
-  const remainingValue = Math.max(clampedGoal - consumedValue, 0);
-  const total = consumedValue + remainingValue || 1; // avoid division by zero
-  const percent = clampedGoal > 0 ? Math.round((consumedValue / clampedGoal) * 100) : 0;
+    return () => animatedValue.removeListener(listener);
+  }, [animatedValue]);
 
-  // dynamic color depending on how close to/over the goal
-  const consumedColor = (() => {
-    if (clampedGoal <= 0) return '#4CAF50';
-    const ratio = consumedValue / clampedGoal;
-    if (ratio >= 1) return '#e53935';
-    if (ratio >= 0.9) return '#FB8C00';
-    return '#4CAF50';
-  })();
+  const safeConsumed = Math.max(0, animatedConsumed);
+  const ratio = clampedGoal > 0 ? safeConsumed / clampedGoal : 0;
+  const clampedRatio = Math.max(0, Math.min(ratio, 1));
+  const displayConsumed = Math.round(safeConsumed);
+  const displayRemaining = Math.max(Math.round(clampedGoal - safeConsumed), 0);
+  const displayPercent = clampedGoal > 0 ? Math.round(ratio * 100) : 0;
+  const isOverGoal = ratio > 1;
 
-  // SVG geometry
-  const cx = size / 2;
-  const cy = size / 2;
-  const outerR = size / 2;
-  const innerR = outerR * 0.62;
+  const radius = size * 0.34;
+  const strokeWidth = size * 0.078;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - clampedRatio);
+  const center = size / 2;
 
-  const toRadians = deg => (deg * Math.PI) / 180;
-  const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-    const angleInRadians = toRadians(angleInDegrees - 90);
-    return {
-      x: centerX + radius * Math.cos(angleInRadians),
-      y: centerY + radius * Math.sin(angleInRadians),
-    };
-  };
-
-  const describeDonutSlice = (cx, cy, outerR, innerR, startAngle, endAngle) => {
-    const largeArc = endAngle - startAngle <= 180 ? '0' : '1';
-    const outerStart = polarToCartesian(cx, cy, outerR, startAngle);
-    const outerEnd = polarToCartesian(cx, cy, outerR, endAngle);
-    const innerStart = polarToCartesian(cx, cy, innerR, endAngle);
-    const innerEnd = polarToCartesian(cx, cy, innerR, startAngle);
-
-    return `M ${outerStart.x} ${outerStart.y} A ${outerR} ${outerR} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y} L ${innerStart.x} ${innerStart.y} A ${innerR} ${innerR} 0 ${largeArc} 0 ${innerEnd.x} ${innerEnd.y} Z`;
-  };
-
-  // compute angles with a small gap between slices for separation
-  const startAngle = 0;
-  const consumedAngle = (consumedValue / total) * 360;
-  const gap = 1.8; // degrees
-  const consumedStart = startAngle + gap / 2;
-  const consumedEnd = consumedStart + Math.max(consumedAngle - gap, 0);
-  const remainingStart = consumedEnd + gap / 2;
-  const remainingEnd = 360 - gap / 2;
-
-  const consumedPath = describeDonutSlice(cx, cy, outerR, innerR, consumedStart, consumedEnd);
-  const remainingPath = describeDonutSlice(cx, cy, outerR, innerR, remainingStart, remainingEnd);
-
-  // friendly display values
-  const displayConsumed = Math.round(consumedValue);
-  const displayRemaining = Math.round(Math.max(clampedGoal - consumedValue, 0));
+  const angle = clampedRatio * Math.PI * 2 - Math.PI / 2;
+  const dotX = center + radius * Math.cos(angle);
+  const dotY = center + radius * Math.sin(angle);
 
   return (
     <View style={styles.container}>
-      <RNText style={styles.title}>Daily Calories</RNText>
-
-      <Svg width={size} height={size}>
-        <G>
-          {/* subtle inner circle */}
-          <Circle cx={cx} cy={cy} r={innerR} fill="#000" opacity={0.12} />
-
-          {/* draw remaining first */}
-          <Path d={remainingPath} fill="#222224" stroke="#111" strokeWidth={1} />
-          <Path d={consumedPath} fill={consumedColor} stroke="#111" strokeWidth={1} />
-
-          {/* percentage in center */}
-          <SvgText x={cx} y={cy - 8} fill="#fff" fontSize="28" fontWeight="700" textAnchor="middle">
-            {percent}%
-          </SvgText>
-        </G>
-      </Svg>
-
-      {/* prominent calorie pill below chart for readability (white pill, colored number) */}
-      <Animated.View style={[styles.pill, { transform: [{ scale: scaleAnim }] }]}>
-        <RNText style={[styles.pillNumber, { color: consumedColor }]}>{displayConsumed}</RNText>
-        <RNText style={[styles.pillLabel, { color: '#666' }]}>kcal</RNText>
-      </Animated.View>
-
-      <View style={styles.legendRow}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: consumedColor }]} />
-          <RNText style={styles.legendText}>Consumed ({displayConsumed} kcal)</RNText>
+      <View style={styles.headingRow}>
+        <View>
+          <Text style={styles.eyebrow}>Daily energy</Text>
+          <Text style={styles.title}>Calorie balance</Text>
         </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#222224' }]} />
-          <RNText style={styles.legendText}>Remaining ({displayRemaining} kcal)</RNText>
+        <View style={[styles.statusBadge, isOverGoal && styles.statusBadgeWarm]}>
+          <Text style={[styles.statusText, isOverGoal && styles.statusTextWarm]}>
+            {isOverGoal ? 'Over goal' : 'On track'}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.chartWrap}>
+        <Animated.View
+          style={[
+            styles.halo,
+            isOverGoal ? styles.haloWarm : styles.haloCool,
+            { transform: [{ scale: haloScale }] },
+          ]}
+        />
+
+        <Svg width={size} height={size}>
+          <Defs>
+            <LinearGradient
+              id="progressCool"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <Stop offset="0%" stopColor="#7af6e0" />
+              <Stop offset="100%" stopColor="#3ecf8e" />
+            </LinearGradient>
+            <LinearGradient
+              id="progressWarm"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="100%"
+            >
+              <Stop offset="0%" stopColor="#ff8d6c" />
+              <Stop offset="100%" stopColor="#ff5f73" />
+            </LinearGradient>
+          </Defs>
+
+          <G rotation="-90" origin={`${center}, ${center}`}>
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth={strokeWidth}
+              fill="transparent"
+            />
+            <Circle
+              cx={center}
+              cy={center}
+              r={radius}
+              stroke={isOverGoal ? 'url(#progressWarm)' : 'url(#progressCool)'}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeDasharray={`${circumference} ${circumference}`}
+              strokeDashoffset={strokeDashoffset}
+              fill="transparent"
+            />
+          </G>
+
+          <Circle
+            cx={center}
+            cy={center}
+            r={radius * 0.76}
+            fill="rgba(9, 16, 23, 0.96)"
+          />
+
+          <Circle
+            cx={dotX}
+            cy={dotY}
+            r={strokeWidth * 0.42}
+            fill={isOverGoal ? '#ff7c79' : '#85ffe1'}
+          />
+        </Svg>
+
+        <View style={styles.centerCopy}>
+          <Text style={styles.centerValue}>{displayConsumed}</Text>
+          <Text style={styles.centerUnit}>kcal consumed</Text>
+          <Text style={styles.centerSubtext}>
+            {displayRemaining} kcal remaining
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.metricRow}>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricLabel}>Goal</Text>
+          <Text style={styles.metricValue}>{clampedGoal}</Text>
+        </View>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricLabel}>Progress</Text>
+          <Text style={styles.metricValue}>{displayPercent}%</Text>
         </View>
       </View>
     </View>
@@ -130,57 +180,113 @@ export default function CaloriePieChart({ consumed = 0, goal = 2000, size = 220,
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     alignItems: 'center',
-    paddingVertical: 12,
+  },
+  headingRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+  },
+  eyebrow: {
+    color: 'rgba(214, 244, 236, 0.62)',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 18,
+    color: '#f8fffc',
+    fontSize: 24,
     fontWeight: '700',
-    color: '#fff',
-    marginBottom: 6,
   },
-  pill: {
-    marginTop: 10,
-    paddingHorizontal: 18,
+  statusBadge: {
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 3,
+    borderRadius: 999,
+    backgroundColor: 'rgba(111, 247, 199, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(111, 247, 199, 0.24)',
   },
-  pillNumber: {
-    color: '#4CAF50',
-    fontSize: 22,
-    fontWeight: '800',
-    marginRight: 8,
+  statusBadgeWarm: {
+    backgroundColor: 'rgba(255, 117, 105, 0.12)',
+    borderColor: 'rgba(255, 117, 105, 0.22)',
   },
-  pillLabel: {
-    color: '#666',
+  statusText: {
+    color: '#b7ffe7',
     fontSize: 12,
-    opacity: 0.95,
+    fontWeight: '700',
   },
-  legendRow: {
-    marginTop: 12,
-    width: '85%',
+  statusTextWarm: {
+    color: '#ffd2c8',
+  },
+  chartWrap: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
+  },
+  halo: {
+    position: 'absolute',
+    width: '62%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    opacity: 0.28,
+  },
+  haloCool: {
+    backgroundColor: '#4effc9',
+  },
+  haloWarm: {
+    backgroundColor: '#ff7e73',
+  },
+  centerCopy: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerValue: {
+    color: '#f8fffc',
+    fontSize: 42,
+    fontWeight: '800',
+    letterSpacing: -1.2,
+  },
+  centerUnit: {
+    color: '#d7e7e2',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  centerSubtext: {
+    color: 'rgba(201, 214, 210, 0.72)',
+    fontSize: 13,
+    marginTop: 6,
+  },
+  metricRow: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  metricCard: {
+    width: '48%',
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
-  legendDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    marginRight: 8,
+  metricLabel: {
+    color: 'rgba(208, 223, 218, 0.66)',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginBottom: 6,
   },
-  legendText: {
-    color: '#ddd',
-    fontSize: 13,
+  metricValue: {
+    color: '#f9fffd',
+    fontSize: 24,
+    fontWeight: '700',
   },
 });

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from exceptions.exceptions import RefreshTokenMismatchException
 from util.token import create_access_token, verify_refresh_token
 from service.user_account_service import log_out
@@ -8,14 +8,20 @@ from config.db_config import collection_name
 token_router = APIRouter()
 
 @token_router.post("/refresh")
-async def generate_new_access_token(refresh_token: str):
-    email = verify_refresh_token(refresh_token)
+async def generate_new_access_token(
+    refresh_token: str | None = None,
+    refresh_token_body: str | None = Body(default=None, embed=True, alias="refresh_token")
+):
+    token = refresh_token or refresh_token_body
+    if not token:
+        raise RefreshTokenMismatchException()
+    email = verify_refresh_token(token)
 
     user = await collection_name.find_one({"email": email})
 
     stored_token = await get_refresh_token(str(user["_id"]))
 
-    if refresh_token != stored_token:
+    if token != stored_token:
         await log_out(str(user["_id"]))
         raise RefreshTokenMismatchException()
 

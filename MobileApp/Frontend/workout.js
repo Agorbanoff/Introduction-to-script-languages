@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -200,6 +200,51 @@ const workoutPlans = {
     ],
   },
 };
+
+const normalizeCopy = (value) => {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  let normalized = value;
+  normalized = normalized.replace(/\u00e2\u20ac\u2122/g, "'");
+  normalized = normalized.replace(/\u00e2\u20ac\u201c/g, '-');
+  normalized = normalized.replace(/[^\x20-\x7E]/g, ' ');
+  normalized = normalized.replace(/\s+/g, ' ');
+  return normalized.trim();
+
+  return value
+    .replace(/â€™/g, "'")
+    .replace(/â€“/g, '-')
+    .replace(/ðŸ’¡/g, '')
+    .replace(/Â/g, '')
+    .trim();
+};
+
+const normalizedAlternatives = Object.fromEntries(
+  Object.entries(exerciseAlternatives).map(([name, alternatives]) => [
+    normalizeCopy(name),
+    alternatives.map((alternative) => normalizeCopy(alternative)),
+  ])
+);
+
+const normalizeWorkoutPlan = (plan) => {
+  if (!plan) {
+    return null;
+  }
+
+  return {
+    ...plan,
+    title: normalizeCopy(plan.title),
+    subtitle: normalizeCopy(plan.subtitle),
+    exercises: plan.exercises.map((exercise) => ({
+      ...exercise,
+      name: normalizeCopy(exercise.name),
+      description: normalizeCopy(exercise.description),
+    })),
+  };
+};
+
 const WorkoutPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
@@ -207,11 +252,21 @@ const WorkoutPage = () => {
 
   const key = workoutType?.replace(/[\s-]/g, '_').toUpperCase();
 
-  const basePlan = workoutPlans[key] || null;
+  const basePlan = useMemo(
+    () => normalizeWorkoutPlan(workoutPlans[key] || null),
+    [key]
+  );
   const [plan, setPlan] = useState(basePlan);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(null);
+
+  useEffect(() => {
+    setPlan(basePlan);
+    setModalVisible(false);
+    setSelectedExercise(null);
+    setSelectedIndex(null);
+  }, [key]);
 
   if (!plan) {
     return (
@@ -274,7 +329,7 @@ const WorkoutPage = () => {
   
   
   const handleOpenModal = (name, index) => {
-    if (!exerciseAlternatives[name]) return;
+    if (!normalizedAlternatives[name]) return;
     setSelectedExercise(name);
     setSelectedIndex(index);
     setModalVisible(true);
@@ -292,7 +347,7 @@ const WorkoutPage = () => {
   };
 
   const resetPlan = () => {
-    setPlan(workoutPlans[key]);
+    setPlan(normalizeWorkoutPlan(workoutPlans[key]));
   };
 
   return (
@@ -342,7 +397,7 @@ const WorkoutPage = () => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Replace "{selectedExercise}" with:</Text>
             <FlatList
-              data={exerciseAlternatives[selectedExercise]}
+              data={normalizedAlternatives[selectedExercise] || []}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -362,7 +417,7 @@ const WorkoutPage = () => {
 
       <View style={styles.navBar}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="red" />
+          <Ionicons name="arrow-back" size={28} color="#9dffe0" />
         </TouchableOpacity>
       </View>
     </View>
@@ -395,7 +450,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 4,
   },
-  scroll: { padding: 16, paddingBottom: 40 },
+  metaText: {
+    marginTop: 10,
+    textAlign: 'center',
+    color: '#9dffe0',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  scroll: { padding: 16, paddingBottom: 120 },
   exerciseRow: { flexDirection: 'row', marginBottom: 20 },
   timelineContainer: { width: 40, alignItems: 'center' },
   timelineCircle: {
@@ -445,13 +507,23 @@ const styles = StyleSheet.create({
   },
   resetText: { color: '#fff', marginLeft: 6, fontWeight: 'bold' },
   navBar: {
-    height: 60,
-    backgroundColor: '#111',
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 18,
+    height: 72,
+    borderRadius: 26,
+    backgroundColor: 'rgba(7, 11, 18, 0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#333',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.24,
+    shadowRadius: 16,
+    elevation: 12,
   },
   backLink: {
     color: '#1db344',

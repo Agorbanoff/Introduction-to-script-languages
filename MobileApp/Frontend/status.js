@@ -1,5 +1,6 @@
 // status.js
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_API } from "./apiConfig";
 import {
   StatusBar,
@@ -8,7 +9,6 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -16,6 +16,8 @@ import {
   Alert,
 } from 'react-native';
 import { authFetch } from './authFetch';
+import { getApiErrorMessage, parseApiResponse } from './apiResponse';
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 export default function StatusPage({ navigation }) {
   const [sessionsPerWeek, setSessionsPerWeek] = useState(3);
@@ -25,21 +27,25 @@ export default function StatusPage({ navigation }) {
 
   // 1) Load body-fat percentage on mount
   useEffect(() => {
-    const fetchBfp = async () => {
+    const hydrateScreen = async () => {
       try {
+        const storedSessions = await AsyncStorage.getItem('sessionsPerWeek');
+        if (storedSessions) {
+          setSessionsPerWeek(parseInt(storedSessions, 10));
+        }
+
         const res = await authFetch(
           `${BASE_API}/stats/statistics`,
           { method: 'GET' }
         );
         if (!res.ok) throw new Error('Failed to fetch body fat percentage');
-        const data = await res.json();
+        const data = await parseApiResponse(res);
         setBfp(data.BFP);
       } catch (err) {
         console.error('BFP fetch error:', err);
-        Alert.alert('Error', 'Could not load your body fat data.');
       }
     };
-    fetchBfp();
+    hydrateScreen();
   }, []);
 
   // 2) Determine warning based on chosen sessions/week
@@ -74,16 +80,14 @@ export default function StatusPage({ navigation }) {
           body: JSON.stringify({ sessions_per_week: sessionsPerWeek }),
         }
       );
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       console.log('Training save response:', data);
 
       if (res.ok) {
+        await AsyncStorage.setItem('sessionsPerWeek', String(sessionsPerWeek));
         navigation.navigate('gym', { sessionsPerWeek });
       } else {
-        const msg = Array.isArray(data.detail)
-          ? data.detail.map(d => d.msg).join('\n')
-          : data.detail || 'Failed to save training info';
-        Alert.alert('Error', msg);
+        Alert.alert('Error', getApiErrorMessage(data, 'Failed to save training info'));
       }
     } catch (err) {
       console.error('Network error:', err);
@@ -119,11 +123,7 @@ export default function StatusPage({ navigation }) {
   const calorieStatus = bfp != null ? (bfp > 25 ? 'deficit' : 'surplus') : '';
 
   return (
-    <ImageBackground
-      source={require('./Images/gymPhoto.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -138,6 +138,10 @@ export default function StatusPage({ navigation }) {
                 </Text>
               )}
 
+              <Text style={styles.captionText}>
+                Choose a weekly rhythm that matches your goal while staying in the same futuristic visual style.
+              </Text>
+
               <Text style={styles.label}>
                 How many times per week do you want to train?
               </Text>
@@ -149,7 +153,13 @@ export default function StatusPage({ navigation }) {
               </Text>
 
               {warningMessage.length > 0 && (
-                <Text style={styles.warningText}>{warningMessage}</Text>
+                <View style={styles.warningContainer}>
+                  <View style={styles.warningIconWrap}>
+                    <Text style={styles.warningIcon}>!</Text>
+                  </View>
+                  <Text style={styles.warningTitle}>Training warning</Text>
+                  <Text style={styles.warningText}>{warningMessage}</Text>
+                </View>
               )}
             </SafeAreaView>
 
@@ -166,27 +176,31 @@ export default function StatusPage({ navigation }) {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33, 33, 33, 0.85)',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   frontText: {
     textAlign: 'center',
     fontSize: 30,
-    fontWeight: 'bold',
-    color: '#1db344',
+    fontWeight: '800',
+    color: '#9dffe0',
     padding: 30,
     marginTop: '35%',
+  },
+  captionText: {
+    textAlign: 'center',
+    color: 'rgba(214, 229, 224, 0.74)',
+    fontSize: 14,
+    lineHeight: 20,
+    paddingHorizontal: 24,
+    marginBottom: 18,
   },
   label: {
     fontSize: 20,
@@ -202,8 +216,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   dayButton: {
-    backgroundColor: '#222',
-    borderColor: '#1db344',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(157,255,224,0.38)',
     borderWidth: 1,
     borderRadius: 100,
     width: '12%',
@@ -212,7 +226,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dayButtonSelected: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
   },
   dayButtonText: {
     color: '#fff',
@@ -228,12 +242,42 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 10,
   },
+  warningContainer: {
+    marginTop: 16,
+    marginHorizontal: 20,
+    padding: 18,
+    backgroundColor: 'rgba(21, 14, 16, 0.88)',
+    borderRadius: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 131, 112, 0.18)',
+  },
+  warningIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 154, 120, 0.12)',
+    marginBottom: 12,
+  },
+  warningIcon: {
+    color: '#ffb074',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  warningTitle: {
+    color: '#fff5ef',
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
   warningText: {
     textAlign: 'center',
-    color: '#FFA500',
-    fontSize: 16,
-    marginTop: 10,
-    paddingHorizontal: 20,
+    color: '#ffd2bd',
+    fontSize: 14,
+    lineHeight: 21,
   },
   container: {
     alignItems: 'center',
@@ -242,17 +286,17 @@ const styles = StyleSheet.create({
     marginBottom: '60%',
   },
   button: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     width: '100%',
     marginVertical: 10,
   },
   buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: '#071611',
+    fontWeight: '800',
     fontSize: 16,
     textAlign: 'center',
   },

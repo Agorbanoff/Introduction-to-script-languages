@@ -10,11 +10,14 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
-  ImageBackground,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { BASE_API } from './apiConfig';
+import { authFetch } from './authFetch';
+import { ensureAccessToken } from './authManager';
+import { getApiErrorMessage, parseApiResponse } from './apiResponse';
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 export default function ChangeCredentialsPage() {
   const route = useRoute();
@@ -28,7 +31,7 @@ export default function ChangeCredentialsPage() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async () => {
-    const token = await AsyncStorage.getItem('token');
+    const token = await ensureAccessToken();
     if (!token) {
       setErrorMessage('Not authenticated.');
       return;
@@ -39,18 +42,21 @@ export default function ChangeCredentialsPage() {
     const method = 'PUT';
 
     if (mode === 'username') {
-      if (!newUsername.trim()) {
-        setErrorMessage('Please enter a new username.');
+      if (!newUsername.trim() || !oldPassword) {
+        setErrorMessage('Please enter your current password and a new username.');
         return;
       }
-      url = 'https://gymax.onrender.com/auth/changeusername';
-      payload = { new_username: newUsername.trim() };
+      url = `${BASE_API}/auth/changeusername`;
+      payload = {
+        new_username: newUsername.trim(),
+        current_password: oldPassword,
+      };
     } else {
       if (!oldPassword || !newPassword) {
         setErrorMessage('Please enter both current and new password.');
         return;
       }
-      url = 'https://gymax.onrender.com/auth/changepassword';
+      url = `${BASE_API}/auth/changepassword`;
       payload = {
         current_password: oldPassword,
         new_password: newPassword,
@@ -58,15 +64,14 @@ export default function ChangeCredentialsPage() {
     }
 
     try {
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = await parseApiResponse(res);
 
       if (res.ok) {
         setSuccessMessage(mode === 'username' ? 'Username updated successfully!' : 'Password changed successfully!');
@@ -76,15 +81,7 @@ export default function ChangeCredentialsPage() {
         setNewPassword('');
       } else {
         setSuccessMessage('');
-        let errorMessage = 'Update failed';
-        if (Array.isArray(data.detail)) {
-          errorMessage = data.detail.map(err => err.msg).join('\n');
-        } else if (typeof data.detail === 'string') {
-          errorMessage = data.detail;
-        } else if (typeof data.message === 'string') {
-          errorMessage = data.message;
-        }
-        setErrorMessage(errorMessage);
+        setErrorMessage(getApiErrorMessage(data, 'Update failed'));
       }
     } catch (err) {
       console.error('Network error:', err);
@@ -94,11 +91,7 @@ export default function ChangeCredentialsPage() {
   };
 
   return (
-    <ImageBackground
-      source={require('./Images/gymPhoto.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex}
@@ -107,6 +100,9 @@ export default function ChangeCredentialsPage() {
           <SafeAreaView style={styles.overlay}>
             <Text style={styles.title}>
               {mode === 'username' ? 'Change Username' : 'Change Password'}
+            </Text>
+            <Text style={styles.captionText}>
+              Update your account details inside the same futuristic visual system.
             </Text>
 
             {successMessage ? (
@@ -118,13 +114,23 @@ export default function ChangeCredentialsPage() {
 
             <View style={styles.form}>
               {mode === 'username' ? (
-                <TextInput
-                  style={styles.input}
-                  placeholder="New Username"
-                  placeholderTextColor="#aaa"
-                  value={newUsername}
-                  onChangeText={setNewUsername}
-                />
+                <>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Current Password"
+                    placeholderTextColor="#aaa"
+                    secureTextEntry
+                    value={oldPassword}
+                    onChangeText={setOldPassword}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="New Username"
+                    placeholderTextColor="#aaa"
+                    value={newUsername}
+                    onChangeText={setNewUsername}
+                  />
+                </>
               ) : (
                 <>
                   <TextInput
@@ -161,16 +167,14 @@ export default function ChangeCredentialsPage() {
           </SafeAreaView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  backgroundImage: { flex: 1 },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(33,33,33,0.85)',
     padding: 20,
     justifyContent: 'center',
   },
@@ -181,45 +185,55 @@ const styles = StyleSheet.create({
     color: '#1db344',
     marginBottom: 20,
   },
+  captionText: {
+    textAlign: 'center',
+    color: 'rgba(214, 229, 224, 0.74)',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 16,
+    paddingHorizontal: 20,
+  },
   form: {
     alignItems: 'center',
   },
   input: {
     width: '80%',
-    height: 44,
-    backgroundColor: 'black',
+    height: 48,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     color: 'white',
-    borderRadius: 8,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'gray',
-    paddingHorizontal: 10,
+    borderColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 14,
     marginBottom: 15,
   },
   button: {
     width: '80%',
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     marginVertical: 10,
   },
   buttonText: {
-    color: 'black',
+    color: '#071611',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   backButton: {
     width: '80%',
-    backgroundColor: '#1db344', // dark button
+    backgroundColor: 'rgba(255,255,255,0.08)',
     paddingVertical: 14,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     marginTop: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   backButtonText: {
-    color: 'black',
+    color: '#f7fffb',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   successText: {
     color: 'lightgreen',

@@ -12,10 +12,9 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
-  ImageBackground,
 } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { setAccessToken } from './authManager';
+import { storeAuthTokens } from './authManager';
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 const SignUpPage = ({ navigation }) => {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
@@ -72,8 +71,10 @@ const SignUpPage = ({ navigation }) => {
       }
 
       if (response.ok && data.access_token && data.refresh_token) {
-        await SecureStore.setItemAsync('refresh_token', data.refresh_token);
-        setAccessToken(data.access_token);
+        await storeAuthTokens({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        });
 
         // Optional: small delay to make sure RAM token is set before navigating
         setTimeout(() => {
@@ -93,11 +94,7 @@ const SignUpPage = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground
-      source={require('./Images/gymPhoto.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -108,34 +105,52 @@ const SignUpPage = ({ navigation }) => {
               <Text style={styles.frontText}>
                 Welcome to our app{'\n'} Make an account and get shredded!
               </Text>
+              <Text style={styles.captionText}>
+                Start inside the same neon fitness atmosphere you’ll see throughout the app.
+              </Text>
             </SafeAreaView>
 
             <View style={styles.container}>
-              <TextInput
-                style={[styles.input, errors.username && styles.inputError]}
-                placeholder={errors.username || 'Enter a username'}
-                value={form.username}
-                onChangeText={(text) => updateField('username', text)}
-                placeholderTextColor={errors.username ? 'red' : '#888'}
-              />
+              <View style={styles.fieldGroup}>
+                <TextInput
+                  style={[styles.input, errors.username && styles.inputError]}
+                  placeholder="Enter a username"
+                  value={form.username}
+                  onChangeText={(text) => updateField('username', text)}
+                  placeholderTextColor="#8a9794"
+                />
+                <Text style={[styles.helperText, errors.username && styles.errorText]}>
+                  {errors.username || 'Use 2 to 30 characters for your username.'}
+                </Text>
+              </View>
 
-              <TextInput
-                style={[styles.input, errors.email && styles.inputError]}
-                placeholder={errors.email || 'Enter your email'}
-                value={form.email}
-                onChangeText={(text) => updateField('email', text)}
-                placeholderTextColor={errors.email ? 'red' : '#888'}
-                keyboardType="email-address"
-              />
+              <View style={styles.fieldGroup}>
+                <TextInput
+                  style={[styles.input, errors.email && styles.inputError]}
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChangeText={(text) => updateField('email', text)}
+                  placeholderTextColor="#8a9794"
+                  keyboardType="email-address"
+                />
+                <Text style={[styles.helperText, errors.email && styles.errorText]}>
+                  {errors.email || 'Use a valid email address you can log in with.'}
+                </Text>
+              </View>
 
-              <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder={errors.password || 'Enter a password'}
-                secureTextEntry={true}
-                value={form.password}
-                onChangeText={(text) => updateField('password', text)}
-                placeholderTextColor={errors.password ? 'red' : '#888'}
-              />
+              <View style={styles.fieldGroup}>
+                <TextInput
+                  style={[styles.input, errors.password && styles.inputError]}
+                  placeholder="Enter a password"
+                  secureTextEntry={true}
+                  value={form.password}
+                  onChangeText={(text) => updateField('password', text)}
+                  placeholderTextColor="#8a9794"
+                />
+                <Text style={[styles.helperText, errors.password && styles.errorText]}>
+                  {errors.password || 'Choose a password between 6 and 50 characters.'}
+                </Text>
+              </View>
 
               <View style={styles.buttonColumn}>
                 <TouchableOpacity style={styles.button} onPress={handleSignUp}>
@@ -153,28 +168,33 @@ const SignUpPage = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 };
 
 export default SignUpPage;
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   frontText: {
     textAlign: 'center',
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#1db344',
-    padding: 30,
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#9dffe0',
+    paddingTop: 30,
+    paddingHorizontal: 30,
+  },
+  captionText: {
+    textAlign: 'center',
+    color: 'rgba(214, 229, 224, 0.74)',
+    fontSize: 15,
+    lineHeight: 22,
+    paddingHorizontal: 34,
+    marginTop: 6,
   },
   container: {
     alignItems: 'center',
@@ -182,19 +202,34 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: '20%',
   },
-  input: {
-    height: 45,
+  fieldGroup: {
     width: '80%',
-    borderColor: '#555',
+    marginBottom: 12,
+  },
+  input: {
+    height: 48,
+    width: '100%',
+    borderColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: '#111',
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     color: 'white',
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: '#ff7f78',
+    backgroundColor: 'rgba(255, 127, 120, 0.08)',
+  },
+  helperText: {
+    color: 'rgba(214, 229, 224, 0.58)',
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 8,
+    paddingHorizontal: 6,
+    minHeight: 34,
+  },
+  errorText: {
+    color: '#ff9f99',
   },
   buttonColumn: {
     flexDirection: 'column',
@@ -204,17 +239,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     width: '100%',
     marginVertical: 10,
   },
   buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: '#071611',
+    fontWeight: '800',
     fontSize: 16,
     textAlign: 'center',
   },

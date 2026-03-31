@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   TextInput,
   TouchableOpacity,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
@@ -16,6 +15,8 @@ import {
   Alert,
 } from 'react-native';
 import { authFetch } from './authFetch';
+import { getApiErrorMessage, parseApiResponse } from './apiResponse';
+import FuturisticBackdrop from './FuturisticBackdrop';
 
 export default function StatisticsPage({ navigation }) {
   const [username, setUsername] = useState('');
@@ -41,8 +42,8 @@ export default function StatisticsPage({ navigation }) {
 
         if (!res.ok) throw new Error('Failed to load profile');
 
-        const { username: nameFromServer } = await res.json();
-        setUsername(nameFromServer);
+        const data = await parseApiResponse(res);
+        setUsername(data?.username || '');
       } catch (err) {
         console.error('Profile fetch error:', err);
         Alert.alert('Error', 'User not authenticated.');
@@ -98,13 +99,13 @@ export default function StatisticsPage({ navigation }) {
         }),
       });
 
-      const data = await res.json();
+      const data = await parseApiResponse(res);
       console.log('Statistics response:', data);
 
       if (res.ok) {
         navigation.navigate('status');
       } else {
-        Alert.alert('Error', data.message || 'Failed to save statistics');
+        Alert.alert('Error', getApiErrorMessage(data, 'Failed to save statistics'));
       }
     } catch (error) {
       console.error('Error submitting stats:', error);
@@ -113,11 +114,7 @@ export default function StatisticsPage({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require('./Images/gymPhoto.jpg')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <FuturisticBackdrop source={require('./Images/gymPhoto.jpg')}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -127,6 +124,9 @@ export default function StatisticsPage({ navigation }) {
             <SafeAreaView>
               <Text style={styles.frontText}>
                 {`Hello, ${username || 'there'}!`}{'\n'}Let's gather some statistics about you!
+              </Text>
+              <Text style={styles.captionText}>
+                We’ll keep the same sleek neon atmosphere while setting up the numbers behind your plan.
               </Text>
             </SafeAreaView>
 
@@ -221,26 +221,30 @@ export default function StatisticsPage({ navigation }) {
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </FuturisticBackdrop>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(20, 20, 20, 0.9)',
     justifyContent: 'center',
+    paddingHorizontal: 20,
   },
   frontText: {
     textAlign: 'center',
     fontSize: 30,
-    fontWeight: 'bold',
-    color: '#1db344',
+    fontWeight: '800',
+    color: '#9dffe0',
     padding: 30,
+  },
+  captionText: {
+    textAlign: 'center',
+    color: 'rgba(214, 229, 224, 0.74)',
+    fontSize: 14,
+    lineHeight: 20,
+    paddingHorizontal: 24,
+    marginBottom: 20,
   },
   label: {
     color: '#fff',
@@ -260,17 +264,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   genderButton: {
-    backgroundColor: '#333',
-    borderColor: '#1db344',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(157,255,224,0.38)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 18,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 10,
     marginBottom: 20,
   },
   genderButtonSelected: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
   },
   genderButtonError: {
     borderColor: 'red',
@@ -284,14 +288,14 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   input: {
-    height: 45,
+    height: 48,
     width: '80%',
-    borderColor: '#555',
+    borderColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 18,
     marginBottom: 15,
-    paddingHorizontal: 10,
-    backgroundColor: '#111',
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     color: 'white',
   },
   inputError: {
@@ -305,17 +309,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   button: {
-    backgroundColor: '#1db344',
+    backgroundColor: '#6ff7c7',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 18,
     alignItems: 'center',
     width: '100%',
     marginVertical: 10,
   },
   buttonText: {
-    color: 'black',
-    fontWeight: 'bold',
+    color: '#071611',
+    fontWeight: '800',
     fontSize: 16,
     textAlign: 'center',
   },
