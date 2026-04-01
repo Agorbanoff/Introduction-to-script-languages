@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-from exceptions.exceptions import EmptyStatisticsException
+from exceptions.exceptions import EmptyStatisticsException, StatisticsNotFoundException
 from service.user_statistics_service import get_statistics, get_bfp
 from util.token import get_user_id_from_token
 from model.user_statistics_entity import Gender
@@ -29,6 +29,6 @@ async def submit_statistics(
 async def get_BFP(user_id: str = Depends(get_user_id_from_token)):
     result = await get_bfp(user_id=user_id)
     if not result:
-        raise EmptyStatisticsException()
+        raise StatisticsNotFoundException()
 
     return {"BFP": result.get("bfp")}

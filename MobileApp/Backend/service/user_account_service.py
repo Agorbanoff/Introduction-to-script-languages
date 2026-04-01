@@ -1,9 +1,9 @@
 import bcrypt
 from bson import ObjectId
 
-from service.token_service import save_refresh_token
 from config.db_config import collection_name, collection_statistics, collection_training, collection_token
 from model.user_credentials_entity import UserSignUp, UserLogIn
+from service.token_service import save_refresh_token
 from exceptions.exceptions import (
     UserNotFoundException,
     InvalidPasswordException,
@@ -16,32 +16,17 @@ def hashing_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
-async def sign_up(user: UserSignUp) -> dict:
+async def sign_up(user: UserSignUp) -> None:
     if await collection_name.find_one({"email": user.email}):
         raise EmailAlreadyUsedException()
 
     hashed_pass = hashing_password(user.password)
 
-    result = await collection_name.insert_one({
+    await collection_name.insert_one({
         "username": user.username,
         "email": user.email,
         "password": hashed_pass
     })
-
-    email = user.email
-
-    tokens = await save_refresh_token(email)
-
-    return {
-        "message": "User registered successfully",
-        "access_token": tokens["access_token"],
-        "refresh_token": tokens["refresh_token"],
-        "token_type": tokens["token_type"],
-        "user": {
-            "username": user.username,
-            "email": user.email
-        }
-    }
 
 async def log_in(user: UserLogIn) -> dict:
     existing_user = await collection_name.find_one({"email": user.email})

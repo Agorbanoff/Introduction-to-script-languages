@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BASE_API } from "./apiConfig";
+import { BASE_API } from './apiConfig';
 import {
   Alert,
   View,
@@ -12,8 +12,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
+  Image,
 } from 'react-native';
-import { storeAuthTokens } from './authManager';
 import FuturisticBackdrop from './FuturisticBackdrop';
 
 const SignUpPage = ({ navigation }) => {
@@ -61,30 +61,24 @@ const SignUpPage = ({ navigation }) => {
         }),
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        console.error('❌ Invalid JSON from backend:', err);
-        Alert.alert('Error', 'Server returned invalid response');
+      if (response.ok) {
+        navigation.replace('login', {
+          email: form.email,
+          password: form.password,
+        });
         return;
       }
 
-      if (response.ok && data.access_token && data.refresh_token) {
-        await storeAuthTokens({
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
-        });
-
-        // Optional: small delay to make sure RAM token is set before navigating
-        setTimeout(() => {
-          navigation.navigate('statistics');
-        }, 100);
-      } else {
-        Alert.alert('Error', data?.detail || data?.message || 'Registration failed.');
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error('Invalid signup error response:', err);
       }
+
+      Alert.alert('Error', data?.detail || data?.message || 'Registration failed.');
     } catch (error) {
-      console.error('❌ Signup error:', error);
+      console.error('Signup error:', error);
       Alert.alert('Network Error', 'Please try again later.');
     }
   };
@@ -102,11 +96,15 @@ const SignUpPage = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.overlay}>
             <SafeAreaView>
+              <Image
+                source={require('./Images/gymax_logo.png')}
+                style={styles.brandLogo}
+              />
               <Text style={styles.frontText}>
-                Welcome to our app{'\n'} Make an account and get shredded!
+                Welcome to our app{'\n'}Make an account and get shredded!
               </Text>
               <Text style={styles.captionText}>
-                Start inside the same neon fitness atmosphere you’ll see throughout the app.
+                Create your account first, then log in to start your Gymax journey.
               </Text>
             </SafeAreaView>
 
@@ -132,6 +130,7 @@ const SignUpPage = ({ navigation }) => {
                   onChangeText={(text) => updateField('email', text)}
                   placeholderTextColor="#8a9794"
                   keyboardType="email-address"
+                  autoCapitalize="none"
                 />
                 <Text style={[styles.helperText, errors.email && styles.errorText]}>
                   {errors.email || 'Use a valid email address you can log in with.'}
@@ -142,7 +141,7 @@ const SignUpPage = ({ navigation }) => {
                 <TextInput
                   style={[styles.input, errors.password && styles.inputError]}
                   placeholder="Enter a password"
-                  secureTextEntry={true}
+                  secureTextEntry
                   value={form.password}
                   onChangeText={(text) => updateField('password', text)}
                   placeholderTextColor="#8a9794"
@@ -158,10 +157,10 @@ const SignUpPage = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.button}
+                  style={styles.secondaryButton}
                   onPress={() => navigation.navigate('login')}
                 >
-                  <Text style={styles.buttonText}>Already have an account?</Text>
+                  <Text style={styles.secondaryButtonText}>Already have an account?</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -180,12 +179,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+  brandLogo: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignSelf: 'flex-start',
+    marginTop: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 255, 224, 0.35)',
+    backgroundColor: 'rgba(8, 16, 14, 0.46)',
+  },
   frontText: {
     textAlign: 'center',
     fontSize: 32,
     fontWeight: '800',
     color: '#9dffe0',
-    paddingTop: 30,
     paddingHorizontal: 30,
   },
   captionText: {
@@ -251,6 +260,23 @@ const styles = StyleSheet.create({
     color: '#071611',
     fontWeight: '800',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  secondaryButton: {
+    width: '100%',
+    marginTop: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  secondaryButtonText: {
+    color: '#ecfff8',
+    fontWeight: '700',
+    fontSize: 15,
     textAlign: 'center',
   },
 });

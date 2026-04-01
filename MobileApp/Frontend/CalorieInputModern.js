@@ -78,6 +78,11 @@ export default function CalorieInputModern() {
 
         const res = await authFetch(`${BASE_API}/stats/statistics`);
 
+        if (res.status === 404 || res.status === 400 || res.status === 422) {
+          navigation.replace('statistics');
+          return;
+        }
+
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
@@ -255,15 +260,6 @@ export default function CalorieInputModern() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContainer}
           >
-            <View style={styles.heroCard}>
-              <Text style={styles.kicker}>Nutrition dashboard</Text>
-              <Text style={styles.header}>Track daily fuel in a cleaner way.</Text>
-              <Text style={styles.subHeader}>
-                Log meals, calculate portions, and keep the lower screen visible
-                with a floating navigation bar.
-              </Text>
-            </View>
-
             <View style={styles.chartCard}>
               <CaloriePieChart
                 consumed={consumedCalories}
@@ -326,9 +322,6 @@ export default function CalorieInputModern() {
               <AnimatedScreenView delay={90}>
                 <View style={styles.actionPanel}>
                   <Text style={styles.sectionTitle}>Add a new entry</Text>
-                  <Text style={styles.sectionCaptionWide}>
-                    Pick the flow that fits how you want to log your food.
-                  </Text>
 
                   <View style={styles.actionsRow}>
                     <TouchableOpacity
@@ -528,37 +521,6 @@ const styles = StyleSheet.create({
     paddingBottom: 140,
     paddingHorizontal: 16,
   },
-  heroCard: {
-    width: CONTENT_WIDTH,
-    alignSelf: 'center',
-    paddingVertical: 22,
-    paddingHorizontal: 22,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 16,
-  },
-  kicker: {
-    color: '#9dffe0',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  header: {
-    color: '#f7fffb',
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: '800',
-    marginBottom: 10,
-  },
-  subHeader: {
-    color: 'rgba(214, 229, 224, 0.72)',
-    fontSize: 15,
-    lineHeight: 22,
-  },
   chartCard: {
     width: CONTENT_WIDTH,
     alignSelf: 'center',
@@ -631,12 +593,6 @@ const styles = StyleSheet.create({
   sectionCaption: {
     color: 'rgba(191, 207, 202, 0.62)',
     fontSize: 12,
-  },
-  sectionCaptionWide: {
-    color: 'rgba(191, 207, 202, 0.68)',
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 16,
   },
   logItem: {
     flexDirection: 'row',

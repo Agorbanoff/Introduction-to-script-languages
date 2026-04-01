@@ -33,22 +33,35 @@ export default function App() {
       }
 
       try {
-        const res = await authFetch(`${BASE_API}/stats/training`, {
+        const statsRes = await authFetch(`${BASE_API}/stats/statistics`, {
           method: 'GET',
         });
 
-        if (res.ok) {
-          const data = await parseApiResponse(res);
+        if (statsRes.status === 404 || statsRes.status === 400 || statsRes.status === 422) {
+          setInitialRoute('statistics');
+          return;
+        }
+
+        if (!statsRes.ok) {
+          throw new Error(`Unexpected statistics state (${statsRes.status})`);
+        }
+
+        const trainingRes = await authFetch(`${BASE_API}/stats/training`, {
+          method: 'GET',
+        });
+
+        if (trainingRes.ok) {
+          const data = await parseApiResponse(trainingRes);
           if (data.sessions_per_week) {
             await AsyncStorage.setItem('sessionsPerWeek', data.sessions_per_week.toString());
             setInitialRoute('gym');
           } else {
             setInitialRoute('status');
           }
-        } else if (res.status === 404 || res.status === 422) {
+        } else if (trainingRes.status === 404 || trainingRes.status === 422) {
           setInitialRoute('status');
         } else {
-          throw new Error(`Unexpected auth state (${res.status})`);
+          throw new Error(`Unexpected training state (${trainingRes.status})`);
         }
       } catch (error) {
         console.error('❌ Redirecting to signup. Reason:', error.message);

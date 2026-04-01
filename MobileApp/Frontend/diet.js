@@ -13,7 +13,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {authFetch} from './authFetch';
-import { Ionicons } from '@expo/vector-icons';
 import AnimatedScreenView from './AnimatedScreenView';
 import FloatingNavBar from './FloatingNavBar';
 
@@ -615,7 +614,6 @@ const cuttingMeals = {
 };
 
 export default function DietPlanScreen({ navigation }) {
-  const [bfp, setBfp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [meals, setMeals] = useState(bulkingMeals); // default bulking
 
@@ -627,12 +625,14 @@ export default function DietPlanScreen({ navigation }) {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
+        if (res.status === 404 || res.status === 400 || res.status === 422) {
+          navigation.replace('statistics');
+          return;
+        }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const { BFP } = await res.json();
-        setBfp(BFP);
 
-        // 3) Choose meal plan based on BFP
         if (BFP > 25) {
           setMeals(cuttingMeals);
         } else {
@@ -688,15 +688,6 @@ export default function DietPlanScreen({ navigation }) {
       <View style={[styles.glow, styles.glowBottom]} />
 
       <AnimatedScreenView style={styles.overlay}>
-        <View style={styles.headerBlock}>
-          <Text style={styles.headerKicker}>Nutrition</Text>
-          <Text style={styles.headerTitle}>Meal ideas with the same clean futuristic vibe.</Text>
-          <Text style={styles.headerText}>
-            The meals flow now keeps the darker food background, but the accents
-            stay aligned with the rest of the app.
-          </Text>
-        </View>
-
         <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
@@ -726,7 +717,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(6, 9, 12, 0.36)',
-    paddingTop: 56,
+    paddingTop: 28,
     paddingHorizontal: 16,
   },
   glow: {
@@ -753,33 +744,6 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: -90,
     backgroundColor: 'rgba(255, 113, 95, 0.1)',
-  },
-  headerBlock: {
-    marginBottom: 14,
-    padding: 20,
-    borderRadius: 28,
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
-  },
-  headerKicker: {
-    color: '#9dffe0',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  headerTitle: {
-    color: '#f8fffd',
-    fontSize: 28,
-    fontWeight: '800',
-    marginBottom: 8,
-  },
-  headerText: {
-    color: 'rgba(218, 230, 226, 0.74)',
-    fontSize: 14,
-    lineHeight: 20,
   },
   scrollView: {
     flex: 1,

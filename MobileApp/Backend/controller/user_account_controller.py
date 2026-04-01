@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Body, Depends, Response, status
 from model.user_credentials_entity import UserSignUp, UserLogIn
 from util.token import get_user_id_from_token
 from service.user_account_service import (sign_up,
@@ -10,9 +10,10 @@ from service.user_account_service import (sign_up,
                                           log_out as log_out_service)
 user_router = APIRouter()
 
-@user_router.post("/signup")
+@user_router.post("/signup", status_code=status.HTTP_204_NO_CONTENT)
 async def register_user(user: UserSignUp):
-    return await sign_up(user)
+    await sign_up(user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 @user_router.post("/login")
 async def send_user(user: UserLogIn):
     return await log_in(user)

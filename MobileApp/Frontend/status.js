@@ -38,15 +38,25 @@ export default function StatusPage({ navigation }) {
           `${BASE_API}/stats/statistics`,
           { method: 'GET' }
         );
-        if (!res.ok) throw new Error('Failed to fetch body fat percentage');
+
+        if (res.status === 404 || res.status === 400 || res.status === 422) {
+          navigation.replace('statistics');
+          return;
+        }
+
+        if (!res.ok) {
+          Alert.alert('Error', 'Failed to load your statistics.');
+          return;
+        }
+
         const data = await parseApiResponse(res);
         setBfp(data.BFP);
       } catch (err) {
-        console.error('BFP fetch error:', err);
+        Alert.alert('Error', 'Could not load your onboarding data.');
       }
     };
     hydrateScreen();
-  }, []);
+  }, [navigation]);
 
   // 2) Determine warning based on chosen sessions/week
   const getTrainingAdvice = () => {

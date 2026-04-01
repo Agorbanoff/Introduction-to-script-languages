@@ -12,17 +12,18 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { authFetch } from './authFetch';
 import { storeAuthTokens } from './authManager';
-import { BASE_API } from "./apiConfig";
+import { BASE_API } from './apiConfig';
 import { getApiErrorMessage, parseApiResponse } from './apiResponse';
 import FuturisticBackdrop from './FuturisticBackdrop';
 
-export default function LogInPage({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LogInPage({ navigation, route }) {
+  const [email, setEmail] = useState(route?.params?.email ?? '');
+  const [password, setPassword] = useState(route?.params?.password ?? '');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
@@ -63,7 +64,24 @@ export default function LogInPage({ navigation }) {
           refreshToken: data.refresh_token,
         });
 
-        // Try to get training info
+        const statisticsResponse = await authFetch(`${BASE_API}/stats/statistics`, {
+          method: 'GET',
+        });
+
+        if (
+          statisticsResponse.status === 404 ||
+          statisticsResponse.status === 400 ||
+          statisticsResponse.status === 422
+        ) {
+          navigation.replace('statistics');
+          return;
+        }
+
+        if (!statisticsResponse.ok) {
+          Alert.alert('Error', 'Could not load your statistics.');
+          return;
+        }
+
         const trainingResponse = await authFetch(`${BASE_API}/stats/training`, {
           method: 'GET',
         });
@@ -85,19 +103,19 @@ export default function LogInPage({ navigation }) {
         setPasswordError('');
 
         const errorMsg = getApiErrorMessage(data, 'Login failed').toLowerCase();
-        if (errorMsg) {
-          if (errorMsg.includes('email')) setEmailError('Invalid email');
-          else if (errorMsg.includes('password')) setPasswordError('Invalid password');
-          else if (errorMsg.includes('credentials')) {
-            setEmailError('Invalid credentials');
-            setPasswordError('Invalid credentials');
-          } else Alert.alert('Error', getApiErrorMessage(data, 'Login failed'));
+        if (errorMsg.includes('email')) {
+          setEmailError('Invalid email');
+        } else if (errorMsg.includes('password')) {
+          setPasswordError('Invalid password');
+        } else if (errorMsg.includes('credentials')) {
+          setEmailError('Invalid credentials');
+          setPasswordError('Invalid credentials');
         } else {
           Alert.alert('Error', getApiErrorMessage(data, 'Login failed'));
         }
       }
     } catch (error) {
-      console.error('❌ Login error:', error);
+      console.error('Login error:', error);
       Alert.alert('Error', 'Network or server error');
     }
   };
@@ -111,9 +129,13 @@ export default function LogInPage({ navigation }) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.overlay}>
             <SafeAreaView>
+              <Image
+                source={require('./Images/gymax_logo.png')}
+                style={styles.brandLogo}
+              />
               <Text style={styles.frontText}>Welcome Back!</Text>
               <Text style={styles.captionText}>
-                Step back into your plan with the same futuristic vibe across the app.
+                Log in here to generate your tokens and continue with your plan.
               </Text>
             </SafeAreaView>
 
@@ -126,8 +148,9 @@ export default function LogInPage({ navigation }) {
                   setEmail(text);
                   if (emailError) setEmailError('');
                 }}
-                placeholderTextColor={emailError ? 'red' : '#888'}
+                placeholderTextColor={emailError ? '#ff9f99' : '#888'}
                 keyboardType="email-address"
+                autoCapitalize="none"
               />
 
               <TextInput
@@ -139,7 +162,7 @@ export default function LogInPage({ navigation }) {
                   setPassword(text);
                   if (passwordError) setPasswordError('');
                 }}
-                placeholderTextColor={passwordError ? 'red' : '#888'}
+                placeholderTextColor={passwordError ? '#ff9f99' : '#888'}
               />
 
               <View style={styles.buttonColumn}>
@@ -148,10 +171,10 @@ export default function LogInPage({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.button}
+                  style={styles.secondaryButton}
                   onPress={() => navigation.navigate('signup')}
                 >
-                  <Text style={styles.buttonText}>Don't have an account?</Text>
+                  <Text style={styles.secondaryButtonText}>Don't have an account?</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -170,12 +193,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+  brandLogo: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignSelf: 'flex-start',
+    marginTop: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 255, 224, 0.35)',
+    backgroundColor: 'rgba(8, 16, 14, 0.46)',
+  },
   frontText: {
     textAlign: 'center',
     fontSize: 44,
     fontWeight: '800',
     color: '#9dffe0',
-    paddingTop: 30,
     paddingHorizontal: 30,
   },
   captionText: {
@@ -204,7 +237,8 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   inputError: {
-    borderColor: 'red',
+    borderColor: '#ff7f78',
+    backgroundColor: 'rgba(255, 127, 120, 0.08)',
   },
   buttonColumn: {
     flexDirection: 'column',
@@ -226,6 +260,23 @@ const styles = StyleSheet.create({
     color: '#071611',
     fontWeight: '800',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  secondaryButton: {
+    width: '100%',
+    marginTop: 4,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  secondaryButtonText: {
+    color: '#ecfff8',
+    fontWeight: '700',
+    fontSize: 15,
     textAlign: 'center',
   },
 });
